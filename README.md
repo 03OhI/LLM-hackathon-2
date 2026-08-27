@@ -1,1 +1,1 @@
-# LM-hackathon
+# LLM-hackathon
