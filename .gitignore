@@ -39,6 +39,8 @@ env/
 
 # FAISS
 faiss_index/
+*.index
+*.pkl
 
 # Logs
 *.log
@@ -52,3 +54,12 @@ Thumbs.db
 downloaded_context.txt
 create_bucket.py
 get-pip.py
+
+# Data files
+data/
+
+# Config files
+config/
+
+# Documentation PDFs
+*.pdf
