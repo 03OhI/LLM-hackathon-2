@@ -76,11 +76,11 @@ function SurveyNav() {
         ⌂
       </Link>
       <Image
-        className="survey-duck-brand"
-        src="/duck-face-smile.png"
-        alt="TMTI 오리"
-        width={74}
-        height={74}
+        className="tmti-header-brand"
+        src="/tmti-survey-logo.png"
+        alt="TMTI 오리 로고"
+        width={196}
+        height={110}
         priority
       />
     </nav>
