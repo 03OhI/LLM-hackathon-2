@@ -135,3 +135,40 @@ class PrivateInsight(SQLModel, table=True):
     validation_status: str | None = Field(default=None)
     used_fallback: bool = Field(default=False)
     created_at: datetime = Field(default_factory=utcnow)
+
+
+# ──────────────────────────────────────────────
+# QuestAssignment
+# ──────────────────────────────────────────────
+
+
+class QuestAssignment(SQLModel, table=True):
+    """세션에 배정된 퀘스트 (팀 공유 또는 개인 전용).
+
+    카탈로그(knowledge_base/quests.yaml)의 quest_code를 참조한다.
+    문구(title/description/action)는 여기에 저장하지 않고 응답 시점에
+    카탈로그에서 조회한다 — 카탈로그가 갱신되면 최신 문구가 자동 반영된다.
+
+    scope=TEAM이면 participant_id는 None (세션 전체 공유).
+    scope=PERSONAL이면 participant_id가 배정 대상 본인이다.
+
+    팀 퀘스트는 참여자 누구나 완료 처리할 수 있다 (완료자만 completed_by_participant_id에 기록).
+    """
+
+    __table_args__ = (
+        UniqueConstraint(
+            "session_id", "participant_id", "quest_code", "analysis_version",
+            name="uq_quest_assignment_target",
+        ),
+    )
+
+    id: str = Field(primary_key=True)
+    session_id: str = Field(foreign_key="session.id", index=True)
+    participant_id: str | None = Field(default=None, foreign_key="participant.id", index=True)
+    scope: str  # TEAM|PERSONAL
+    quest_code: str
+    analysis_version: int  # 분석이 재실행되면 새 버전으로 재배정 (design 일관성)
+    status: str = Field(default="ASSIGNED")  # ASSIGNED|COMPLETED
+    completed_by_participant_id: str | None = Field(default=None, foreign_key="participant.id")
+    assigned_at: datetime = Field(default_factory=utcnow)
+    completed_at: datetime | None = Field(default=None)

@@ -10,7 +10,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import participants, results, sessions, survey
+from app.api import participants, quests, results, sessions, survey
 from app.config import get_settings
 from app.db import init_db
 from app.errors import AppError
@@ -40,6 +40,7 @@ app.include_router(sessions.router, prefix="/api")
 app.include_router(participants.router, prefix="/api")
 app.include_router(survey.router, prefix="/api")
 app.include_router(results.router, prefix="/api")
+app.include_router(quests.router, prefix="/api")
 
 
 @app.get("/api/health")

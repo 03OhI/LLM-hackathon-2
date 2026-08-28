@@ -93,6 +93,10 @@ def load_recommendations() -> dict:
     return _load_yaml("recommendations.yaml")
 
 
+def load_quests() -> dict:
+    return _load_yaml("quests.yaml")
+
+
 # ──────────────────────────────────────────────
 # 분석 결과 데이터 클래스
 # ──────────────────────────────────────────────
@@ -136,6 +140,23 @@ class PrivateAnalysisResult:
     caution_codes: list[str]
     recommendation_codes: list[str]
     matched_rule_ids: list[str]
+
+
+@dataclass
+class QuestCandidate:
+    """카탈로그(quests.yaml)에서 매칭된 퀘스트 후보.
+
+    quest_code는 QuestAssignment DB row가 참조하는 안정적 식별자다.
+    title/description/action은 카탈로그에 미리 작성/생성된 문구를 그대로 담는다
+    (서빙 시점에는 LLM을 호출하지 않는다).
+    """
+
+    quest_code: str
+    scope: str  # TEAM | PERSONAL
+    title: str
+    description: str
+    action: str
+    tags: list[str] = field(default_factory=list)
 
 
 # ──────────────────────────────────────────────
@@ -471,6 +492,79 @@ def match_private_rules(
         recommendation_codes=list(dict.fromkeys(recommendation_codes)),
         matched_rule_ids=list(dict.fromkeys(matched_rule_ids)),
     )
+
+
+# ──────────────────────────────────────────────
+# 퀘스트 매칭 — knowledge_base/quests.yaml
+#
+# team_rules/private_insight_rules와 동일한 결정론적 매칭 방식을 그대로 재사용한다.
+# 카탈로그 문구는 사전에(오프라인) 작성/생성되어 있으므로 여기서는 LLM을 호출하지 않는다.
+# ──────────────────────────────────────────────
+
+
+def _quest_item_to_candidate(scope: str, item: dict) -> QuestCandidate:
+    return QuestCandidate(
+        quest_code=item.get("quest_code", ""),
+        scope=scope,
+        title=item.get("title", ""),
+        description=item.get("description", ""),
+        action=item.get("action", ""),
+        tags=list(item.get("tags", [])),
+    )
+
+
+def match_team_quests(
+    distribution: dict[str, dict[str, int]],
+) -> list[QuestCandidate]:
+    """팀 분포에 매칭되는 팀 공유 퀘스트 후보 전체를 반환한다 (결정론적, 순서 안정).
+
+    호출부(quests 서비스 레이어)가 이 중 N개를 골라 배정한다.
+    """
+    items = load_quests().get("team_quests", [])
+    candidates: list[QuestCandidate] = []
+
+    for item in items:
+        when = item.get("when", {})
+        axis = when.get("axis")
+        condition = when.get("condition")
+        if not axis or not condition or axis not in distribution:
+            continue
+        if not _match_team_condition(condition, distribution[axis], axis):
+            continue
+        candidates.append(_quest_item_to_candidate("TEAM", item))
+
+    return candidates
+
+
+def match_private_quests(
+    profile: CanonicalProfile,
+    distribution: dict[str, dict[str, int]],
+    team_size: int,
+) -> list[QuestCandidate]:
+    """개인 프로필 + 팀 분포에 매칭되는 개인 퀘스트 후보 전체를 반환한다 (결정론적, 순서 안정)."""
+    items = load_quests().get("personal_quests", [])
+    candidates: list[QuestCandidate] = []
+
+    for item in items:
+        if not _match_private_when(item.get("when", {}), profile, distribution, team_size):
+            continue
+        candidates.append(_quest_item_to_candidate("PERSONAL", item))
+
+    return candidates
+
+
+def get_quest_by_code(scope: str, quest_code: str) -> QuestCandidate | None:
+    """카탈로그에서 quest_code로 단건 조회한다 (API 응답 렌더링용).
+
+    카탈로그가 갱신되면 이미 배정된 QuestAssignment도 최신 문구를 그대로 보여준다
+    (문구를 DB에 복제 저장하지 않기 때문).
+    """
+    key = "team_quests" if scope == "TEAM" else "personal_quests"
+    items = load_quests().get(key, [])
+    for item in items:
+        if item.get("quest_code") == quest_code:
+            return _quest_item_to_candidate(scope, item)
+    return None
 
 
 # ──────────────────────────────────────────────

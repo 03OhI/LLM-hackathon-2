@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     cookie_secure: bool = True  # 로컬 HTTP 개발 시 .env로 False
     session_ttl_days: int = 30
 
+    # 퀘스트 배정 개수 (분석당 lazy 배정 시 카탈로그 후보 중 상위 N개)
+    team_quest_count: int = 3
+    personal_quest_count: int = 2
+
     # ai/config.py의 AISettings와 동일 키를 공유 (문서화 목적, 실제 조회는 ai.config가 담당)
     bedrock_model_id: str = "global.anthropic.claude-sonnet-5"
 
