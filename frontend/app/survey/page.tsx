@@ -602,6 +602,16 @@ export default function SurveyPage() {
           : 0,
     );
   }, [freshStart]);
+  useEffect(() => {
+    if (step < 0 || step >= groups.length) return;
+
+    // 다음 축으로 넘어가도 이전 페이지의 하단 스크롤 위치가 남지 않게 한다.
+    // 모든 설문 단계가 계획성 페이지와 같은 시작 위치에서 보이도록 맞춘다.
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [step]);
   const resetSurvey = () => {
     window.sessionStorage.removeItem(teamSessionStorageKey);
     window.sessionStorage.removeItem("tmti-session-id");

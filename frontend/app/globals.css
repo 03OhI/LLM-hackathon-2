@@ -6175,6 +6175,9 @@ a {
 .survey-workspace .question,
 .survey-workspace .question:nth-child(odd),
 .survey-workspace .question:nth-child(even) {
+  display: grid;
+  grid-template-rows: auto minmax(56px, auto) auto;
+  align-content: start;
   width: 100%;
   min-width: 0;
   margin: 0;
@@ -6186,6 +6189,9 @@ a {
   padding-bottom: 16px;
 }
 .survey-workspace .question h2 {
+  display: flex;
+  min-height: 56px;
+  align-items: center;
   margin: 8px 0 17px;
 }
 .survey-workspace .scale {
@@ -6212,7 +6218,11 @@ a {
   .survey-workspace .question,
   .survey-workspace .question:nth-child(odd),
   .survey-workspace .question:nth-child(even) {
+    grid-template-rows: auto minmax(74px, auto) auto;
     padding: 16px 14px 22px;
+  }
+  .survey-workspace .question h2 {
+    min-height: 74px;
   }
   .survey-workspace .survey-actions {
     margin-top: 28px;
