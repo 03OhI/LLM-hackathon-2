@@ -4,8 +4,14 @@
 // workspace_id를 URL로 미리 몰라도 room_id만으로 상태를 조회할 수 있게 한다.
 // LOCKED: 아직 방장이 시작하지 않음(workspace_id는 null).
 // ACTIVE: 방장이 시작함(workspace_id로 상세 조회 가능).
+//
+// GET /api/workspaces/{id} 응답(backend/app/api/workspace.py의 WorkspaceResponse)에는
+// notice/meeting_notes/presentation_checklist/decisions까지 함께 내려온다 — 공지 조회에
+// 별도 GET 엔드포인트는 없으므로 이 값을 그대로 쓴다(공지 "수정"만 workspace-tools-api.ts의
+// PATCH를 별도로 쓴다).
 
 import { requestJson } from "./api";
+import type { Decision, MeetingNote, PresentationChecklistItem } from "./workspace-tools-api";
 
 export type TaskStatus = "TODO" | "IN_PROGRESS" | "DONE";
 export type ResourceProvider = "GITHUB" | "FIGMA" | "NOTION" | "GOOGLE_DRIVE" | "DEPLOYMENT" | "OTHER";
@@ -35,8 +41,14 @@ export type Workspace = {
   session_id: string;
   status: string;
   started_at: string;
+  notice: string | null;
+  deadline_at: string | null;
+  presentation_order: string | null;
   tasks: Task[];
   resources: ResourceLink[];
+  meeting_notes: MeetingNote[];
+  presentation_checklist: PresentationChecklistItem[];
+  decisions: Decision[];
 };
 
 export type RoomWorkspaceStatus = {

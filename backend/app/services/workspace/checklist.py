@@ -51,6 +51,20 @@ def list_items(workspace_id: str, db: DBSession) -> list[PresentationChecklistIt
     )
 
 
+def ensure_default_items(workspace_id: str, db: DBSession) -> list[PresentationChecklistItem]:
+    """조회 시점에 항목이 0개면 기본 4개를 채운다(배포 전 생성된 워크스페이스 보정용).
+
+    확인 후 삽입(check-then-insert) 방식의 최소한의 방어다 — 이미 하나라도 있으면
+    절대 다시 만들지 않으므로, 정상적인 순차 요청에서는 중복이 생기지 않는다.
+    완전한 동시성 보장이 필요하면 DB 유니크 제약이 필요하지만(CUSTOM 항목은 여러 개
+    허용해야 해서 단순 유니크 제약을 걸 수 없다), 해커톤 데모 규모에서는 이 정도로 충분하다.
+    """
+    existing = list_items(workspace_id, db)
+    if existing:
+        return existing
+    return create_default_items(workspace_id, db)
+
+
 def create_item(
     workspace_id: str,
     db: DBSession,

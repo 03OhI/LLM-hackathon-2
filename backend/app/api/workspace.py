@@ -301,7 +301,7 @@ def _build_workspace_response(workspace: Workspace, db: DBSession, actor: RoomAc
     tasks = service.list_tasks(workspace.id, db)
     resources = service.list_resources(workspace.id, db)
     notes = meeting_notes.list_notes(workspace.id, db)
-    checklist_items = checklist.list_items(workspace.id, db)
+    checklist_items = checklist.ensure_default_items(workspace.id, db)
     decision_rows = decisions.list_decisions(workspace.id, db)
     return WorkspaceResponse(
         id=workspace.id,
@@ -620,7 +620,7 @@ def list_checklist_items(
 ) -> list[ChecklistItemResponse]:
     workspace = service.get_workspace_or_404(workspace_id, db)
     _resolve_actor_for_workspace(workspace, request, db)
-    return [ChecklistItemResponse.from_model(i) for i in checklist.list_items(workspace_id, db)]
+    return [ChecklistItemResponse.from_model(i) for i in checklist.ensure_default_items(workspace_id, db)]
 
 
 @router.post("/workspaces/{workspace_id}/presentation-checklist", response_model=ChecklistItemResponse)

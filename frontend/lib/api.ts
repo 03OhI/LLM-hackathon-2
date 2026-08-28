@@ -82,6 +82,10 @@ export function friendlyErrorMessage(error: unknown): string {
       case "TASK_NOT_FOUND":
       case "RESOURCE_NOT_FOUND":
       case "NO_ACTIVE_QUEST":
+      case "MEETING_NOTE_NOT_FOUND":
+      case "CHECKLIST_ITEM_NOT_FOUND":
+      case "DECISION_NOT_FOUND":
+      case "DECISION_OPTION_NOT_FOUND":
         return "정보를 찾지 못했어요. 새로고침한 뒤 다시 시도해 주세요.";
       case "QUEST_CATALOG_UNAVAILABLE":
         return "지금은 배정할 수 있는 퀘스트가 없어요. 잠시 후 다시 시도해 주세요.";
@@ -93,6 +97,8 @@ export function friendlyErrorMessage(error: unknown): string {
         return "아직 완료 조건을 채우지 못했어요. 팀원 응답을 조금 더 모아 주세요.";
       case "WORKSPACE_NOT_READY":
         return "퀘스트가 끝난 뒤에 협업 공간을 시작할 수 있어요.";
+      case "DECISION_ALREADY_FINALIZED":
+        return "이미 확정된 안건이에요.";
       case "NETWORK_ERROR":
         return "네트워크 연결을 확인해 주세요.";
       default:

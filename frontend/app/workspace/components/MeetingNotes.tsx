@@ -12,6 +12,7 @@ export function MeetingNotes({
   notes,
   pendingAction,
   canManage,
+  error,
   onCreate,
   onUpdate,
   onDelete,
@@ -19,21 +20,22 @@ export function MeetingNotes({
   notes: MeetingNote[];
   pendingAction: string | null;
   canManage: (createdBy: string) => boolean;
-  onCreate: (input: { title: string; discussion: string; next_actions: string }) => void;
-  onUpdate: (noteId: string, input: { title: string; discussion: string; next_actions: string }) => void;
+  error?: string | null;
+  onCreate: (input: { title: string; content: string; next_action: string | null }) => void;
+  onUpdate: (noteId: string, input: { title: string; content: string; next_action: string | null }) => void;
   onDelete: (noteId: string) => void;
 }) {
   const [creating, setCreating] = useState(false);
   const [title, setTitle] = useState("");
-  const [discussion, setDiscussion] = useState("");
-  const [nextActions, setNextActions] = useState("");
+  const [content, setContent] = useState("");
+  const [nextAction, setNextAction] = useState("");
 
   const sorted = [...notes].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 
   const resetForm = () => {
     setTitle("");
-    setDiscussion("");
-    setNextActions("");
+    setContent("");
+    setNextAction("");
     setCreating(false);
   };
 
@@ -47,21 +49,25 @@ export function MeetingNotes({
           onSubmit={(event) => {
             event.preventDefault();
             if (!title.trim()) return;
-            onCreate({ title: title.trim(), discussion: discussion.trim(), next_actions: nextActions.trim() });
+            onCreate({
+              title: title.trim(),
+              content: content.trim(),
+              next_action: nextAction.trim() ? nextAction.trim() : null,
+            });
             resetForm();
           }}
         >
           <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="제목" aria-label="메모 제목" />
           <textarea
-            value={discussion}
-            onChange={(event) => setDiscussion(event.target.value)}
+            value={content}
+            onChange={(event) => setContent(event.target.value)}
             placeholder="논의 내용"
             aria-label="논의 내용"
             rows={3}
           />
           <textarea
-            value={nextActions}
-            onChange={(event) => setNextActions(event.target.value)}
+            value={nextAction}
+            onChange={(event) => setNextAction(event.target.value)}
             placeholder="다음 행동"
             aria-label="다음 행동"
             rows={2}
@@ -97,6 +103,7 @@ export function MeetingNotes({
           ))}
         </ul>
       )}
+      {error && <p className="workspace-section-inline-error">{error}</p>}
     </div>
   );
 }
@@ -111,17 +118,17 @@ function MeetingNoteItem({
   note: MeetingNote;
   pendingAction: string | null;
   canManage: boolean;
-  onUpdate: (noteId: string, input: { title: string; discussion: string; next_actions: string }) => void;
+  onUpdate: (noteId: string, input: { title: string; content: string; next_action: string | null }) => void;
   onDelete: (noteId: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [title, setTitle] = useState(note.title);
-  const [discussion, setDiscussion] = useState(note.discussion);
-  const [nextActions, setNextActions] = useState(note.next_actions);
+  const [content, setContent] = useState(note.content);
+  const [nextAction, setNextAction] = useState(note.next_action ?? "");
 
-  const isLong = note.discussion.length > COLLAPSE_THRESHOLD;
-  const shownDiscussion = isLong && !expanded ? `${note.discussion.slice(0, COLLAPSE_THRESHOLD)}…` : note.discussion;
+  const isLong = note.content.length > COLLAPSE_THRESHOLD;
+  const shownContent = isLong && !expanded ? `${note.content.slice(0, COLLAPSE_THRESHOLD)}…` : note.content;
 
   if (editing) {
     return (
@@ -130,13 +137,17 @@ function MeetingNoteItem({
           className="workspace-note-form"
           onSubmit={(event) => {
             event.preventDefault();
-            onUpdate(note.id, { title: title.trim(), discussion: discussion.trim(), next_actions: nextActions.trim() });
+            onUpdate(note.id, {
+              title: title.trim(),
+              content: content.trim(),
+              next_action: nextAction.trim() ? nextAction.trim() : null,
+            });
             setEditing(false);
           }}
         >
           <input value={title} onChange={(event) => setTitle(event.target.value)} aria-label="메모 제목 수정" />
-          <textarea value={discussion} onChange={(event) => setDiscussion(event.target.value)} aria-label="논의 내용 수정" rows={3} />
-          <textarea value={nextActions} onChange={(event) => setNextActions(event.target.value)} aria-label="다음 행동 수정" rows={2} />
+          <textarea value={content} onChange={(event) => setContent(event.target.value)} aria-label="논의 내용 수정" rows={3} />
+          <textarea value={nextAction} onChange={(event) => setNextAction(event.target.value)} aria-label="다음 행동 수정" rows={2} />
           <div className="workspace-notice-form-actions">
             <button type="submit" className="button-next" disabled={pendingAction === `update-note-${note.id}`}>
               저장
@@ -171,9 +182,9 @@ function MeetingNoteItem({
           </div>
         )}
       </div>
-      {note.discussion && (
+      {note.content && (
         <p className="workspace-note-discussion">
-          {shownDiscussion}
+          {shownContent}
           {isLong && (
             <button type="button" className="workspace-note-toggle" onClick={() => setExpanded((v) => !v)}>
               {expanded ? "접기" : "더보기"}
@@ -181,7 +192,7 @@ function MeetingNoteItem({
           )}
         </p>
       )}
-      {note.next_actions && <p className="workspace-note-next-actions">다음 행동: {note.next_actions}</p>}
+      {note.next_action && <p className="workspace-note-next-actions">다음 행동: {note.next_action}</p>}
     </li>
   );
 }

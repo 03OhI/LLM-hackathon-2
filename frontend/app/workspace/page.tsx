@@ -24,6 +24,7 @@ import {
   updateTask,
 } from "@/lib/workspace-api";
 import {
+  ChecklistItemType,
   Decision,
   DecisionOption,
   MeetingNote,
@@ -35,10 +36,6 @@ import {
   deleteMeetingNote,
   deletePresentationChecklistItem,
   finalizeDecision,
-  getDecisions,
-  getMeetingNotes,
-  getNotice,
-  getPresentationChecklist,
   updateMeetingNote,
   updateNotice,
   updatePresentationChecklistItem,
@@ -120,22 +117,26 @@ function adminDemoDeadline(): string {
   return new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
 }
 
+const DEFAULT_CHECKLIST_TYPES: ChecklistItemType[] = ["DEMO_URL", "SLIDES", "SCRIPT", "BACKUP"];
+
 function AdminDemoWorkspaceView() {
   const [notice, setNotice] = useState<WorkspaceNotice>({
-    content: "오늘 17시까지 기능 통합 완료",
+    notice: "오늘 17시까지 기능 통합 완료",
     deadline_at: adminDemoDeadline(),
-    presentation_order: 3,
-    updated_at: new Date().toISOString(),
+    presentation_order: "3번째 발표",
   });
 
   const [checklist, setChecklist] = useState<PresentationChecklistItem[]>(
     DEFAULT_CHECKLIST_LABELS.map((label, index) => ({
       id: `admin-demo-checklist-${index}`,
+      item_type: DEFAULT_CHECKLIST_TYPES[index],
       label,
       url: null,
-      is_checked: index < 2,
+      completed: index < 2,
+      completed_by: index < 2 ? "admin-demo-host" : null,
       created_by: "admin-demo-host",
       created_at: "2026-08-29T00:00:00Z",
+      updated_at: "2026-08-29T00:00:00Z",
     })),
   );
 
@@ -150,10 +151,11 @@ function AdminDemoWorkspaceView() {
         { id: "admin-demo-option-3", label: "Vibemap", vote_count: 0 },
       ],
       status: "OPEN",
-      finalized_option_id: null,
+      final_result: null,
       my_vote_option_id: "admin-demo-option-1",
       created_by: "admin-demo-host",
       created_at: "2026-08-29T00:00:00Z",
+      finalized_at: null,
     },
   ]);
 
@@ -161,8 +163,8 @@ function AdminDemoWorkspaceView() {
     {
       id: "admin-demo-note-1",
       title: "발표 리허설 회의",
-      discussion: "발표 순서와 역할 분담을 정하고, 시연 시나리오를 처음부터 끝까지 한 번 맞춰봤어요.",
-      next_actions: "각자 맡은 파트 대본 다듬기",
+      content: "발표 순서와 역할 분담을 정하고, 시연 시나리오를 처음부터 끝까지 한 번 맞춰봤어요.",
+      next_action: "각자 맡은 파트 대본 다듬기",
       created_by: "admin-demo-host",
       created_at: "2026-08-29T00:00:00Z",
       updated_at: "2026-08-29T00:00:00Z",
@@ -216,28 +218,38 @@ function AdminDemoWorkspaceView() {
           notice={notice}
           isHost
           pending={false}
-          onSave={(input) => setNotice((current) => ({ ...current, ...input, updated_at: new Date().toISOString() }))}
+          onSave={(input) => setNotice((current) => ({ ...current, ...input }))}
         />
         <FocusTimer />
         <PresentationChecklist
           items={checklist}
           pendingAction={null}
-          onToggle={(itemId, checked) =>
-            setChecklist((current) => current.map((item) => (item.id === itemId ? { ...item, is_checked: checked } : item)))
+          canManage={() => true}
+          onToggle={(itemId, completed) =>
+            setChecklist((current) =>
+              current.map((item) =>
+                item.id === itemId
+                  ? { ...item, completed, completed_by: completed ? ADMIN_DEMO_SESSION.participantId : null }
+                  : item,
+              ),
+            )
           }
           onUrlChange={(itemId, url) =>
             setChecklist((current) => current.map((item) => (item.id === itemId ? { ...item, url } : item)))
           }
-          onAdd={(label) =>
+          onAdd={(label, itemType) =>
             setChecklist((current) => [
               ...current,
               {
                 id: `admin-demo-checklist-${Date.now()}`,
+                item_type: itemType,
                 label,
                 url: null,
-                is_checked: false,
+                completed: false,
+                completed_by: null,
                 created_by: ADMIN_DEMO_SESSION.participantId,
                 created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
               },
             ])
           }
@@ -245,7 +257,8 @@ function AdminDemoWorkspaceView() {
         />
         <DecisionBoard
           decisions={decisions}
-          isHost
+          canVote
+          canFinalize
           pendingAction={null}
           onCreate={(input) =>
             setDecisions((current) => [
@@ -259,10 +272,11 @@ function AdminDemoWorkspaceView() {
                   vote_count: 0,
                 })),
                 status: "OPEN",
-                finalized_option_id: null,
+                final_result: null,
                 my_vote_option_id: null,
                 created_by: ADMIN_DEMO_SESSION.participantId,
                 created_at: new Date().toISOString(),
+                finalized_at: null,
               },
               ...current,
             ])
@@ -281,11 +295,11 @@ function AdminDemoWorkspaceView() {
               }),
             )
           }
-          onFinalize={(decisionId, optionId) =>
+          onFinalize={(decisionId, finalResult) =>
             setDecisions((current) =>
               current.map((decision) =>
                 decision.id === decisionId
-                  ? { ...decision, status: "FINALIZED", finalized_option_id: optionId }
+                  ? { ...decision, status: "FINALIZED", final_result: finalResult, finalized_at: new Date().toISOString() }
                   : decision,
               ),
             )
@@ -401,19 +415,16 @@ function WorkspaceView({ session, roomId }: { session: TeamSession; roomId: stri
   const [loadError, setLoadError] = useState<string | null>(null);
   const pendingRef = useRef<string | null>(null);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
 
-  // 새 확장 기능 4종 — 백엔드가 아직 병합되지 않았을 수 있으므로 각자 독립적으로
-  // 로딩/에러 상태를 갖는다. 하나가 실패해도(엔드포인트 미존재 등) 나머지와
-  // 기존 할 일/링크 화면은 계속 정상 동작해야 한다.
-  const [notice, setNotice] = useState<WorkspaceNotice | null>(null);
-  const [noticeError, setNoticeError] = useState<string | null>(null);
-  const [checklist, setChecklist] = useState<PresentationChecklistItem[]>([]);
-  const [checklistError, setChecklistError] = useState<string | null>(null);
-  const [decisions, setDecisions] = useState<Decision[]>([]);
-  const [decisionsError, setDecisionsError] = useState<string | null>(null);
-  const [notes, setNotes] = useState<MeetingNote[]>([]);
-  const [notesError, setNotesError] = useState<string | null>(null);
+  // 카드별로 독립된 오류 상태를 둔다 — 회의 메모 저장이 실패해도 체크리스트/의사결정/
+  // 할 일/링크 카드는 계속 정상 동작해야 한다(부가 기능 실패가 전체 화면을 가리지 않음).
+  const [startError, setStartError] = useState<string | null>(null);
+  const [noticeActionError, setNoticeActionError] = useState<string | null>(null);
+  const [checklistActionError, setChecklistActionError] = useState<string | null>(null);
+  const [decisionActionError, setDecisionActionError] = useState<string | null>(null);
+  const [taskActionError, setTaskActionError] = useState<string | null>(null);
+  const [noteActionError, setNoteActionError] = useState<string | null>(null);
+  const [resourceActionError, setResourceActionError] = useState<string | null>(null);
   const [presetProvider, setPresetProvider] = useState<{ provider: ResourceProvider; token: number } | null>(null);
 
   // 팀원 목록은 자주 바뀌지 않으므로 최초 1회만 가져온다(4초 폴링 대상이 아니다).
@@ -425,6 +436,8 @@ function WorkspaceView({ session, roomId }: { session: TeamSession; roomId: stri
       });
   }, [roomId]);
 
+  // GET /workspaces/{id}(getWorkspace) 응답 하나에 notice/tasks/resources/meeting_notes/
+  // presentation_checklist/decisions가 모두 담겨 온다 — 부가 기능마다 별도로 GET하지 않는다.
   const refresh = useCallback(async () => {
     try {
       const roomWorkspace = await getRoomWorkspace(roomId);
@@ -438,39 +451,6 @@ function WorkspaceView({ session, roomId }: { session: TeamSession; roomId: stri
       const full = await getWorkspace(roomWorkspace.workspace_id);
       setWorkspace(full);
       setLoadError(null);
-
-      const id = roomWorkspace.workspace_id;
-      const [noticeResult, checklistResult, decisionsResult, notesResult] = await Promise.allSettled([
-        getNotice(id),
-        getPresentationChecklist(id),
-        getDecisions(id),
-        getMeetingNotes(id),
-      ]);
-
-      if (noticeResult.status === "fulfilled") {
-        setNotice(noticeResult.value);
-        setNoticeError(null);
-      } else {
-        setNoticeError(friendlyErrorMessage(noticeResult.reason));
-      }
-      if (checklistResult.status === "fulfilled") {
-        setChecklist(checklistResult.value);
-        setChecklistError(null);
-      } else {
-        setChecklistError(friendlyErrorMessage(checklistResult.reason));
-      }
-      if (decisionsResult.status === "fulfilled") {
-        setDecisions(decisionsResult.value);
-        setDecisionsError(null);
-      } else {
-        setDecisionsError(friendlyErrorMessage(decisionsResult.reason));
-      }
-      if (notesResult.status === "fulfilled") {
-        setNotes(notesResult.value);
-        setNotesError(null);
-      } else {
-        setNotesError(friendlyErrorMessage(notesResult.reason));
-      }
     } catch (error) {
       setLoadError(friendlyErrorMessage(error));
     } finally {
@@ -487,17 +467,19 @@ function WorkspaceView({ session, roomId }: { session: TeamSession; roomId: stri
 
   usePolling(refresh, POLL_INTERVAL_MS, true);
 
+  // 카드마다 다른 setState로 오류를 보내는 것만 다르고, 그 외 로직(단일 진행,
+  // 성공 시 getWorkspace 재조회)은 모든 액션이 동일하게 공유한다.
   const runAction = useCallback(
-    async (key: string, action: () => Promise<unknown>) => {
+    async (key: string, action: () => Promise<unknown>, onError: (message: string) => void) => {
       if (pendingRef.current) return;
       pendingRef.current = key;
       setPendingAction(key);
-      setActionError(null);
+      onError("");
       try {
         await action();
         await refresh();
       } catch (error) {
-        setActionError(friendlyErrorMessage(error));
+        onError(friendlyErrorMessage(error));
       } finally {
         pendingRef.current = null;
         setPendingAction(null);
@@ -519,17 +501,25 @@ function WorkspaceView({ session, roomId }: { session: TeamSession; roomId: stri
             type="button"
             className="button-next"
             disabled={pendingAction === "start-workspace"}
-            onClick={() => runAction("start-workspace", () => startWorkspace(roomId))}
+            onClick={() => runAction("start-workspace", () => startWorkspace(roomId), setStartError)}
           >
             {pendingAction === "start-workspace" ? "시작하는 중…" : "협업 시작하기"}
           </button>
         )}
-        {actionError && <p className="quest-action-error">{actionError}</p>}
+        {startError && <p className="quest-action-error">{startError}</p>}
       </section>
     );
   }
 
   const canManage = (createdBy: string) => session.isHost || createdBy === session.participantId;
+  // 방장은 participant 레코드가 없어 투표할 수 없다(백엔드 정책) — 팀원만 투표, 방장만 확정.
+  const canVote = !session.isHost;
+  const canFinalize = session.isHost;
+  const notice: WorkspaceNotice = {
+    notice: workspace.notice,
+    deadline_at: workspace.deadline_at,
+    presentation_order: workspace.presentation_order,
+  };
 
   return (
     <section className="result-report workspace-card-shell survey-card-enter">
@@ -537,44 +527,58 @@ function WorkspaceView({ session, roomId }: { session: TeamSession; roomId: stri
         <p className="result-eyebrow">협업 워크스페이스</p>
         <h1>함께 정리하고 공유해요</h1>
       </header>
-      {actionError && <p className="quest-action-error">{actionError}</p>}
       <div className="workspace-grid">
-        {notice ? (
-          <NoticeCard
-            notice={notice}
-            isHost={session.isHost}
-            pending={pendingAction === "save-notice"}
-            onSave={(input) => runAction("save-notice", () => updateNotice(workspace.id, input))}
-          />
-        ) : (
-          <WorkspaceSectionError title="고정 공지" error={noticeError} span2 />
-        )}
+        <NoticeCard
+          notice={notice}
+          isHost={session.isHost}
+          pending={pendingAction === "save-notice"}
+          error={noticeActionError}
+          onSave={(input) => runAction("save-notice", () => updateNotice(workspace.id, input), setNoticeActionError)}
+        />
 
         <FocusTimer />
 
         <PresentationChecklist
-          items={checklist}
+          items={workspace.presentation_checklist}
           pendingAction={pendingAction}
-          onToggle={(itemId, checked) =>
-            runAction(`toggle-checklist-${itemId}`, () => updatePresentationChecklistItem(itemId, { is_checked: checked }))
+          canManage={canManage}
+          error={checklistActionError}
+          onToggle={(itemId, completed) =>
+            runAction(
+              `toggle-checklist-${itemId}`,
+              () => updatePresentationChecklistItem(itemId, { completed }),
+              setChecklistActionError,
+            )
           }
           onUrlChange={(itemId, url) =>
-            runAction(`url-checklist-${itemId}`, () => updatePresentationChecklistItem(itemId, { url }))
+            runAction(`url-checklist-${itemId}`, () => updatePresentationChecklistItem(itemId, { url }), setChecklistActionError)
           }
-          onAdd={(label) => runAction("create-checklist-item", () => createPresentationChecklistItem(workspace.id, { label }))}
-          onDelete={(itemId) => runAction(`delete-checklist-${itemId}`, () => deletePresentationChecklistItem(itemId))}
+          onAdd={(label, itemType) =>
+            runAction(
+              "create-checklist-item",
+              () => createPresentationChecklistItem(workspace.id, { item_type: itemType, label }),
+              setChecklistActionError,
+            )
+          }
+          onDelete={(itemId) =>
+            runAction(`delete-checklist-${itemId}`, () => deletePresentationChecklistItem(itemId), setChecklistActionError)
+          }
         />
-        {checklistError && <p className="workspace-section-inline-error">{checklistError}</p>}
 
         <DecisionBoard
-          decisions={decisions}
-          isHost={session.isHost}
+          decisions={workspace.decisions}
+          canVote={canVote}
+          canFinalize={canFinalize}
           pendingAction={pendingAction}
-          onCreate={(input) => runAction("create-decision", () => createDecision(workspace.id, input))}
-          onVote={(decisionId, optionId) => runAction(`vote-${decisionId}`, () => voteDecision(decisionId, optionId))}
-          onFinalize={(decisionId, optionId) => runAction(`finalize-${decisionId}`, () => finalizeDecision(decisionId, optionId))}
+          error={decisionActionError}
+          onCreate={(input) => runAction("create-decision", () => createDecision(workspace.id, input), setDecisionActionError)}
+          onVote={(decisionId, optionId) =>
+            runAction(`vote-${decisionId}`, () => voteDecision(decisionId, optionId), setDecisionActionError)
+          }
+          onFinalize={(decisionId, finalResult) =>
+            runAction(`finalize-${decisionId}`, () => finalizeDecision(decisionId, finalResult), setDecisionActionError)
+          }
         />
-        {decisionsError && <p className="workspace-section-inline-error">{decisionsError}</p>}
 
         <TaskPanel
           tasks={workspace.tasks}
@@ -582,20 +586,21 @@ function WorkspaceView({ session, roomId }: { session: TeamSession; roomId: stri
           participants={participants}
           pendingAction={pendingAction}
           canManage={canManage}
-          onCreate={(input) => runAction("create-task", () => createTask(workspace.id, input))}
-          onUpdate={(taskId, input) => runAction(`update-task-${taskId}`, () => updateTask(taskId, input))}
-          onDelete={(taskId) => runAction(`delete-task-${taskId}`, () => deleteTask(taskId))}
+          error={taskActionError}
+          onCreate={(input) => runAction("create-task", () => createTask(workspace.id, input), setTaskActionError)}
+          onUpdate={(taskId, input) => runAction(`update-task-${taskId}`, () => updateTask(taskId, input), setTaskActionError)}
+          onDelete={(taskId) => runAction(`delete-task-${taskId}`, () => deleteTask(taskId), setTaskActionError)}
         />
 
         <MeetingNotes
-          notes={notes}
+          notes={workspace.meeting_notes}
           pendingAction={pendingAction}
           canManage={canManage}
-          onCreate={(input) => runAction("create-note", () => createMeetingNote(workspace.id, input))}
-          onUpdate={(noteId, input) => runAction(`update-note-${noteId}`, () => updateMeetingNote(noteId, input))}
-          onDelete={(noteId) => runAction(`delete-note-${noteId}`, () => deleteMeetingNote(noteId))}
+          error={noteActionError}
+          onCreate={(input) => runAction("create-note", () => createMeetingNote(workspace.id, input), setNoteActionError)}
+          onUpdate={(noteId, input) => runAction(`update-note-${noteId}`, () => updateMeetingNote(noteId, input), setNoteActionError)}
+          onDelete={(noteId) => runAction(`delete-note-${noteId}`, () => deleteMeetingNote(noteId), setNoteActionError)}
         />
-        {notesError && <p className="workspace-section-inline-error">{notesError}</p>}
 
         <QuickLinks resources={workspace.resources} onConnect={(provider) => setPresetProvider({ provider, token: Date.now() })} />
         <ResourcePanel
@@ -603,20 +608,12 @@ function WorkspaceView({ session, roomId }: { session: TeamSession; roomId: stri
           pendingAction={pendingAction}
           canManage={canManage}
           presetProvider={presetProvider}
-          onCreate={(input) => runAction("create-resource", () => createResource(workspace.id, input))}
-          onDelete={(resourceId) => runAction(`delete-resource-${resourceId}`, () => deleteResource(resourceId))}
+          error={resourceActionError}
+          onCreate={(input) => runAction("create-resource", () => createResource(workspace.id, input), setResourceActionError)}
+          onDelete={(resourceId) => runAction(`delete-resource-${resourceId}`, () => deleteResource(resourceId), setResourceActionError)}
         />
       </div>
     </section>
-  );
-}
-
-function WorkspaceSectionError({ title, error, span2 }: { title: string; error: string | null; span2?: boolean }) {
-  return (
-    <div className={span2 ? "workspace-panel workspace-span-2" : "workspace-panel"}>
-      <h2>{title}</h2>
-      <p className="workspace-section-inline-error">{error ?? "아직 준비되지 않은 기능이에요."}</p>
-    </div>
   );
 }
 
@@ -626,6 +623,7 @@ function TaskPanel({
   participants,
   pendingAction,
   canManage,
+  error,
   onCreate,
   onUpdate,
   onDelete,
@@ -635,6 +633,7 @@ function TaskPanel({
   participants: RoomParticipant[];
   pendingAction: string | null;
   canManage: (createdBy: string) => boolean;
+  error?: string | null;
   onCreate: (input: { title: string; assignee_participant_id?: string | null; due_at?: string | null }) => void;
   onUpdate: (taskId: string, input: { status?: TaskStatus; due_at?: string | null; clear_due_at?: boolean }) => void;
   onDelete: (taskId: string) => void;
@@ -734,6 +733,7 @@ function TaskPanel({
           ))}
         </ul>
       )}
+      {error && <p className="workspace-section-inline-error">{error}</p>}
     </div>
   );
 }
@@ -743,6 +743,7 @@ function ResourcePanel({
   pendingAction,
   canManage,
   presetProvider,
+  error,
   onCreate,
   onDelete,
 }: {
@@ -750,6 +751,7 @@ function ResourcePanel({
   pendingAction: string | null;
   canManage: (createdBy: string) => boolean;
   presetProvider?: { provider: ResourceProvider; token: number } | null;
+  error?: string | null;
   onCreate: (input: { title: string; url: string; provider: ResourceProvider }) => void;
   onDelete: (resourceId: string) => void;
 }) {
@@ -831,6 +833,7 @@ function ResourcePanel({
           ))}
         </ul>
       )}
+      {error && <p className="workspace-section-inline-error">{error}</p>}
     </div>
   );
 }

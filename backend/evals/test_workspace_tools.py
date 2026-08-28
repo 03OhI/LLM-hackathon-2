@@ -209,6 +209,46 @@ def test_default_checklist_items_created_on_workspace_start():
     assert all(i["completed"] is False for i in items)
 
 
+def test_pre_existing_workspace_without_checklist_gets_backfilled_exactly_once():
+    """배포 DB에 기능 추가 전 생성된 Workspace(체크리스트 0개)를 흉내낸다."""
+    from sqlmodel import Session as DBSession
+    from sqlmodel import select
+
+    from app.db import engine
+    from app.models import PresentationChecklistItem
+    from app.services.workspace import checklist as checklist_service
+
+    team = _started_workspace()
+    workspace_id = team["workspace_id"]
+    member_secret = team["members"][0][1]
+
+    # start_workspace가 만든 기본 4개를 지워 "기능 추가 전 생성된 워크스페이스" 상태로 되돌린다.
+    with DBSession(engine) as db:
+        for item in checklist_service.list_items(workspace_id, db):
+            db.delete(item)
+        db.commit()
+        assert checklist_service.list_items(workspace_id, db) == []
+
+    first = client.get(f"/api/workspaces/{workspace_id}", headers=_auth(member_secret))
+    assert first.status_code == 200
+    first_items = first.json()["presentation_checklist"]
+    assert len(first_items) == 4
+    assert {i["item_type"] for i in first_items} == {"DEMO_URL", "SLIDES", "SCRIPT", "BACKUP"}
+
+    # 다시 조회해도 중복 생성되지 않고 정확히 4개만 유지된다.
+    second = client.get(f"/api/workspaces/{workspace_id}", headers=_auth(member_secret))
+    assert second.status_code == 200
+    second_items = second.json()["presentation_checklist"]
+    assert len(second_items) == 4
+    assert {i["id"] for i in second_items} == {i["id"] for i in first_items}
+
+    with DBSession(engine) as db:
+        rows = db.exec(
+            select(PresentationChecklistItem).where(PresentationChecklistItem.workspace_id == workspace_id)
+        ).all()
+        assert len(rows) == 4
+
+
 def test_member_can_toggle_checklist_completion():
     team = _started_workspace()
     member_secret = team["members"][0][1]

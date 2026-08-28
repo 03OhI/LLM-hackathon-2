@@ -1,6 +1,8 @@
 "use client";
 
 // 고정 공지 카드 — 상단 전체 너비. 방장에게만 편집 버튼을 보여준다.
+// 조회는 부모가 GET /workspaces/{id} 응답의 notice/deadline_at/presentation_order를
+// 그대로 넘겨준다(별도 GET 없음) — 이 컴포넌트는 표시와 PATCH 입력값 구성만 담당한다.
 
 import { useEffect, useState } from "react";
 
@@ -41,17 +43,20 @@ export function NoticeCard({
   notice,
   isHost,
   pending,
+  error,
   onSave,
 }: {
   notice: WorkspaceNotice;
   isHost: boolean;
   pending: boolean;
-  onSave: (input: { content: string; deadline_at: string | null; presentation_order: number | null }) => void;
+  error?: string | null;
+  onSave: (input: { notice: string | null; deadline_at: string | null; presentation_order: string | null }) => void;
 }) {
   const [editing, setEditing] = useState(false);
-  const [content, setContent] = useState(notice.content);
+  const [content, setContent] = useState(notice.notice ?? "");
   const [deadline, setDeadline] = useState(toDatetimeLocalValue(notice.deadline_at));
-  const [order, setOrder] = useState(notice.presentation_order != null ? String(notice.presentation_order) : "");
+  const [order, setOrder] = useState(notice.presentation_order ?? "");
+
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -64,9 +69,9 @@ export function NoticeCard({
     // (편집 중에 덮어써서 입력 중인 내용이 날아가지 않게).
     if (editing) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setContent(notice.content);
+    setContent(notice.notice ?? "");
     setDeadline(toDatetimeLocalValue(notice.deadline_at));
-    setOrder(notice.presentation_order != null ? String(notice.presentation_order) : "");
+    setOrder(notice.presentation_order ?? "");
   }, [notice, editing]);
 
   return (
@@ -77,9 +82,9 @@ export function NoticeCard({
           onSubmit={(event) => {
             event.preventDefault();
             onSave({
-              content: content.trim(),
+              notice: content.trim() ? content.trim() : null,
               deadline_at: deadline ? new Date(deadline).toISOString() : null,
-              presentation_order: order.trim() ? Number(order) : null,
+              presentation_order: order.trim() ? order.trim() : null,
             });
             setEditing(false);
           }}
@@ -103,10 +108,9 @@ export function NoticeCard({
             <label>
               발표 순서
               <input
-                type="number"
-                min={1}
                 value={order}
                 onChange={(event) => setOrder(event.target.value)}
+                placeholder="예: 3번째 발표"
                 aria-label="발표 순서"
               />
             </label>
@@ -123,10 +127,12 @@ export function NoticeCard({
       ) : (
         <>
           <div className="workspace-notice-body">
-            <p className="workspace-notice-content">{notice.content || "등록된 공지가 없어요."}</p>
+            <p className="workspace-notice-content">{notice.notice || "등록된 공지가 없어요."}</p>
             <div className="workspace-notice-meta">
               {notice.deadline_at && <span>마감 {formatDeadline(notice.deadline_at)}</span>}
-              {notice.presentation_order != null && <span>발표 순서 {notice.presentation_order}번째</span>}
+              {notice.presentation_order != null && notice.presentation_order !== "" && (
+                <span>발표 순서: {notice.presentation_order}</span>
+              )}
               {notice.deadline_at && (
                 <span className="workspace-notice-countdown">{formatRemaining(notice.deadline_at, now)}</span>
               )}
@@ -139,6 +145,7 @@ export function NoticeCard({
           )}
         </>
       )}
+      {error && <p className="workspace-section-inline-error">{error}</p>}
     </section>
   );
 }

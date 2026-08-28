@@ -1,36 +1,25 @@
 // 협업 대시보드 확장 기능(공지/체크리스트/의사결정/회의메모) API 클라이언트.
 //
-// 백엔드가 아직 병합되지 않았으므로, 이 파일의 엔드포인트는 workspace-api.ts의
-// 기존 관례(REST, workspace_id 하위 리소스 + 개별 리소스는 최상위 경로)를 그대로
-// 따른 "합의(가정)" 계약이다. 요청서에 명시된 것은 PATCH /workspaces/{id}/notice
-// 뿐이지만, 최초 진입 시 조회할 방법이 필요해 같은 관례로 GET을 함께 추가했다
-// (workspace.tasks/resources처럼 Workspace 응답에 포함시키지 않고 별도 엔드포인트로
-// 분리한 이유: 이 리소스들은 workspace 조회 폴링과 갱신 빈도가 달라 워크스페이스
-// 폴링 페이로드를 불필요하게 키우지 않기 위함).
-//
-// 실제 백엔드 병합 시 경로/필드가 달라지면 이 파일만 맞추면 된다 — 컴포넌트는
-// 이 모듈이 내보내는 타입/함수에만 의존한다.
+// backend/app/api/workspace.py를 정본으로 한다. 공지는 별도 GET이 없다 —
+// 조회는 getWorkspace()가 돌려주는 Workspace.notice/deadline_at/presentation_order를
+// 쓰고, 이 파일은 PATCH(수정, 방장 전용)만 내보낸다.
 
 import { requestJson } from "./api";
 
 // ──────────────────────────────────────────────
-// 1. 고정 공지
+// 1. 상단 고정 공지 — 조회는 workspace-api.ts의 Workspace 타입/GET을 그대로 쓴다.
 // ──────────────────────────────────────────────
 
 export type WorkspaceNotice = {
-  content: string;
+  notice: string | null;
   deadline_at: string | null;
-  presentation_order: number | null;
-  updated_at: string | null;
+  presentation_order: string | null;
 };
 
-export function getNotice(workspaceId: string): Promise<WorkspaceNotice> {
-  return requestJson(`/workspaces/${encodeURIComponent(workspaceId)}/notice`);
-}
-
+// 방장 전용.
 export function updateNotice(
   workspaceId: string,
-  input: { content: string; deadline_at: string | null; presentation_order: number | null },
+  input: { notice: string | null; deadline_at: string | null; presentation_order: string | null },
 ): Promise<WorkspaceNotice> {
   return requestJson(`/workspaces/${encodeURIComponent(workspaceId)}/notice`, {
     method: "PATCH",
@@ -39,16 +28,63 @@ export function updateNotice(
 }
 
 // ──────────────────────────────────────────────
+// 2. 회의 메모
+// ──────────────────────────────────────────────
+
+export type MeetingNote = {
+  id: string;
+  title: string;
+  content: string;
+  next_action: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export function getMeetingNotes(workspaceId: string): Promise<MeetingNote[]> {
+  return requestJson(`/workspaces/${encodeURIComponent(workspaceId)}/meeting-notes`);
+}
+
+export function createMeetingNote(
+  workspaceId: string,
+  input: { title: string; content: string; next_action?: string | null },
+): Promise<MeetingNote> {
+  return requestJson(`/workspaces/${encodeURIComponent(workspaceId)}/meeting-notes`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function updateMeetingNote(
+  noteId: string,
+  input: { title?: string; content?: string; next_action?: string | null; clear_next_action?: boolean },
+): Promise<MeetingNote> {
+  return requestJson(`/meeting-notes/${encodeURIComponent(noteId)}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export function deleteMeetingNote(noteId: string): Promise<{ deleted: boolean }> {
+  return requestJson(`/meeting-notes/${encodeURIComponent(noteId)}`, { method: "DELETE" });
+}
+
+// ──────────────────────────────────────────────
 // 3. 발표 준비 체크리스트
 // ──────────────────────────────────────────────
 
+export type ChecklistItemType = "DEMO_URL" | "SLIDES" | "SCRIPT" | "BACKUP" | "CUSTOM";
+
 export type PresentationChecklistItem = {
   id: string;
+  item_type: ChecklistItemType;
   label: string;
+  completed: boolean;
   url: string | null;
-  is_checked: boolean;
+  completed_by: string | null;
   created_by: string;
   created_at: string;
+  updated_at: string;
 };
 
 export function getPresentationChecklist(workspaceId: string): Promise<PresentationChecklistItem[]> {
@@ -57,7 +93,7 @@ export function getPresentationChecklist(workspaceId: string): Promise<Presentat
 
 export function createPresentationChecklistItem(
   workspaceId: string,
-  input: { label: string; url?: string | null },
+  input: { item_type: ChecklistItemType; label: string; url?: string | null },
 ): Promise<PresentationChecklistItem> {
   return requestJson(`/workspaces/${encodeURIComponent(workspaceId)}/presentation-checklist`, {
     method: "POST",
@@ -67,7 +103,7 @@ export function createPresentationChecklistItem(
 
 export function updatePresentationChecklistItem(
   itemId: string,
-  input: { label?: string; url?: string | null; is_checked?: boolean },
+  input: { label?: string; url?: string | null; clear_url?: boolean; completed?: boolean },
 ): Promise<PresentationChecklistItem> {
   return requestJson(`/presentation-checklist/${encodeURIComponent(itemId)}`, {
     method: "PATCH",
@@ -92,13 +128,14 @@ export type DecisionOption = {
 export type Decision = {
   id: string;
   title: string;
-  description: string;
-  options: DecisionOption[];
+  description: string | null;
   status: "OPEN" | "FINALIZED";
-  finalized_option_id: string | null;
-  my_vote_option_id: string | null;
+  final_result: string | null;
   created_by: string;
   created_at: string;
+  finalized_at: string | null;
+  options: DecisionOption[];
+  my_vote_option_id: string | null;
 };
 
 export function getDecisions(workspaceId: string): Promise<Decision[]> {
@@ -107,7 +144,7 @@ export function getDecisions(workspaceId: string): Promise<Decision[]> {
 
 export function createDecision(
   workspaceId: string,
-  input: { title: string; description: string; options: string[] },
+  input: { title: string; description?: string | null; options: string[] },
 ): Promise<Decision> {
   return requestJson(`/workspaces/${encodeURIComponent(workspaceId)}/decisions`, {
     method: "POST",
@@ -115,6 +152,7 @@ export function createDecision(
   });
 }
 
+// 방장은 participant 레코드가 없어 투표할 수 없다(백엔드 정책 — 403).
 export function voteDecision(decisionId: string, optionId: string): Promise<Decision> {
   return requestJson(`/decisions/${encodeURIComponent(decisionId)}/vote`, {
     method: "POST",
@@ -122,51 +160,10 @@ export function voteDecision(decisionId: string, optionId: string): Promise<Deci
   });
 }
 
-export function finalizeDecision(decisionId: string, optionId: string): Promise<Decision> {
+// 방장 전용. finalResult는 확정할 선택지의 label 문자열이다(option_id가 아니다).
+export function finalizeDecision(decisionId: string, finalResult: string): Promise<Decision> {
   return requestJson(`/decisions/${encodeURIComponent(decisionId)}/finalize`, {
     method: "POST",
-    body: JSON.stringify({ option_id: optionId }),
+    body: JSON.stringify({ final_result: finalResult }),
   });
-}
-
-// ──────────────────────────────────────────────
-// 5. 회의 메모
-// ──────────────────────────────────────────────
-
-export type MeetingNote = {
-  id: string;
-  title: string;
-  discussion: string;
-  next_actions: string;
-  created_by: string;
-  created_at: string;
-  updated_at: string;
-};
-
-export function getMeetingNotes(workspaceId: string): Promise<MeetingNote[]> {
-  return requestJson(`/workspaces/${encodeURIComponent(workspaceId)}/meeting-notes`);
-}
-
-export function createMeetingNote(
-  workspaceId: string,
-  input: { title: string; discussion: string; next_actions: string },
-): Promise<MeetingNote> {
-  return requestJson(`/workspaces/${encodeURIComponent(workspaceId)}/meeting-notes`, {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
-}
-
-export function updateMeetingNote(
-  noteId: string,
-  input: { title?: string; discussion?: string; next_actions?: string },
-): Promise<MeetingNote> {
-  return requestJson(`/meeting-notes/${encodeURIComponent(noteId)}`, {
-    method: "PATCH",
-    body: JSON.stringify(input),
-  });
-}
-
-export function deleteMeetingNote(noteId: string): Promise<{ deleted: boolean }> {
-  return requestJson(`/meeting-notes/${encodeURIComponent(noteId)}`, { method: "DELETE" });
 }

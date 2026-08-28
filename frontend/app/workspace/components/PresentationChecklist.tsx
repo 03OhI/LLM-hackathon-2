@@ -1,16 +1,20 @@
 "use client";
 
 // 발표 준비 체크리스트.
+// 완료 상태 변경은 같은 방 팀원 누구나 할 수 있다(백엔드 정책). 삭제만 작성자/방장으로 제한한다
+// (기본 4개 항목은 워크스페이스를 시작한 방장 소유로 취급된다).
 
 import { useState } from "react";
 
-import type { PresentationChecklistItem } from "@/lib/workspace-tools-api";
+import type { ChecklistItemType, PresentationChecklistItem } from "@/lib/workspace-tools-api";
 
-export const DEFAULT_CHECKLIST_LABELS = ["시연 URL", "발표 자료", "발표 대본", "백업 화면"];
+export const DEFAULT_CHECKLIST_LABELS = ["시연 URL 확인", "발표 자료 확인", "발표 대본 확인", "백업 화면 확인"];
 
 export function PresentationChecklist({
   items,
   pendingAction,
+  canManage,
+  error,
   onToggle,
   onUrlChange,
   onAdd,
@@ -18,13 +22,15 @@ export function PresentationChecklist({
 }: {
   items: PresentationChecklistItem[];
   pendingAction: string | null;
-  onToggle: (itemId: string, checked: boolean) => void;
+  canManage: (createdBy: string) => boolean;
+  error?: string | null;
+  onToggle: (itemId: string, completed: boolean) => void;
   onUrlChange: (itemId: string, url: string) => void;
-  onAdd: (label: string) => void;
+  onAdd: (label: string, itemType: ChecklistItemType) => void;
   onDelete: (itemId: string) => void;
 }) {
   const [newLabel, setNewLabel] = useState("");
-  const doneCount = items.filter((item) => item.is_checked).length;
+  const doneCount = items.filter((item) => item.completed).length;
   const progress = items.length === 0 ? 0 : Math.round((doneCount / items.length) * 100);
 
   return (
@@ -46,16 +52,16 @@ export function PresentationChecklist({
           {items.map((item) => (
             <li
               key={item.id}
-              className={item.is_checked ? "quest-check-row quest-check-done" : "quest-check-row"}
+              className={item.completed ? "quest-check-row quest-check-done" : "quest-check-row"}
             >
               <label className="workspace-checklist-label">
                 <input
                   type="checkbox"
-                  checked={item.is_checked}
+                  checked={item.completed}
                   disabled={pendingAction === `toggle-checklist-${item.id}`}
                   onChange={(event) => onToggle(item.id, event.target.checked)}
                 />
-                <span className={item.is_checked ? "workspace-checklist-done-text" : undefined}>{item.label}</span>
+                <span className={item.completed ? "workspace-checklist-done-text" : undefined}>{item.label}</span>
               </label>
               <input
                 className="workspace-checklist-url"
@@ -67,14 +73,17 @@ export function PresentationChecklist({
                   if (value !== (item.url ?? "")) onUrlChange(item.id, value);
                 }}
               />
-              <button
-                type="button"
-                className="task-delete-button"
-                onClick={() => onDelete(item.id)}
-                aria-label={`${item.label} 삭제`}
-              >
-                삭제
-              </button>
+              {canManage(item.created_by) && (
+                <button
+                  type="button"
+                  className="task-delete-button"
+                  disabled={pendingAction === `delete-checklist-${item.id}`}
+                  onClick={() => onDelete(item.id)}
+                  aria-label={`${item.label} 삭제`}
+                >
+                  삭제
+                </button>
+              )}
             </li>
           ))}
         </ul>
@@ -85,7 +94,7 @@ export function PresentationChecklist({
         onSubmit={(event) => {
           event.preventDefault();
           if (!newLabel.trim()) return;
-          onAdd(newLabel.trim());
+          onAdd(newLabel.trim(), "CUSTOM");
           setNewLabel("");
         }}
       >
@@ -99,6 +108,7 @@ export function PresentationChecklist({
           항목 추가
         </button>
       </form>
+      {error && <p className="workspace-section-inline-error">{error}</p>}
     </div>
   );
 }

@@ -1,6 +1,10 @@
 "use client";
 
 // 빠른 의사결정 보드 — 안건 생성, 투표, 방장 확정.
+//
+// 실제 모드에서는 canVote/canFinalize가 방장/팀원 역할에 따라 서로 배타적으로 켜진다
+// (방장은 participant 레코드가 없어 백엔드가 투표를 막는다 — 403). 관리자 시연 모드에서는
+// 부모가 둘 다 true로 넘겨 투표와 확정을 모두 시연할 수 있게 한다.
 
 import { useState } from "react";
 
@@ -11,18 +15,22 @@ const MAX_OPTIONS = 5;
 
 export function DecisionBoard({
   decisions,
-  isHost,
+  canVote,
+  canFinalize,
   pendingAction,
+  error,
   onCreate,
   onVote,
   onFinalize,
 }: {
   decisions: Decision[];
-  isHost: boolean;
+  canVote: boolean;
+  canFinalize: boolean;
   pendingAction: string | null;
+  error?: string | null;
   onCreate: (input: { title: string; description: string; options: string[] }) => void;
   onVote: (decisionId: string, optionId: string) => void;
-  onFinalize: (decisionId: string, optionId: string) => void;
+  onFinalize: (decisionId: string, finalResult: string) => void;
 }) {
   const [creating, setCreating] = useState(false);
   const [title, setTitle] = useState("");
@@ -50,9 +58,7 @@ export function DecisionBoard({
             return (
               <li key={decision.id} className="workspace-decision-card">
                 {finalized && (
-                  <span className="workspace-decision-final-badge">
-                    최종 결정: {decision.options.find((o) => o.id === decision.finalized_option_id)?.label ?? "-"}
-                  </span>
+                  <span className="workspace-decision-final-badge">최종 결정: {decision.final_result ?? "-"}</span>
                 )}
                 <b className="workspace-decision-title">{decision.title}</b>
                 {decision.description && <p className="workspace-decision-description">{decision.description}</p>}
@@ -73,20 +79,22 @@ export function DecisionBoard({
                           <div className="workspace-progress-fill" style={{ width: `${barWidth}%` }} />
                         </div>
                         <div className="workspace-decision-option-actions">
-                          <button
-                            type="button"
-                            className={isMine ? "task-status-active" : "task-status-button"}
-                            disabled={finalized || pendingAction === `vote-${decision.id}`}
-                            onClick={() => onVote(decision.id, option.id)}
-                          >
-                            {isMine ? "투표함" : "투표"}
-                          </button>
-                          {isHost && !finalized && (
+                          {canVote && (
+                            <button
+                              type="button"
+                              className={isMine ? "task-status-active" : "task-status-button"}
+                              disabled={finalized || pendingAction === `vote-${decision.id}`}
+                              onClick={() => onVote(decision.id, option.id)}
+                            >
+                              {isMine ? "투표함" : "투표"}
+                            </button>
+                          )}
+                          {canFinalize && !finalized && (
                             <button
                               type="button"
                               className="button-muted"
                               disabled={pendingAction === `finalize-${decision.id}`}
-                              onClick={() => onFinalize(decision.id, option.id)}
+                              onClick={() => onFinalize(decision.id, option.label)}
                             >
                               이 선택지로 확정
                             </button>
@@ -168,6 +176,7 @@ export function DecisionBoard({
           새 안건 만들기
         </button>
       )}
+      {error && <p className="workspace-section-inline-error">{error}</p>}
     </div>
   );
 }
