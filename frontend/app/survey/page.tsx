@@ -248,7 +248,7 @@ function WaitingScreen({ team }: { team: TeamSession }) {
     typeof window === "undefined"
       ? ""
       : `${window.location.origin}/?team=${team.code}`;
-  if (showPreview) return <ResultsPage demoMode />;
+  if (showPreview) return <ResultsPage />;
 
   return (
     <main className="survey-shell">
@@ -302,7 +302,10 @@ function WaitingScreen({ team }: { team: TeamSession }) {
           <button
             type="button"
             className="admin-preview-button"
-            onClick={() => setShowPreview(true)}
+            onClick={() => {
+              window.sessionStorage.setItem("tmti-inline-demo-preview", "1");
+              setShowPreview(true);
+            }}
           >
             관리자 · 결과 미리보기 <span aria-hidden="true">→</span>
           </button>
