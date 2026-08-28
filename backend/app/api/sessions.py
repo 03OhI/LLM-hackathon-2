@@ -61,6 +61,9 @@ class UpdateExpectedCountRequest(BaseModel):
 class AnalysisStatusResponse(BaseModel):
     analysis_status: str | None  # PROCESSING|COMPLETED|FALLBACK, 분석 없으면 None
     private_insight_status: str | None = None  # participant 인증 시에만
+    expected_member_count: int
+    joined_member_count: int  # 세션에 합류한 참여자 수 (제출 여부 무관)
+    submitted_member_count: int
 
 
 # ──────────────────────────────────────────────
@@ -164,7 +167,16 @@ def get_analysis_status(
         .order_by(AnalysisResult.analysis_version.desc())
     ).first()
 
-    if latest is None:
-        return AnalysisStatusResponse(analysis_status=None)
-
-    return AnalysisStatusResponse(analysis_status=latest.status)
+    participants = db.exec(
+        select(Participant).where(Participant.session_id == session_id)
+    ).all()
+    joined_count = len(participants)
+    submitted_count = sum(
+        1 for p in participants if p.submission_status in ("SUBMITTED", "LOCKED")
+    )
+    return AnalysisStatusResponse(
+        analysis_status=latest.status if latest is not None else None,
+        expected_member_count=session.expected_member_count,
+        joined_member_count=joined_count,
+        submitted_member_count=submitted_count,
+    )

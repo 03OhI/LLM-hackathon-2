@@ -34,15 +34,14 @@ router = APIRouter(tags=["results"])
 
 
 class TeamResultResponse(BaseModel):
-    # 최신 기획(INTEGRATION_CONTRACT_V2 §7): 아래 필드는 공개 API에서 제외한다.
+    # 최신 기획: team_grade / team_caution_codes / top_caution_pairs /
+    # team_strength_codes / top_complement_pairs 는 공개 API에서 제외한다.
+    # used_rule_ids(내부 rule_id) 도 공개 응답에 노출하지 않는다.
     # (DB(AnalysisResult)에는 계속 저장·계산하되 응답 스키마에만 노출하지 않는다.)
-    #   - team_grade / team_caution_codes / top_caution_pairs (75240c8)
-    #   - team_strength_codes (내부 코드)
-    #   - top_complement_pairs (공개 불필요)
     session_id: str
     status: str  # PROCESSING|COMPLETED|FALLBACK
     distribution: dict | None
-    team_comment: dict | None  # TeamSnapshot.model_dump() 또는 None
+    team_comment: dict | None  # TeamSnapshot(title/formula/scene/keywords) 또는 None
     rule_text_fallback: dict[str, str] | None = None  # AI 코멘트가 전혀 없을 때만
 
 
@@ -50,7 +49,7 @@ class PrivateResultResponse(BaseModel):
     participant_id: str
     status: str  # NOT_REQUESTED|PROCESSING|COMPLETED|FALLBACK
     self_positions: dict | None
-    insight: dict | None  # PrivateCard.model_dump()
+    insight: dict | None  # PrivateCard(card_title/contribution/optional_try)
 
 
 # ──────────────────────────────────────────────
@@ -66,6 +65,13 @@ def _latest_analysis(session_id: str, db: DBSession) -> AnalysisResult | None:
     ).first()
 
 
+def _strip_internal(payload: dict | None) -> dict | None:
+    """AI 산출물 dict에서 내부 전용 필드(used_rule_ids)를 제거한다."""
+    if payload is None:
+        return None
+    return {k: v for k, v in payload.items() if k != "used_rule_ids"}
+
+
 def _build_team_result(session_id: str, analysis: AnalysisResult | None) -> TeamResultResponse:
     if analysis is None:
         return TeamResultResponse(
@@ -76,7 +82,11 @@ def _build_team_result(session_id: str, analysis: AnalysisResult | None) -> Team
         )
 
     distribution = json.loads(analysis.distribution_json) if analysis.distribution_json else None
-    team_comment = json.loads(analysis.public_report_json) if analysis.public_report_json else None
+    team_comment = (
+        _strip_internal(json.loads(analysis.public_report_json))
+        if analysis.public_report_json
+        else None
+    )
 
     rule_text_fallback = None
     if team_comment is None and analysis.status in ("FALLBACK", "PROCESSING"):
@@ -129,7 +139,11 @@ def get_my_result(
 
     profile = canonical_profile_for_participant(participant.id, db)
 
-    insight = json.loads(private_insight.insight_json) if private_insight.insight_json else None
+    insight = (
+        _strip_internal(json.loads(private_insight.insight_json))
+        if private_insight.insight_json
+        else None
+    )
 
     return PrivateResultResponse(
         participant_id=participant.id,

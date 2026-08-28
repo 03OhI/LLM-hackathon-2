@@ -33,6 +33,11 @@ class JoinResponse(BaseModel):
     session_id: str
 
 
+class InvitePreviewResponse(BaseModel):
+    session_name: str
+    expected_member_count: int
+
+
 class UpdateSubmissionMethodRequest(BaseModel):
     """제출 방식 전환 전, 세션 상태만 확인하는 용도 (실제 데이터는 survey.py에서 처리)."""
 
@@ -70,6 +75,18 @@ def join_session(
         participant_id=participant.id,
         participant_secret=participant_secret,
         session_id=session.id,
+    )
+
+
+@router.get("/invites/{token}", response_model=InvitePreviewResponse)
+def preview_invite(token: str, db: DBSession = Depends(get_session)) -> InvitePreviewResponse:
+    sessions = db.exec(select(SessionModel)).all()
+    session = next((s for s in sessions if verify_secret(token, s.invite_token_hash)), None)
+    if session is None:
+        raise app_error(INVALID_INVITE_TOKEN, "유효하지 않은 초대 링크입니다.")
+    return InvitePreviewResponse(
+        session_name=session.name,
+        expected_member_count=session.expected_member_count,
     )
 
 
