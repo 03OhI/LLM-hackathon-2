@@ -170,6 +170,6 @@ team_index_weights:
 
 # ── 등급 임계치 ──
 grade_thresholds:
-  HIGH: 0.65
-  MID: 0.40
-  # LOW: < 0.40
+  HIGH: 0.90
+  MID: 0.70
+  # LOW: < 0.70
