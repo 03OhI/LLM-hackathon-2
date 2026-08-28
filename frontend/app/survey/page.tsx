@@ -216,6 +216,7 @@ function WaitingScreen({ team }: { team: TeamSession }) {
   });
   const [copied, setCopied] = useState(false);
   const [analysisRequested, setAnalysisRequested] = useState(false);
+  const [statusError, setStatusError] = useState("");
   useEffect(() => {
     const refresh = async () => {
       try {
@@ -223,13 +224,19 @@ function WaitingScreen({ team }: { team: TeamSession }) {
           cache: "no-store",
           credentials: "same-origin",
         });
-        if (!response.ok) return;
+        if (!response.ok) {
+          setStatusError("완료 현황을 다시 확인하고 있어요.");
+          return;
+        }
         const next = await response.json();
         setStatus({
-          completedMembers: next.submitted_member_count,
+          // 제출 완료 직후에는 이 브라우저의 완료 상태를 우선 보존합니다.
+          // 서버 응답이 도착한 뒤에는 더 큰 값으로 자연스럽게 동기화됩니다.
+          completedMembers: Math.max(1, next.submitted_member_count ?? 0),
           expectedMembers: next.expected_member_count,
           analysisStatus: next.analysis_status,
         });
+        setStatusError("");
         if (next.analysis_status === "COMPLETED" || next.analysis_status === "FALLBACK") {
           window.location.assign(`/results?sessionId=${encodeURIComponent(team.sessionId)}`);
           return;
@@ -239,7 +246,7 @@ function WaitingScreen({ team }: { team: TeamSession }) {
           await fetch(`${apiBase}/sessions/${team.sessionId}/analysis`, { method: "POST", credentials: "same-origin" });
         }
       } catch {
-        /* 프론트 시연에서는 대기 UI를 계속 보여 줍니다. */
+        setStatusError("완료 현황을 불러오지 못했어요. 잠시 후 자동으로 다시 확인합니다.");
       }
     };
     refresh();
@@ -300,8 +307,9 @@ function WaitingScreen({ team }: { team: TeamSession }) {
           >
             {copied ? "참여 링크가 복사되었어요" : "팀 참여 링크 복사"}
           </button>
-          {team.isHost && <button type="button" className="admin-preview-button" onClick={() => window.location.assign(`/results?sessionId=${encodeURIComponent(team.sessionId)}`)}>관리자 · 응답 결과 보기 <span aria-hidden="true">→</span></button>}
+          {team.isHost && <button type="button" className="admin-preview-button" onClick={() => window.location.assign("/results?mode=admin")}>관리자 · 응답 결과 보기 <span aria-hidden="true">→</span></button>}
         </div>
+        {statusError && <p className="waiting-demo-note" role="status">{statusError}</p>}
         {team.isHost && <p className="waiting-demo-note">모든 응답이 모이면 분석을 시작하고 결과 화면으로 이동합니다.</p>}
       </section>
     </main>

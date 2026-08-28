@@ -38,12 +38,43 @@ type View = "personal" | "team";
 const sessionStorageKey = "tmti-session-id";
 const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? "/backend/api";
 
+const administratorPreview = {
+  personal: {
+    participant_id: "administrator-preview",
+    status: "COMPLETED" as ResultStatus,
+    insight: {
+      card_title: "흐름을 정리해 팀을 앞으로 움직이는 사람",
+      contribution:
+        "해야 할 일을 작게 나누고 다음 순서를 제안해, 팀이 막히지 않도록 안정적인 리듬을 만듭니다.",
+      optional_try:
+        "결정이 필요한 순간에는 우선순위를 한 문장으로 먼저 공유해 보세요.",
+      used_rule_ids: [],
+    },
+  } satisfies PersonalResult,
+  team: {
+    session_id: "administrator-preview",
+    status: "COMPLETED" as ResultStatus,
+    team_comment: {
+      title: "서로의 속도를 맞추며 완성하는 팀",
+      formula: "구조를 잡는 사람 × 실행을 밀어주는 사람 × 분위기를 살피는 사람",
+      scene:
+        "방향을 먼저 맞춘 뒤 각자의 강점을 나누어 쓰는 팀이에요. 짧은 체크인만 꾸준히 해도 협업의 흐름이 더 단단해집니다.",
+      keywords: ["역할 분담", "빠른 공유", "균형 있는 실행"],
+      used_rule_ids: [],
+    },
+  } satisfies TeamResult,
+};
+
 export default function ResultsPage() {
   const [view, setView] = useState<View>("personal");
   const [teamResult, setTeamResult] = useState<TeamResult | null>(null);
   const [personalResult, setPersonalResult] = useState<PersonalResult | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const administratorMode = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return new URLSearchParams(window.location.search).get("mode") === "admin";
+  }, []);
   const sessionId = useMemo(() => {
     if (typeof window === "undefined") return "";
     const params = new URLSearchParams(window.location.search);
@@ -51,6 +82,9 @@ export default function ResultsPage() {
   }, []);
 
   useEffect(() => {
+    if (administratorMode) {
+      return;
+    }
     if (!sessionId) {
       setError("결과를 확인할 세션 정보가 없어요. 초대 링크에서 다시 시작해 주세요.");
       setIsLoading(false);
@@ -95,10 +129,16 @@ export default function ResultsPage() {
       cancelled = true;
       if (pollTimer) window.clearTimeout(pollTimer);
     };
-  }, [sessionId]);
+  }, [administratorMode, sessionId]);
 
-  if (isLoading) return <ResultLoading />;
-  if (error || !teamResult || !personalResult) return <ResultError message={error} />;
+  const displayedTeam = administratorMode ? administratorPreview.team : teamResult;
+  const displayedPersonal = administratorMode
+    ? administratorPreview.personal
+    : personalResult;
+
+  if (!administratorMode && isLoading) return <ResultLoading />;
+  if (error || !displayedTeam || !displayedPersonal)
+    return <ResultError message={error} />;
 
   return (
     <ResultShell>
@@ -106,7 +146,7 @@ export default function ResultsPage() {
         <button className={view === "personal" ? "active" : ""} onClick={() => setView("personal")}>개인 결과</button>
         <button className={view === "team" ? "active" : ""} onClick={() => setView("team")}>우리 팀 분석</button>
       </section>
-      {view === "personal" ? <PersonalReport insight={personalResult.insight} onTeam={() => setView("team")} /> : <TeamReport snapshot={teamResult.team_comment} onPersonal={() => setView("personal")} />}
+      {view === "personal" ? <PersonalReport insight={displayedPersonal.insight} onTeam={() => setView("team")} /> : <TeamReport snapshot={displayedTeam.team_comment} onPersonal={() => setView("personal")} />}
     </ResultShell>
   );
 }
