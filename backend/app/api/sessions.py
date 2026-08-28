@@ -98,7 +98,9 @@ def create_session(
     db.add(session)
     db.commit()
 
-    set_secret_cookie(response, "host_secret", host_secret, secure=settings.cookie_secure)
+    set_secret_cookie(
+        response, "host_secret", host_secret, secure=settings.cookie_secure, samesite=settings.cookie_samesite
+    )
 
     return CreateSessionResponse(
         session_id=session_id,

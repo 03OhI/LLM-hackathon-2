@@ -10,7 +10,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import participants, results, sessions, survey
+from app.api import participants, quests, results, sessions, survey, workspace
 from app.config import get_settings
 from app.db import init_db
 from app.errors import AppError
@@ -21,7 +21,7 @@ app = FastAPI(title="team-chemistry-analyzer")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=settings.frontend_origins,  # FRONTEND_ORIGINS 환경변수, 와일드카드 금지 (app/config.py)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -40,6 +40,8 @@ app.include_router(sessions.router, prefix="/api")
 app.include_router(participants.router, prefix="/api")
 app.include_router(survey.router, prefix="/api")
 app.include_router(results.router, prefix="/api")
+app.include_router(quests.router, prefix="/api")
+app.include_router(workspace.router, prefix="/api")
 
 
 @app.get("/api/health")

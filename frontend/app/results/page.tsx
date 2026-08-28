@@ -147,6 +147,11 @@ export default function ResultsPage() {
         <button className={view === "team" ? "active" : ""} onClick={() => setView("team")}>우리 팀 분석</button>
       </section>
       {view === "personal" ? <PersonalReport insight={displayedPersonal.insight} onTeam={() => setView("team")} /> : <TeamReport snapshot={displayedTeam.team_comment} onPersonal={() => setView("personal")} />}
+      {!administratorMode && (
+        <Link href="/quest" className="result-quest-link">
+          아이스브레이킹 퀘스트로 이동 <b>→</b>
+        </Link>
+      )}
     </ResultShell>
   );
 }
