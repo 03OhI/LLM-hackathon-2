@@ -63,3 +63,8 @@ config/
 
 # Documentation PDFs
 *.pdf
+
+# environment files (do not commit real secrets/config)
+.env
+backend/.env
+*.pem

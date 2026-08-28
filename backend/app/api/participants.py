@@ -1,8 +1,9 @@
 """
-참여자 API — design.md §7.1
+참여자 API — design.md §7.1, SPEC_V5 프론트 통합
 
 POST /api/invites/{token}/participants
 PUT  /api/participants/{id}/submission
+GET  /api/rooms/{room_id}/participants
 """
 
 from __future__ import annotations
@@ -14,7 +15,15 @@ from pydantic import BaseModel, Field
 from sqlmodel import Session as DBSession
 from sqlmodel import select
 
-from app.auth import assert_participant, generate_secret, hash_secret, set_secret_cookie, verify_secret
+from app.auth import (
+    RoomActor,
+    assert_participant,
+    assert_room_member_strict,
+    generate_secret,
+    hash_secret,
+    set_secret_cookie,
+    verify_secret,
+)
 from app.config import get_settings
 from app.db import get_session
 from app.errors import INVALID_INVITE_TOKEN, SUBMISSION_LOCKED, app_error
@@ -69,7 +78,13 @@ def join_session(
     db.add(participant)
     db.commit()
 
-    set_secret_cookie(response, "participant_secret", participant_secret, secure=settings.cookie_secure)
+    set_secret_cookie(
+        response,
+        "participant_secret",
+        participant_secret,
+        secure=settings.cookie_secure,
+        samesite=settings.cookie_samesite,
+    )
 
     return JoinResponse(
         participant_id=participant.id,
@@ -104,3 +119,33 @@ def update_submission(
         raise app_error(SUBMISSION_LOCKED, "분석이 시작된 후에는 제출본을 수정할 수 없습니다.")
 
     return {"participant_id": participant.id, "submission_status": participant.submission_status}
+
+
+# ──────────────────────────────────────────────
+# 팀원 목록 — SPEC_V5 프론트 통합
+# ──────────────────────────────────────────────
+
+
+class ParticipantPublic(BaseModel):
+    """팀원 목록 공개 필드. secret/설문 원문/positions/개인 카드/내부 분석값은 절대 포함하지 않는다."""
+
+    participant_id: str
+    nickname: str
+
+
+@router.get("/rooms/{session_id}/participants", response_model=list[ParticipantPublic])
+def list_room_participants(
+    session_id: str,
+    db: DBSession = Depends(get_session),
+    _actor: RoomActor = Depends(assert_room_member_strict),
+) -> list[ParticipantPublic]:
+    """URL의 {session_id}는 SPEC의 room_id와 동일 개념이다(§8.1 — TeamRoom == Session).
+
+    다른 /rooms/{session_id}/... 라우터(quests.py, workspace.py)와 path parameter
+    이름을 맞춰 assert_room_member_strict/assert_host 등 공용 의존성이 그대로
+    재사용되도록 한다. 실제 URL 문자열(/api/rooms/<id>/participants)은 동일하다.
+    """
+    participants = db.exec(
+        select(Participant).where(Participant.session_id == session_id).order_by(Participant.created_at)
+    ).all()
+    return [ParticipantPublic(participant_id=p.id, nickname=p.nickname) for p in participants]

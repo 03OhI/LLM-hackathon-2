@@ -21,6 +21,7 @@ sqlmodel>=0.0.16
 # 유틸
 pyyaml>=6.0
 typing-extensions>=4.8.0
+jsonschema>=4.20.0
 
 # 테스트
 pytest>=7.4.0
