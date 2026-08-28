@@ -1,0 +1,2406 @@
+[
+  {
+    "quest_id": "Q_CSB_001",
+    "title": "공통점 다섯 개 채우기",
+    "summary": "팀 전원에게 해당하는 공통점 다섯 개를 함께 찾아 목록으로 남깁니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "자기소개 대신 공동 목표를 두고 대화를 시작해, 첫 발화 부담을 낮춘 상태로 팀의 말차례를 만듭니다.",
+    "duration_minutes": 12,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "AGENCY",
+        "dimension": "발화 역할",
+        "pole_a": "먼저 제안",
+        "pole_b": "반응과 보완"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "탐색 방식",
+        "pole_a": "후보를 넓게 던짐",
+        "pole_b": "확실한 것만 제시"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "확인 습관",
+        "pole_a": "질문으로 검증",
+        "pole_b": "진술로 공유"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_LOW_DRIVER",
+      "TEAM_SUPPORTER_MAJORITY",
+      "TEAM_DIVERSE_COMMUNICATION"
+    ],
+    "also_for": [
+      "TEAM_TACTFUL_COMMUNICATION",
+      "TEAM_HARMONIZER_PRESENCE"
+    ],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "REMOTE_TEAM",
+      "HACKATHON"
+    ],
+    "materials": [
+      "제외 주제 목록: 거주지, 가족 관계, 종교, 정치 성향, 연애 여부, 학점, 소득",
+      "후보 예시: 즐겨 쓰는 메모 앱, 아침형인지 저녁형인지, 자주 가는 캠퍼스 건물"
+    ],
+    "steps": [
+      "제외 주제 목록을 함께 읽고, 이 범위 밖에서 후보를 찾기로 합의합니다.",
+      "각자 팀 전원에게 해당할 것 같은 공통점 후보를 최소 한 개씩 채팅에 올립니다.",
+      "올라온 후보 중 전원이 해당하는 항목에 표시하고, 다섯 개가 찰 때까지 후보를 추가합니다.",
+      "확정된 다섯 개를 팀 카드에 저장합니다."
+    ],
+    "deliverable": "팀 전원에게 해당하는 공통점 다섯 줄이 적힌 팀 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 후보를 1개 이상 제출하고, 팀 카드에 공통점 5개가 확정된다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        },
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "TEAM",
+          "min_count": 5
+        }
+      ]
+    },
+    "safety_notes": [
+      "제외 주제 목록에 있는 항목은 후보로 제안하지 않습니다.",
+      "해당 여부를 밝히고 싶지 않은 후보는 답하지 않고 다른 후보로 넘어갈 수 있습니다.",
+      "특정 팀원에게 후보 제안을 지목해 요구하지 않습니다."
+    ],
+    "is_active": true,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_010",
+    "title": "초능력 밸런스 게임",
+    "summary": "통제와 효율을 두고 고르는 가정 질문 하나에 전원이 한 줄씩 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "먼저 그려두고 시작",
+        "pole_b": "하면서 맞춰감"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "먼저 던지고 끎",
+        "pole_b": "붙어서 보완함"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "바로 짚어 말함",
+        "pole_b": "완충해서 전함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "결론부터 말함",
+        "pole_b": "맥락부터 깖"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_CONFRONTER_MAJORITY",
+      "TEAM_DIRECT_CONCENTRATION",
+      "TEAM_PLANNING_STABILITY",
+      "TEAM_DRIVER_ENERGY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: 팀플할 때 하나만 가질 수 있다면? 팀원들 텔레파시로 조종하기 vs 마감일 하루 늘리기",
+      "질문 B: 하나만 고른다면? 10년 치 인생 계획이 머릿속에 그려지는 능력 vs 어떤 위기든 1초 만에 대안이 떠오르는 능력"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "답하고 싶지 않은 질문은 넘길 수 있고, 넘긴 이유를 묻지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_011",
+    "title": "궁극의 백색소음 찾기",
+    "summary": "집중 환경과 계획 스타일을 두고 고르는 질문 하나에 전원이 한 줄씩 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "먼저 그려두고 시작",
+        "pole_b": "하면서 맞춰감"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "먼저 던지고 끎",
+        "pole_b": "붙어서 보완함"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "바로 짚어 말함",
+        "pole_b": "완충해서 전함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "맥락부터 깖",
+        "pole_b": "결론부터 말함"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_BALANCED_CONFLICT",
+      "TEAM_TACTFUL_COMMUNICATION",
+      "TEAM_PLANNING_STABILITY",
+      "TEAM_DRIVER_ENERGY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: 집중할 때 어떤 환경이 제일 좋아요? 완전 무음 vs 잔잔한 카페 소음 vs 노동요",
+      "질문 B: 더 숨 막히는 여행은? 나 혼자 계획러고 나머지가 무계획 vs 나 빼고 전원이 분 단위 계획러"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "답하고 싶지 않은 질문은 넘길 수 있고, 넘긴 이유를 묻지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_012",
+    "title": "가장 짜릿한 순간은?",
+    "summary": "회의와 할 일 정리에서 오는 쾌감과 짜증을 두고 고르는 질문에 전원이 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "먼저 그려두고 시작",
+        "pole_b": "하면서 맞춰감"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "먼저 던지고 끎",
+        "pole_b": "붙어서 보완함"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "완충해서 전함",
+        "pole_b": "바로 짚어 말함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "결론부터 말함",
+        "pole_b": "맥락부터 깖"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_HARMONIZER_PRESENCE",
+      "TEAM_DIRECT_CONCENTRATION",
+      "TEAM_PLANNING_STABILITY",
+      "TEAM_DRIVER_ENERGY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: 둘 중 더 쾌감 쩌는 순간은? 투두리스트 다 지웠을 때 vs 1시간 회의가 15분 만에 끝났을 때",
+      "질문 B: 더 화나는 상황은? 결론 없이 3시간 딴소리 vs 결론은 5분 만에 났는데 수습할 일이 산더미"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "답하고 싶지 않은 질문은 넘길 수 있고, 넘긴 이유를 묻지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_013",
+    "title": "종료 후 보상 회로",
+    "summary": "끝난 뒤의 보상과 예상 밖의 돈을 어떻게 쓸지 고르는 질문에 전원이 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "먼저 그려두고 시작",
+        "pole_b": "하면서 맞춰감"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "먼저 던지고 끎",
+        "pole_b": "붙어서 보완함"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "완충해서 전함",
+        "pole_b": "바로 짚어 말함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "맥락부터 깖",
+        "pole_b": "결론부터 말함"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_HARMONIZER_PRESENCE",
+      "TEAM_TACTFUL_COMMUNICATION",
+      "TEAM_PLANNING_STABILITY",
+      "TEAM_DRIVER_ENERGY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: 이거 다 끝나고 팀에 예산 10만 원이 생긴다면? 다 같이 맛있는 거 먹기 vs N빵해서 각자 쉬기",
+      "질문 B: 로또 10억에 당첨된다면? 아무에게도 말 안 하고 조용히 vs 바로 쏘고 다 같이 장기 플랜 짜기"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "답하고 싶지 않은 질문은 넘길 수 있고, 넘긴 이유를 묻지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_014",
+    "title": "디테일 강박 공유하기",
+    "summary": "일상에서 유독 거슬리는 디테일을 두고 고르는 질문 하나에 전원이 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "먼저 그려두고 시작",
+        "pole_b": "하면서 맞춰감"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "붙어서 보완함",
+        "pole_b": "먼저 던지고 끎"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "바로 짚어 말함",
+        "pole_b": "완충해서 전함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "결론부터 말함",
+        "pole_b": "맥락부터 깖"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_CONFRONTER_MAJORITY",
+      "TEAM_DIRECT_CONCENTRATION",
+      "TEAM_SUPPORTER_MAJORITY",
+      "TEAM_PLANNING_STABILITY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: 일상에서 은근히 거슬리는 포인트 있나요? PPT 도형 줄 안 맞는 거 vs 메뉴판 맞춤법 틀린 거",
+      "질문 B: 영화나 드라마 볼 때 나는? 설정 구멍 찾기 vs 재밌으면 그만"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "답하고 싶지 않은 질문은 넘길 수 있고, 넘긴 이유를 묻지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_015",
+    "title": "나의 디지털 정리 스타일",
+    "summary": "탭 정리와 쇼핑 습관처럼 재고 고르는 방식을 묻는 질문에 전원이 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "먼저 그려두고 시작",
+        "pole_b": "하면서 맞춰감"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "붙어서 보완함",
+        "pole_b": "먼저 던지고 끎"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "바로 짚어 말함",
+        "pole_b": "완충해서 전함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "맥락부터 깖",
+        "pole_b": "결론부터 말함"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_BALANCED_CONFLICT",
+      "TEAM_TACTFUL_COMMUNICATION",
+      "TEAM_SUPPORTER_MAJORITY",
+      "TEAM_PLANNING_STABILITY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: 브라우저 쓸 때 나는? 탭 50개 띄워두는 편 vs 그때그때 다 끄는 편",
+      "질문 B: 쇼핑할 때 나는? 장바구니에 한 달 담고 비교 분석 vs 꽂히면 일단 결제"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "답하고 싶지 않은 질문은 넘길 수 있고, 넘긴 이유를 묻지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_016",
+    "title": "생존 필수템 털기",
+    "summary": "책상 위 필수템과 나만의 효율 꿀팁을 하나씩 꺼내는 질문에 전원이 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "먼저 그려두고 시작",
+        "pole_b": "하면서 맞춰감"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "붙어서 보완함",
+        "pole_b": "먼저 던지고 끎"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "완충해서 전함",
+        "pole_b": "바로 짚어 말함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "결론부터 말함",
+        "pole_b": "맥락부터 깖"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_HARMONIZER_PRESENCE",
+      "TEAM_DIRECT_CONCENTRATION",
+      "TEAM_SUPPORTER_MAJORITY",
+      "TEAM_PLANNING_STABILITY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: 오늘 집중해야 할 때 책상 위에 꼭 있어야 하는 물건 하나는?",
+      "질문 B: 남들은 잘 모르는 나만의 소소한 효율 꿀팁이 있다면?"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "답하고 싶지 않은 질문은 넘길 수 있고, 넘긴 이유를 묻지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_017",
+    "title": "스트레스 로그아웃 방법",
+    "summary": "피곤할 때 각자 어떻게 충전하는지 고르는 질문 하나에 전원이 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "먼저 그려두고 시작",
+        "pole_b": "하면서 맞춰감"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "붙어서 보완함",
+        "pole_b": "먼저 던지고 끎"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "완충해서 전함",
+        "pole_b": "바로 짚어 말함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "맥락부터 깖",
+        "pole_b": "결론부터 말함"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_HARMONIZER_PRESENCE",
+      "TEAM_TACTFUL_COMMUNICATION",
+      "TEAM_SUPPORTER_MAJORITY",
+      "TEAM_PLANNING_STABILITY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: 진짜 피곤할 때 어떻게 쉬세요? 영상 무지성 시청 vs 방 청소하며 잡생각 없애기",
+      "질문 B: 진짜 피곤할 때 어떻게 쉬세요? 침대와 혼연일체 vs 맛있는 거 먹으며 폭풍 수다"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "휴식 방식만 나누며 건강 상태나 피로의 원인을 묻지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_018",
+    "title": "최근의 충동 실행 인증",
+    "summary": "최근의 충동적인 결정과 길을 잃었을 때의 선택을 묻는 질문에 전원이 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "하면서 맞춰감",
+        "pole_b": "먼저 그려두고 시작"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "먼저 던지고 끎",
+        "pole_b": "붙어서 보완함"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "바로 짚어 말함",
+        "pole_b": "완충해서 전함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "결론부터 말함",
+        "pole_b": "맥락부터 깖"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_CONFRONTER_MAJORITY",
+      "TEAM_DIRECT_CONCENTRATION",
+      "TEAM_DRIVER_ENERGY",
+      "TEAM_ADAPTABILITY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: 최근에 가장 충동적으로 저지른 일이나 산 물건 있나요?",
+      "질문 B: 초행길에서 길을 잃었다면? 감을 믿고 일단 직진 vs 그 자리에 서서 지도를 다시 찾기"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "충동구매나 소비 금액을 구체적으로 밝히도록 요구하지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_019",
+    "title": "알고리즘 영업 뛰기",
+    "summary": "요즘 꽂힌 영상과 맛집을 어떻게 다루는지 묻는 질문에 전원이 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "하면서 맞춰감",
+        "pole_b": "먼저 그려두고 시작"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "먼저 던지고 끎",
+        "pole_b": "붙어서 보완함"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "바로 짚어 말함",
+        "pole_b": "완충해서 전함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "맥락부터 깖",
+        "pole_b": "결론부터 말함"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_BALANCED_CONFLICT",
+      "TEAM_TACTFUL_COMMUNICATION",
+      "TEAM_DRIVER_ENERGY",
+      "TEAM_ADAPTABILITY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: 요즘 알고리즘에 제일 많이 뜨는 영상 하나만 추천해 주세요",
+      "질문 B: 대박인 맛집을 발견하면? 동네방네 영업해서 다 데려가기 vs 나만 아는 아지트로 숨겨두기"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "답하고 싶지 않은 질문은 넘길 수 있고, 넘긴 이유를 묻지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_020",
+    "title": "외출 준비 타임어택",
+    "summary": "외출 준비 속도와 새 기기 익히는 방식을 묻는 질문에 전원이 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "하면서 맞춰감",
+        "pole_b": "먼저 그려두고 시작"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "먼저 던지고 끎",
+        "pole_b": "붙어서 보완함"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "완충해서 전함",
+        "pole_b": "바로 짚어 말함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "결론부터 말함",
+        "pole_b": "맥락부터 깖"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_HARMONIZER_PRESENCE",
+      "TEAM_DIRECT_CONCENTRATION",
+      "TEAM_DRIVER_ENERGY",
+      "TEAM_ADAPTABILITY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: 아침에 일어나서 집 밖으로 나가기까지 최소 몇 분 컷 가능해요?",
+      "질문 B: 새 기기를 샀을 때 나는? 설명서 정독 vs 일단 켜고 눌러보며 익히기"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "답하고 싶지 않은 질문은 넘길 수 있고, 넘긴 이유를 묻지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_021",
+    "title": "오늘의 나를 영화 제목으로",
+    "summary": "오늘 하루의 썸네일 제목과 단톡방 포지션을 묻는 질문에 전원이 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "하면서 맞춰감",
+        "pole_b": "먼저 그려두고 시작"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "먼저 던지고 끎",
+        "pole_b": "붙어서 보완함"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "완충해서 전함",
+        "pole_b": "바로 짚어 말함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "맥락부터 깖",
+        "pole_b": "결론부터 말함"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_HARMONIZER_PRESENCE",
+      "TEAM_TACTFUL_COMMUNICATION",
+      "TEAM_DRIVER_ENERGY",
+      "TEAM_ADAPTABILITY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: 오늘 하루가 브이로그라면 썸네일 제목은 뭘로 지을래요?",
+      "질문 B: 단톡방에서 나는? 떡밥을 냅다 던지는 사람 vs 던져진 떡밥에 리액션 폭발하는 사람"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "답하고 싶지 않은 질문은 넘길 수 있고, 넘긴 이유를 묻지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_022",
+    "title": "미디어 속 클리셰 부수기",
+    "summary": "현실성 없는 장면과 더 참기 힘든 쪽을 고르는 질문에 전원이 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "하면서 맞춰감",
+        "pole_b": "먼저 그려두고 시작"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "붙어서 보완함",
+        "pole_b": "먼저 던지고 끎"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "바로 짚어 말함",
+        "pole_b": "완충해서 전함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "결론부터 말함",
+        "pole_b": "맥락부터 깖"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_CONFRONTER_MAJORITY",
+      "TEAM_DIRECT_CONCENTRATION",
+      "TEAM_ADAPTER_MAJORITY",
+      "TEAM_ADAPTABILITY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: 드라마나 영화 볼 때 '저건 진짜 현실성 없다' 싶었던 장면 있나요?",
+      "질문 B: 둘 중 더 참기 힘든 쪽은? 일은 완벽한데 성격이 어려운 사람 vs 성격은 좋은데 실력이 아직인 사람"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "사람을 평가하는 질문은 가상의 인물에 한정하며 실제 팀원이나 과거 조원을 지칭하지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_023",
+    "title": "사람 볼 때 먼저 꽂히는 것",
+    "summary": "사람을 볼 때 먼저 보는 것과 솔직함의 수위를 묻는 질문에 전원이 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "하면서 맞춰감",
+        "pole_b": "먼저 그려두고 시작"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "붙어서 보완함",
+        "pole_b": "먼저 던지고 끎"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "바로 짚어 말함",
+        "pole_b": "완충해서 전함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "맥락부터 깖",
+        "pole_b": "결론부터 말함"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_BALANCED_CONFLICT",
+      "TEAM_TACTFUL_COMMUNICATION",
+      "TEAM_ADAPTER_MAJORITY",
+      "TEAM_ADAPTABILITY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: 처음 사람 만날 때 은근히 제일 먼저 보게 되는 것? 목소리, 신발, 눈빛 등등",
+      "질문 B: 지인의 바뀐 헤어스타일이 영 아닐 때? '오 새롭네' 하고 돌려 말하기 vs 솔직하게 말하기"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "외모에 대한 평가로 흐르지 않도록 관찰 포인트만 짧게 나눕니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_024",
+    "title": "휴일의 루틴 밸런스 게임",
+    "summary": "주말 루틴과 편한 지시 방식을 두고 고르는 질문 하나에 전원이 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "하면서 맞춰감",
+        "pole_b": "먼저 그려두고 시작"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "붙어서 보완함",
+        "pole_b": "먼저 던지고 끎"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "완충해서 전함",
+        "pole_b": "바로 짚어 말함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "결론부터 말함",
+        "pole_b": "맥락부터 깖"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_HARMONIZER_PRESENCE",
+      "TEAM_DIRECT_CONCENTRATION",
+      "TEAM_ADAPTER_MAJORITY",
+      "TEAM_ADAPTABILITY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: 약속 없는 주말엔? 시간 단위로 계획 짜서 움직이기 vs 눈뜨는 시간이 곧 기상 시간",
+      "질문 B: 더 마음이 편한 쪽은? 명확한 리스트를 받았을 때 vs 알아서 자유롭게 하라고 할 때"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "답하고 싶지 않은 질문은 넘길 수 있고, 넘긴 이유를 묻지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_CSB_025",
+    "title": "게임 파티원 포지션 고르기",
+    "summary": "게임 속 포지션과 견디기 힘든 카톡 상황을 묻는 질문에 전원이 답합니다.",
+    "category": "CASUAL_BONDING",
+    "primary_goal": "정답 없는 질문 하나로 첫 대화를 열어, 서로의 기본값을 평가 없이 확인합니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 순서",
+        "pole_a": "하면서 맞춰감",
+        "pole_b": "먼저 그려두고 시작"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "판 여는 법",
+        "pole_a": "붙어서 보완함",
+        "pole_b": "먼저 던지고 끎"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "완충해서 전함",
+        "pole_b": "바로 짚어 말함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "맥락부터 깖",
+        "pole_b": "결론부터 말함"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_HARMONIZER_PRESENCE",
+      "TEAM_TACTFUL_COMMUNICATION",
+      "TEAM_ADAPTER_MAJORITY",
+      "TEAM_ADAPTABILITY"
+    ],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "질문 A: RPG 게임할 때 주로 어떤 역할 하세요? 앞에서 맞는 탱커 vs 뒤에서 때리는 딜러 vs 힐러",
+      "질문 B: 더 견디기 힘든 카톡 상황은? 하루 종일 안읽씹 vs 애매하게 읽씹"
+    ],
+    "steps": [
+      "아래 두 질문 중 하나를 팀이 골라 시작합니다. 시간이 남으면 둘 다 해도 됩니다.",
+      "전원이 각자의 답을 한 줄씩 올립니다. 길게 쓰지 않습니다.",
+      "답이 가장 갈린 지점 한 곳만 짚고 마무리합니다."
+    ],
+    "deliverable": "질문 한 장과 팀원 전원의 한 줄 답이 담긴 대화 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 질문에 한 줄 답을 1건 제출한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "이 퀘스트가 배정된 이유로 특정 팀원의 성향이나 유형을 화면에 표시하거나 지목하지 않습니다.",
+      "질문은 가정과 취향만 다루며, 실제 성과나 과거 협업 이야기를 요구하지 않습니다.",
+      "답하고 싶지 않은 질문은 넘길 수 있고, 넘긴 이유를 묻지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_WSD_001",
+    "title": "업무 스타일 밸런스 게임",
+    "summary": "정답 없는 A/B 질문 세 개에 투표하고 가장 갈린 문항만 한 줄씩 이유를 남깁니다.",
+    "category": "WORK_STYLE_DISCOVERY",
+    "primary_goal": "협업 방식의 차이를 개인 평가가 아니라 팀 분포로 드러내, 역할 분담 전에 서로의 기본값을 공유합니다.",
+    "duration_minutes": 12,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "BLIND_POLL",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획성",
+        "pole_a": "먼저 설계하고 착수",
+        "pole_b": "착수 후 조정"
+      },
+      {
+        "axis": "PLANNING",
+        "dimension": "완료 기준",
+        "pole_a": "기한을 먼저 맞춤",
+        "pole_b": "완성도를 먼저 맞춤"
+      },
+      {
+        "axis": "PLANNING",
+        "dimension": "결정 속도",
+        "pole_a": "빠르게 정하고 수정",
+        "pole_b": "충분히 검토 후 확정"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "공유 주기",
+        "pole_a": "진행 중 수시 공유",
+        "pole_b": "마무리 후 일괄 공유"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_DIVERSE_COMMUNICATION",
+      "TEAM_BALANCED_AGENCY",
+      "TEAM_PLANNING_STABILITY"
+    ],
+    "also_for": [
+      "TEAM_ADAPTABILITY",
+      "TEAM_ADAPTER_MAJORITY"
+    ],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "BEFORE_ROLE_ASSIGNMENT",
+      "HACKATHON"
+    ],
+    "materials": [
+      "문항 1: 착수 시점에 [A] 전체 일정을 먼저 짠다 vs [B] 일단 시작하고 일정을 붙인다",
+      "문항 2: 제출 하루 전에 [A] 현재 완성도로 마감한다 vs [B] 남은 시간만큼 더 다듬는다",
+      "문항 3: 내 파트 진행 상황을 [A] 중간중간 올린다 vs [B] 끝나면 한 번에 올린다"
+    ],
+    "steps": [
+      "제시된 A/B 문항 세 개에 각자 블라인드로 투표합니다.",
+      "투표가 끝나면 문항별 선택 분포를 함께 확인합니다.",
+      "가장 의견이 갈린 문항 하나를 골라, 팀원 전원이 자신의 선택 이유를 한 줄씩 남깁니다."
+    ],
+    "deliverable": "문항별 선택 분포와 팀원별 한 줄 코멘트가 담긴 투표 결과 카드",
+    "completion_condition": {
+      "description": "팀원 각자가 3개 문항에 모두 투표하고, 선택된 문항에 한 줄 코멘트를 1개 남긴다.",
+      "checks": [
+        {
+          "type": "VOTE",
+          "scope": "PER_MEMBER",
+          "min_count": 3
+        },
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "모든 선택지는 정답이 없으며 일하는 방식의 차이임을 문항 상단에 고정 표시합니다.",
+      "소수 선택을 한 팀원에게 이유를 되묻거나 해명을 요구하지 않습니다.",
+      "코멘트는 이번 선택의 이유만 적으며, 과거 협업 경험이나 실패 사례를 요구하지 않습니다.",
+      "밤샘이나 과로를 선택지로 제시하지 않습니다."
+    ],
+    "is_active": true,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_COM_001",
+    "title": "설명 전달 릴레이",
+    "summary": "한 명이 짧은 작업 절차를 글로만 설명하고 나머지가 각자 복원해 차이를 확인합니다.",
+    "category": "COMMUNICATION",
+    "primary_goal": "설명이 어디서 어긋나는지 무해한 과제로 먼저 겪어, 실제 작업에서 쓸 확인 습관을 만듭니다.",
+    "duration_minutes": 15,
+    "team_size": {
+      "min": 3,
+      "max": 6
+    },
+    "interaction_mode": "GUIDED_RELAY",
+    "energy_level": "MEDIUM",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "설명 순서",
+        "pole_a": "전체 구조부터",
+        "pole_b": "세부 요소부터"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "질문 시점",
+        "pole_a": "떠오를 때 즉시",
+        "pole_b": "다 듣고 한 번에"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "용어 사용",
+        "pole_a": "단계와 수치로",
+        "pole_b": "비유와 상황으로"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "확인 방식",
+        "pole_a": "중간중간 되짚음",
+        "pole_b": "결과로 대조"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_DIVERSE_COMMUNICATION"
+    ],
+    "also_for": [
+      "TEAM_TACTFUL_COMMUNICATION",
+      "TEAM_BALANCED_CONFLICT"
+    ],
+    "avoid_for": [
+      "TEAM_DIRECT_CONCENTRATION"
+    ],
+    "context_tags": [
+      "REMOTE_TEAM",
+      "LONG_TERM_PROJECT",
+      "BEFORE_ROLE_ASSIGNMENT"
+    ],
+    "materials": [
+      "절차 카드 예시: 자판기에서 음료 뽑아 친구 자리까지 가져다주기 (5단계)",
+      "절차 카드 예시: 도서관에서 책 한 권 찾아 대출하고 나오기 (5단계)",
+      "설명자 제약: 카드에 적힌 명사 중 두 개는 그대로 쓸 수 없습니다"
+    ],
+    "steps": [
+      "설명자 한 명을 지원자 중에서 정하고, 지원자가 없으면 시스템이 무작위로 지정합니다.",
+      "설명자는 절차 카드를 혼자 보고, 제약 단어를 피해 90초 안에 글로만 설명합니다.",
+      "나머지 팀원은 각자 이해한 절차를 순서대로 한 번 다시 적어 제출합니다.",
+      "설명자는 마지막에 전달하며 어려웠던 점을 한 줄 제출하고, 원본 카드를 공개해 갈린 지점만 짚습니다."
+    ],
+    "deliverable": "원본 절차 카드와 팀원별 복원본을 나란히 붙인 비교 보드",
+    "completion_condition": {
+      "description": "팀원 각자가 글 1건을 제출한다. 청자는 복원본, 설명자는 전달 소감 한 줄로 동일하게 카운트된다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "복원본의 정확도를 점수화하거나 순위를 매기지 않으며, 어긋난 지점만 표시합니다.",
+      "설명자 역할은 거절할 수 있고, 거절 사유를 묻지 않습니다.",
+      "설명이 어려웠던 부분은 개인의 문제가 아니라 전달 경로의 문제로 기록합니다."
+    ],
+    "is_active": true,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_COM_002",
+    "title": "의견 갈릴 때 첫 문장 정하기",
+    "summary": "가상의 의견 충돌 상황에서 각자 꺼낼 첫 문장을 고르고, 팀 공용 조율 문장 하나를 정합니다.",
+    "category": "COMMUNICATION",
+    "primary_goal": "실제 마찰이 생기기 전에 의견이 갈렸을 때 쓸 첫 문장을 미리 합의해, 반대 의견을 꺼내는 부담을 낮춥니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "HYBRID",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "CONFLICT",
+        "dimension": "이견 표현",
+        "pole_a": "바로 반대를 말함",
+        "pole_b": "먼저 절차를 제안함"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "결정 시점",
+        "pole_a": "그 자리에서 정함",
+        "pole_b": "시간을 두고 정함"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "말 꺼내는 법",
+        "pole_a": "결론부터 말함",
+        "pole_b": "질문부터 던짐"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_CONFRONTER_MAJORITY",
+      "TEAM_BALANCED_CONFLICT"
+    ],
+    "also_for": [
+      "TEAM_HARMONIZER_PRESENCE",
+      "TEAM_DIRECT_CONCENTRATION"
+    ],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "BEFORE_ROLE_ASSIGNMENT",
+      "HACKATHON"
+    ],
+    "materials": [
+      "상황 카드: 마감 이틀 전, 한 명은 기능을 더 넣자고 하고 다른 한 명은 지금 상태로 마감하자고 합니다",
+      "보기 A: 둘 다 이유가 있어 보이는데, 각자 근거를 30초씩 들어볼까요",
+      "보기 B: 저는 마감 쪽입니다. 이유는 이렇습니다",
+      "보기 C: 지금 정하지 말고 30분 뒤에 다시 볼까요",
+      "보기 D: 무엇을 우선할지 기준부터 정할까요"
+    ],
+    "steps": [
+      "제시된 가상 상황 카드를 함께 읽습니다. 팀원 두 명이 서로 다른 방향을 주장하는 장면입니다.",
+      "그 자리에서 자신이 실제로 꺼낼 것 같은 첫 문장을 보기 네 개 중 하나 고릅니다.",
+      "선택 분포를 함께 확인하고, 가장 적게 나온 보기가 무엇인지만 짚습니다.",
+      "우리 팀이 의견이 갈렸을 때 먼저 쓰기로 할 조율 문장 하나를 정해 팀 카드에 저장합니다."
+    ],
+    "deliverable": "팀이 의견 충돌 시 먼저 쓰기로 합의한 조율 문장 한 줄",
+    "completion_condition": {
+      "description": "팀원 각자가 첫 문장을 1회 선택하고, 팀 공용 조율 문장 1개를 저장한다.",
+      "checks": [
+        {
+          "type": "VOTE",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        },
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "TEAM",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "상황 카드는 가상이며, 팀원이 겪은 실제 갈등이나 과거 팀 이야기는 꺼내지 않습니다.",
+      "네 개 보기 모두 유효한 방식이며, 소수 선택을 한 팀원에게 이유를 되묻지 않습니다.",
+      "선택 결과를 개인의 성향으로 규정하거나 개인 카드에 기록하지 않습니다."
+    ],
+    "is_active": true,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_TSF_001",
+    "title": "세이브포인트 정하기",
+    "summary": "연락을 주고받지 않을 집중 구간을 한두 개 합의해 응답 부담을 미리 없앱니다.",
+    "category": "TEAM_SAFETY",
+    "primary_goal": "응답 지연이 성의 부족으로 읽히지 않도록, 답하지 않아도 되는 시간을 미리 명시합니다.",
+    "duration_minutes": 12,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "POLL",
+    "energy_level": "LOW",
+    "disclosure_level": "MEDIUM",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "소통 방식",
+        "pole_a": "실시간 응답 선호",
+        "pole_b": "비동기 응답 선호"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "집중 시간대",
+        "pole_a": "이른 시간에 집중",
+        "pole_b": "늦은 시간에 집중"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "경계 설정",
+        "pole_a": "규칙으로 미리 정함",
+        "pole_b": "상황 따라 조율함"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_TACTFUL_COMMUNICATION",
+      "TEAM_HARMONIZER_PRESENCE"
+    ],
+    "also_for": [
+      "TEAM_SUPPORTER_MAJORITY",
+      "TEAM_BALANCED_CONFLICT"
+    ],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM",
+      "LONG_TERM_PROJECT"
+    ],
+    "materials": [
+      "짧은 일정 예시: 오늘 밤 11시부터 내일 아침 8시까지는 응답을 요구하지 않는다",
+      "긴 일정 예시: 평일 오전은 각자 수업 시간이라 응답을 요구하지 않는다"
+    ],
+    "steps": [
+      "각자 연락을 받기 어렵거나 혼자 집중하고 싶은 구간을 익명으로 한 개씩 제출합니다. 이유는 적지 않습니다.",
+      "제출된 구간을 겹쳐 보고, 팀 전체의 세이브포인트를 한두 개 지정합니다. 하루짜리 일정이면 시간 단위로, 여러 주 일정이면 요일과 시간대로 잡습니다.",
+      "해당 구간에는 긴급 상황이 아닌 한 응답을 요구하지 않는다는 문장에 전원이 동의 표시를 남깁니다."
+    ],
+    "deliverable": "세이브포인트 구간이 명시된 한 줄짜리 팀 규칙 문장",
+    "completion_condition": {
+      "description": "팀원 각자가 시간 구간 1개를 제출하고, 확정 문장에 동의 표시를 1회 남긴다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        },
+        {
+          "type": "APPROVE",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "제출은 시간 구간만 받으며, 그 시간에 무엇을 하는지 묻지 않습니다.",
+      "제출 내역은 익명으로 집계되어 개인별로 표시되지 않습니다.",
+      "구간이 겹치지 않아도 조정을 강요하지 않고, 겹치는 부분만 규칙으로 삼습니다.",
+      "밤샘을 전제로 한 구간은 제안하지 않습니다."
+    ],
+    "is_active": true,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_TSF_002",
+    "title": "그라운드 룰 세 문장",
+    "summary": "협업 중 지킬 최소한의 약속 세 가지를 긍정문으로 함께 작성합니다.",
+    "category": "TEAM_SAFETY",
+    "primary_goal": "마찰이 생기기 전에 판단 기준을 문서로 남겨, 나중에 사람이 아니라 규칙을 근거로 말할 수 있게 합니다.",
+    "duration_minutes": 20,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "COLLAB_EDIT",
+    "energy_level": "MEDIUM",
+    "disclosure_level": "MEDIUM",
+    "assignment": "MANUAL",
+    "reveals_axes": [
+      {
+        "axis": "CONFLICT",
+        "dimension": "규칙 선호",
+        "pole_a": "명문화된 절차",
+        "pole_b": "상황별 재량"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "피드백 방식",
+        "pole_a": "바로 짚어 말함",
+        "pole_b": "완충해서 전달"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "초안 주도",
+        "pole_a": "초안을 먼저 씀",
+        "pole_b": "초안을 다듬음"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_BALANCED_CONFLICT",
+      "TEAM_CONFRONTER_MAJORITY"
+    ],
+    "also_for": [
+      "TEAM_DIVERSE_COMMUNICATION",
+      "TEAM_DRIVER_ENERGY"
+    ],
+    "avoid_for": [],
+    "context_tags": [
+      "BEFORE_ROLE_ASSIGNMENT",
+      "LONG_TERM_PROJECT"
+    ],
+    "steps": [
+      "협업할 때 중요하게 여기는 행동 키워드를 각자 한 개씩 제출합니다.",
+      "제출된 키워드를 묶어, 전원이 동의할 수 있는 세 개의 행동 문장으로 다듬습니다.",
+      "완성된 세 문장 묶음에 전원이 한 번씩 승인 표시를 남기고, 동의하기 어려운 문장은 문구를 고쳐 다시 확인합니다."
+    ],
+    "deliverable": "전원 승인이 기록된 세 문장짜리 팀 규칙 문서",
+    "completion_condition": {
+      "description": "팀원 각자가 키워드 1개를 제출하고, 확정된 3문장 묶음에 승인 표시를 1회 남긴다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        },
+        {
+          "type": "APPROVE",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        },
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "TEAM",
+          "min_count": 3
+        }
+      ]
+    },
+    "safety_notes": [
+      "과거의 안 좋았던 협업 경험이나 특정 인물을 지칭하는 표현은 입력하지 않습니다.",
+      "'하지 않기'가 아니라 '하기' 형태의 긍정문으로 작성하도록 안내합니다.",
+      "동의하지 않은 문장은 그대로 확정되지 않으며, 반대 이유를 밝힐 의무는 없습니다."
+    ],
+    "is_active": true,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_TSF_003",
+    "title": "팀 구조신호 정하기",
+    "summary": "파트가 막히거나 기한을 못 맞출 것 같을 때 눈치 안 보고 올릴 신호 하나를 미리 정합니다.",
+    "category": "TEAM_SAFETY",
+    "primary_goal": "도움 요청의 문턱을 미리 낮춰, 혼자 끙끙 앓다 타이밍을 놓치는 상황을 막습니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "REACTION_ONLY",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "요청 방식",
+        "pole_a": "바로 말함",
+        "pole_b": "정리해서 말함"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "문제 노출",
+        "pole_a": "일찍 드러냄",
+        "pole_b": "해결 후 알림"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_LOW_DRIVER",
+      "TEAM_TACTFUL_COMMUNICATION"
+    ],
+    "also_for": [
+      "TEAM_HARMONIZER_PRESENCE",
+      "TEAM_SUPPORTER_MAJORITY"
+    ],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "LONG_TERM_PROJECT",
+      "REMOTE_TEAM"
+    ],
+    "materials": [
+      "신호 후보 예시: 백기 이모지, 사이렌 이모지, 정해둔 한 단어",
+      "약속 문장 예시: 이 신호가 올라오면 이유를 묻지 않고 먼저 할 일을 덜어준다"
+    ],
+    "steps": [
+      "막혔을 때 올릴 신호 후보를 각자 하나씩 올립니다.",
+      "후보 중 하나를 팀 공식 구조신호로 채택합니다.",
+      "이 신호가 올라오면 이유를 캐묻지 않고 먼저 분량을 덜어준다는 약속 문장을 함께 확정합니다.",
+      "확정된 약속 문장에 전원이 동의 표시를 남깁니다."
+    ],
+    "deliverable": "채택된 구조신호 한 종과 대응 약속이 적힌 한 줄 문장",
+    "completion_condition": {
+      "description": "팀원 각자가 후보 1개를 올리고 확정 문장에 동의 표시를 1회 남긴다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        },
+        {
+          "type": "APPROVE",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "신호를 올린 팀원에게 사유나 진행률 보고를 요구하지 않기로 문장에 명시합니다.",
+      "지금 힘든 사람이 있는지 이 자리에서 확인하거나 묻지 않습니다.",
+      "신호 사용 횟수를 집계하거나 개인별로 표시하지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_TSF_004",
+    "title": "파티 컨디션 게이지 열기",
+    "summary": "이번 주 각자 쓸 수 있는 여력을 1에서 5까지 숫자로만 공유하고 일정을 거기에 맞춥니다.",
+    "category": "TEAM_SAFETY",
+    "primary_goal": "가용 여력을 모른 채 일정을 잡는 것을 막고, 처음부터 쌩쌩한 모습을 보여야 한다는 부담을 낮춥니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "POLL",
+    "energy_level": "LOW",
+    "disclosure_level": "MEDIUM",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "여력 반영",
+        "pole_a": "일정을 먼저 맞춤",
+        "pole_b": "상태를 먼저 맞춤"
+      },
+      {
+        "axis": "CONFLICT",
+        "dimension": "한계 표현",
+        "pole_a": "미리 밝힘",
+        "pole_b": "버티고 조정함"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_PLANNING_OVERLOAD",
+      "TEAM_DRIVER_ENERGY"
+    ],
+    "also_for": [
+      "TEAM_HARMONIZER_PRESENCE",
+      "TEAM_SUPPORTER_MAJORITY"
+    ],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "LONG_TERM_PROJECT"
+    ],
+    "materials": [
+      "게이지 기준: 5는 이번 주 여유 있음, 3은 보통, 1은 다른 일정으로 거의 못 뺌",
+      "입력은 숫자 하나만 받으며 사유 칸을 두지 않습니다"
+    ],
+    "steps": [
+      "이번 주 이 프로젝트에 쓸 수 있는 여력을 1에서 5 중 하나로 각자 선택합니다. 이유는 적지 않습니다.",
+      "팀 전체 분포만 함께 확인합니다. 누가 몇 점인지는 표시하지 않습니다.",
+      "가장 낮은 구간에 맞춰 이번 주에 잡지 않을 일정 한 가지를 정해 저장합니다."
+    ],
+    "deliverable": "팀 여력 분포와 이번 주에 잡지 않기로 한 일정 한 줄",
+    "completion_condition": {
+      "description": "팀원 각자가 여력 점수를 1회 선택하고, 팀이 제외 일정 1건을 저장한다.",
+      "checks": [
+        {
+          "type": "VOTE",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        },
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "TEAM",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "숫자만 받으며 건강 상태, 질병, 음주, 수면 같은 사유를 묻거나 적지 않습니다.",
+      "점수는 익명 분포로만 표시하고 개인별 점수를 공개하거나 저장하지 않습니다.",
+      "낮은 점수를 낸 팀원에게 설명이나 만회를 요구하지 않습니다.",
+      "밤샘이나 무리한 일정으로 여력을 메우는 방안은 제안하지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_TSF_005",
+    "title": "팀 데스 룰 정하기",
+    "summary": "흔한 팀플 사고 사례 목록에서 각자 가장 싫은 것을 골라, 절대 하지 말 규칙 두 개를 정합니다.",
+    "category": "TEAM_SAFETY",
+    "primary_goal": "서로가 가장 견디기 힘든 행동이 무엇인지 먼저 확인해, 나중에 사람이 아니라 규칙을 근거로 말할 수 있게 합니다.",
+    "duration_minutes": 10,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "POLL",
+    "energy_level": "MEDIUM",
+    "disclosure_level": "MEDIUM",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "CONFLICT",
+        "dimension": "금지선 설정",
+        "pole_a": "명문화해 둠",
+        "pole_b": "상황 따라 봄"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "불만 표현",
+        "pole_a": "미리 밝힘",
+        "pole_b": "생기면 말함"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_CONFRONTER_MAJORITY",
+      "TEAM_BALANCED_CONFLICT"
+    ],
+    "also_for": [
+      "TEAM_DIVERSE_COMMUNICATION",
+      "TEAM_HARMONIZER_PRESENCE"
+    ],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "BEFORE_ROLE_ASSIGNMENT",
+      "LONG_TERM_PROJECT"
+    ],
+    "materials": [
+      "사례 카드 1: 메시지를 읽고 답하지 않기",
+      "사례 카드 2: 회의 전날 밤에 일정 파기하기",
+      "사례 카드 3: 연락이 끊긴 채 잠수하기",
+      "사례 카드 4: 마감 직전에 전면 수정 요구하기",
+      "사례 카드 5: 맡은 파트를 말없이 떠넘기기"
+    ],
+    "steps": [
+      "제시된 사례 카드 다섯 장을 함께 읽습니다. 전부 흔한 상황이며 특정인의 이야기가 아닙니다.",
+      "각자 가장 견디기 힘든 사례 두 개에 투표합니다.",
+      "표가 가장 많이 몰린 두 가지를 우리 팀 데스 룰로 뒤집어 적습니다.",
+      "완성된 두 문장을 팀 규칙으로 저장합니다."
+    ],
+    "deliverable": "전원 투표로 정해진 두 문장짜리 팀 데스 룰",
+    "completion_condition": {
+      "description": "팀원 각자가 사례에 투표하고, 팀이 데스 룰 2건을 저장한다.",
+      "checks": [
+        {
+          "type": "VOTE",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        },
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "TEAM",
+          "min_count": 2
+        }
+      ]
+    },
+    "safety_notes": [
+      "사례는 제시된 카드 중에서만 고르며, 겪은 일이나 특정 인물을 이야기하지 않습니다.",
+      "과거 조원이나 다른 팀을 지칭하는 표현은 입력하지 않습니다.",
+      "데스 룰은 '하지 않기'가 아니라 '이렇게 하기' 형태로 뒤집어 적습니다.",
+      "투표 결과는 분포만 보이며 누가 무엇을 골랐는지 표시하지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_TID_001",
+    "title": "팀 공식 리액션 정하기",
+    "summary": "누군가 결과물을 올렸을 때 반드시 달아줄 팀 공용 이모지 하나를 채택합니다.",
+    "category": "TEAM_IDENTITY",
+    "primary_goal": "공유 후 무반응이 주는 부담을 없애고, 최소한의 피드백을 규칙으로 만들어 둡니다.",
+    "duration_minutes": 6,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "REACTION_ONLY",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "표현 강도",
+        "pole_a": "표현을 크게",
+        "pole_b": "표현을 담백하게"
+      },
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "반응 속도",
+        "pole_a": "즉시 반응",
+        "pole_b": "확인 후 반응"
+      }
+    ],
+    "is_universal": true,
+    "best_for": [
+      "TEAM_LOW_DRIVER",
+      "TEAM_TACTFUL_COMMUNICATION"
+    ],
+    "also_for": [
+      "TEAM_SUPPORTER_MAJORITY",
+      "TEAM_HARMONIZER_PRESENCE"
+    ],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "REMOTE_TEAM",
+      "HACKATHON"
+    ],
+    "steps": [
+      "결과물이 올라왔을 때 달아줄 리액션 후보를 각자 하나씩 채팅방에 올립니다.",
+      "올라온 후보 중 하나를 팀 공식 리액션으로 채택합니다.",
+      "'테스트입니다' 메시지를 하나 올리고, 전원이 채택된 리액션으로 반응해 동작을 확인합니다."
+    ],
+    "deliverable": "채택된 팀 공식 리액션 한 종과 연습 메시지 반응 기록",
+    "completion_condition": {
+      "description": "팀원 각자가 후보 1개를 올리고, 연습 메시지에 채택된 리액션으로 1회 반응한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        },
+        {
+          "type": "REACTION",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "기본 제공 이모지 사용을 권장하며, 유료 이모티콘 구매를 유도하지 않습니다.",
+      "개인이 촬영하거나 소장한 사진을 후보로 요구하지 않습니다.",
+      "채택되지 않은 후보에 대해 평가하는 발언을 남기지 않습니다."
+    ],
+    "is_active": true,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_TID_002",
+    "title": "팀 공식 노동요 플리 만들기",
+    "summary": "각자 작업할 때 트는 노래를 두세 곡씩 모아 팀 공용 플레이리스트 하나를 만듭니다.",
+    "category": "TEAM_IDENTITY",
+    "primary_goal": "말없이 각자 작업하는 시간과 회의 중간의 정적이 어색하지 않도록, 틀어둘 것을 미리 만들어 둡니다.",
+    "duration_minutes": 8,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "IDEA_BURST",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "COMMUNICATION",
+        "dimension": "취향 공유",
+        "pole_a": "먼저 권함",
+        "pole_b": "맞춰서 고름"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "제안 방식",
+        "pole_a": "여러 곡 던짐",
+        "pole_b": "한 곡만 고름"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_LOW_DRIVER",
+      "TEAM_TACTFUL_COMMUNICATION"
+    ],
+    "also_for": [
+      "TEAM_HARMONIZER_PRESENCE",
+      "TEAM_SUPPORTER_MAJORITY"
+    ],
+    "avoid_for": [],
+    "context_tags": [
+      "FIRST_MEETING",
+      "HACKATHON",
+      "REMOTE_TEAM",
+      "IN_PERSON"
+    ],
+    "materials": [
+      "무료로 공유 가능한 스트리밍 플레이리스트 링크 하나",
+      "권장 범위: 가사에 집중이 방해되지 않는 곡, 각자 두세 곡"
+    ],
+    "steps": [
+      "작업할 때 트는 노래를 각자 두세 곡씩 채팅에 올립니다.",
+      "올라온 곡을 하나의 공용 플레이리스트로 묶고 링크를 공유합니다.",
+      "회의 대기 시간이나 각자 작업 시간에 이 플리를 튼다는 것만 합의하고 마칩니다."
+    ],
+    "deliverable": "팀원 전원의 추천곡이 담긴 공용 플레이리스트 링크",
+    "completion_condition": {
+      "description": "팀원 각자가 곡을 1개 이상 올리고, 팀이 플레이리스트 링크 1건을 저장한다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        },
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "TEAM",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "무료로 들을 수 있는 범위에서 만들며 유료 구독 가입을 요구하지 않습니다.",
+      "올라온 곡의 취향을 평가하는 발언을 남기지 않습니다.",
+      "특정 팀원에게 추천을 지목해 요구하지 않습니다."
+    ],
+    "is_active": false,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_SAR_001",
+    "title": "가상 타임라인 릴레이",
+    "summary": "가상의 목표 하나를 두고 순서대로 한 단계씩 이어 붙여 짧은 계획을 완성합니다.",
+    "category": "SHARED_ARTIFACT",
+    "primary_goal": "실제 과제를 걸지 않은 상태에서 각자가 일의 순서를 어떻게 잡는지 관찰 가능한 형태로 남깁니다.",
+    "duration_minutes": 22,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "ROUND_ROBIN",
+    "energy_level": "MEDIUM",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "PLANNING",
+        "dimension": "계획 입도",
+        "pole_a": "큰 단위로 묶음",
+        "pole_b": "작은 단위로 쪼갬"
+      },
+      {
+        "axis": "PLANNING",
+        "dimension": "리스크 처리",
+        "pole_a": "미리 대비를 넣음",
+        "pole_b": "생기면 대응함"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "주도성",
+        "pole_a": "방향을 제시함",
+        "pole_b": "흐름에 맞춰 붙임"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_ADAPTER_MAJORITY",
+      "TEAM_ADAPTABILITY",
+      "TEAM_BALANCED_AGENCY"
+    ],
+    "also_for": [
+      "TEAM_PLANNING_STABILITY",
+      "TEAM_DRIVER_ENERGY"
+    ],
+    "avoid_for": [
+      "TEAM_PLANNING_OVERLOAD"
+    ],
+    "context_tags": [
+      "FIRST_MEETING",
+      "BEFORE_ROLE_ASSIGNMENT",
+      "HACKATHON"
+    ],
+    "materials": [
+      "가상 목표 예시: 무인도에서 일주일 버티기",
+      "가상 목표 예시: 하루 만에 교내 팝업 카페 열기",
+      "가상 목표 예시: 예산 5만 원으로 팀 MT 준비하기"
+    ],
+    "steps": [
+      "시스템이 무작위로 제시한 가상 목표 하나를 확인합니다.",
+      "지정된 순서대로 한 명씩 다음 행동이나 일정을 한 줄씩 이어 적습니다.",
+      "전원이 최소 한 번씩 차례를 받아 하나의 타임라인을 완성합니다.",
+      "완성된 타임라인을 보고, 순서가 갈릴 뻔한 지점 한 곳만 표시합니다."
+    ],
+    "deliverable": "팀원별 항목이 순서대로 이어진 가상 프로젝트 타임라인",
+    "completion_condition": {
+      "description": "팀원 각자가 타임라인 항목을 1개 이상 이어 적는다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "기발한 아이디어를 요구하지 않으며, 평범한 진행 단계도 그대로 수용합니다.",
+      "앞사람이 적은 항목을 지우거나 평가하지 않고 이어서 붙입니다.",
+      "차례가 왔을 때 떠오르지 않으면 넘길 수 있고, 마지막에 다시 기회를 받습니다."
+    ],
+    "is_active": true,
+    "version": "1.0.0"
+  },
+  {
+    "quest_id": "Q_SAR_002",
+    "title": "공동 작업 공간 세팅",
+    "summary": "공유 워크스페이스의 이름과 대표 이모지를 함께 정하고 전원 접속을 확인합니다.",
+    "category": "SHARED_ARTIFACT",
+    "primary_goal": "본 작업 전에 접근 권한 문제를 먼저 걸러내고, 공유 공간에 팀의 흔적을 남깁니다.",
+    "duration_minutes": 15,
+    "team_size": {
+      "min": 3,
+      "max": 10
+    },
+    "interaction_mode": "SCREEN_SHARE",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      {
+        "axis": "AGENCY",
+        "dimension": "도구 적응",
+        "pole_a": "먼저 만져보며 익힘",
+        "pole_b": "안내를 보고 따라감"
+      },
+      {
+        "axis": "AGENCY",
+        "dimension": "제안 성향",
+        "pole_a": "아이디어를 던짐",
+        "pole_b": "선택지를 좁힘"
+      },
+      {
+        "axis": "PLANNING",
+        "dimension": "결정 방식",
+        "pole_a": "일단 정하고 수정",
+        "pole_b": "합의 후 적용"
+      }
+    ],
+    "is_universal": false,
+    "best_for": [
+      "TEAM_DRIVER_ENERGY",
+      "TEAM_ADAPTABILITY"
+    ],
+    "also_for": [
+      "TEAM_BALANCED_AGENCY",
+      "TEAM_LOW_DRIVER"
+    ],
+    "avoid_for": [],
+    "context_tags": [
+      "WORKSPACE_NOT_READY",
+      "REMOTE_TEAM",
+      "LONG_TERM_PROJECT"
+    ],
+    "materials": [
+      "툴 후보 예시: 노션, 구글 독스, 슬랙 캔버스, 팀즈",
+      "시연 범위: 문서 만들기, 링크 공유하기, 댓글 달기 중 두세 가지만"
+    ],
+    "steps": [
+      "어떤 툴이 가장 다루기 편한지 후보를 놓고 빠르게 투표해 하나로 정합니다.",
+      "그 툴이 낯선 팀원이 있으면, 익숙한 팀원이 화면을 공유해 기초 세팅 두세 가지만 1분 안에 시연합니다.",
+      "3분 동안 각자 워크스페이스 이름과 어울리는 이모지 아이디어를 최소 한 개씩 채팅에 올립니다.",
+      "가장 많이 호응을 받은 조합을 적용하고, 전원이 링크를 열어본 뒤 확인 버튼을 누릅니다."
+    ],
+    "deliverable": "이름과 이모지가 적용된 공동 워크스페이스 링크",
+    "completion_condition": {
+      "description": "팀원 각자가 아이디어를 1개 제출하고, 생성된 링크 접속 확인 버튼을 1회 누른다.",
+      "checks": [
+        {
+          "type": "TEXT_SUBMIT",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        },
+        {
+          "type": "APPROVE",
+          "scope": "PER_MEMBER",
+          "min_count": 1
+        }
+      ]
+    },
+    "safety_notes": [
+      "툴 사용이 익숙하지 않은 팀원에게 세팅 작업을 맡기지 않으며, 이모지 제안만으로도 참여가 인정됩니다.",
+      "화면 공유 중 개인 계정 정보나 다른 탭이 노출되지 않도록 창 단위 공유를 안내합니다.",
+      "접속이 안 되는 팀원이 있으면 원인을 캐묻지 않고 권한을 다시 부여합니다."
+    ],
+    "is_active": true,
+    "version": "1.0.0"
+  }
+]

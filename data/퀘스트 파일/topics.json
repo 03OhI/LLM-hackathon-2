@@ -1,0 +1,303 @@
+{
+  "_note": "16유형 질문 원본. 카탈로그 제작·검수용 참조 파일이며 런타임에 로드하지 않는다. 질문 본문은 각 퀘스트의 materials에 그대로 들어가 있고, types[].quest_id가 그 연결이다. 검증기가 두 곳의 질문 텍스트 일치를 대조한다.",
+  "_hierarchy": "2단계. 상위 = planning × agency (PL/PS/AL/AS), 하위 = conflict × communication (CD/CI/HD/HI). 상위 4 × 하위 4 = 16유형이며 유형마다 퀘스트가 하나씩 대응한다.",
+  "_axis_codes": {
+    "P": {
+      "axis": "planning",
+      "value": "PLANNER"
+    },
+    "A": {
+      "axis": "planning",
+      "value": "ADAPTER"
+    },
+    "L": {
+      "axis": "agency",
+      "value": "DRIVER"
+    },
+    "S": {
+      "axis": "agency",
+      "value": "SUPPORTER"
+    },
+    "C": {
+      "axis": "conflict",
+      "value": "CONFRONTER"
+    },
+    "H": {
+      "axis": "conflict",
+      "value": "HARMONIZER"
+    },
+    "D": {
+      "axis": "communication",
+      "value": "DIRECT"
+    },
+    "I": {
+      "axis": "communication",
+      "value": "TACTFUL"
+    }
+  },
+  "groups": {
+    "PL": {
+      "label": "판 짜는 형",
+      "axes": {
+        "planning": "PLANNER",
+        "agency": "DRIVER"
+      },
+      "rule_ids": [
+        "TEAM_PLANNING_STABILITY",
+        "TEAM_DRIVER_ENERGY"
+      ],
+      "trait": "순서를 먼저 그리고 끌고 가는 성향. 통제감·효율·상상력을 자극하는 질문이 잘 붙는다."
+    },
+    "PS": {
+      "label": "길 닦는 형",
+      "axes": {
+        "planning": "PLANNER",
+        "agency": "SUPPORTER"
+      },
+      "rule_ids": [
+        "TEAM_SUPPORTER_MAJORITY",
+        "TEAM_PLANNING_STABILITY"
+      ],
+      "trait": "꼼꼼히 준비해 남이 쓸 길을 닦는 성향. 남들은 신경 안 쓰는 디테일과 습관을 묻는 질문이 잘 붙는다."
+    },
+    "AL": {
+      "label": "먼저 뛰는 형",
+      "axes": {
+        "planning": "ADAPTER",
+        "agency": "DRIVER"
+      },
+      "rule_ids": [
+        "TEAM_DRIVER_ENERGY",
+        "TEAM_ADAPTABILITY"
+      ],
+      "trait": "일단 시작하고 사람을 끌어당기는 성향. 최근 경험과 즉흥적인 행동 패턴을 묻는 질문이 잘 붙는다."
+    },
+    "AS": {
+      "label": "바로 붙는 형",
+      "axes": {
+        "planning": "ADAPTER",
+        "agency": "SUPPORTER"
+      },
+      "rule_ids": [
+        "TEAM_ADAPTER_MAJORITY",
+        "TEAM_ADAPTABILITY"
+      ],
+      "trait": "주어진 환경에 붙어 필요한 걸 채우는 성향. 거창한 상상보다 지금 피부로 느끼는 현실 질문이 잘 붙는다."
+    }
+  },
+  "sub_groups": {
+    "CD": {
+      "label": "직진 지적형",
+      "axes": {
+        "conflict": "CONFRONTER",
+        "communication": "DIRECT"
+      },
+      "rule_ids": [
+        "TEAM_CONFRONTER_MAJORITY",
+        "TEAM_DIRECT_CONCENTRATION"
+      ],
+      "trait": "안 되는 지점을 먼저 발견하고 결론부터 짚는다. 날카로운 관찰을 가벼운 불만 공유로 풀어주는 질문이 맞는다."
+    },
+    "CI": {
+      "label": "신중 설득형",
+      "axes": {
+        "conflict": "CONFRONTER",
+        "communication": "TACTFUL"
+      },
+      "rule_ids": [
+        "TEAM_BALANCED_CONFLICT",
+        "TEAM_TACTFUL_COMMUNICATION"
+      ],
+      "trait": "문제를 알아채되 상처 없이 돌려 전한다. 비교하고 재는 습관을 자연스럽게 꺼내는 질문이 맞는다."
+    },
+    "HD": {
+      "label": "담백 실행형",
+      "axes": {
+        "conflict": "HARMONIZER",
+        "communication": "DIRECT"
+      },
+      "rule_ids": [
+        "TEAM_HARMONIZER_PRESENCE",
+        "TEAM_DIRECT_CONCENTRATION"
+      ],
+      "trait": "각을 세우지 않으면서 말보다 결과로 정리한다. 짧고 간결하게 하나만 답하고 넘어갈 수 있는 질문이 맞는다."
+    },
+    "HI": {
+      "label": "분위기 조율형",
+      "axes": {
+        "conflict": "HARMONIZER",
+        "communication": "TACTFUL"
+      },
+      "rule_ids": [
+        "TEAM_HARMONIZER_PRESENCE",
+        "TEAM_TACTFUL_COMMUNICATION"
+      ],
+      "trait": "사람과 분위기를 먼저 살핀다. 서로를 감싸거나 웃음이 나는 질문이 맞는다."
+    }
+  },
+  "types": {
+    "PLCD": {
+      "group": "PL",
+      "sub_group": "CD",
+      "label": "선봉 설계자",
+      "topics": [
+        "팀플할 때 하나만 가질 수 있다면? 팀원들 텔레파시로 조종하기 vs 마감일 하루 늘리기",
+        "하나만 고른다면? 10년 치 인생 계획이 머릿속에 그려지는 능력 vs 어떤 위기든 1초 만에 대안이 떠오르는 능력"
+      ],
+      "quest_id": "Q_CSB_010"
+    },
+    "PLCI": {
+      "group": "PL",
+      "sub_group": "CI",
+      "label": "조심스러운 지휘자",
+      "topics": [
+        "집중할 때 어떤 환경이 제일 좋아요? 완전 무음 vs 잔잔한 카페 소음 vs 노동요",
+        "더 숨 막히는 여행은? 나 혼자 계획러고 나머지가 무계획 vs 나 빼고 전원이 분 단위 계획러"
+      ],
+      "quest_id": "Q_CSB_011"
+    },
+    "PLHD": {
+      "group": "PL",
+      "sub_group": "HD",
+      "label": "실무 조정자",
+      "topics": [
+        "둘 중 더 쾌감 쩌는 순간은? 투두리스트 다 지웠을 때 vs 1시간 회의가 15분 만에 끝났을 때",
+        "더 화나는 상황은? 결론 없이 3시간 딴소리 vs 결론은 5분 만에 났는데 수습할 일이 산더미"
+      ],
+      "quest_id": "Q_CSB_012"
+    },
+    "PLHI": {
+      "group": "PL",
+      "sub_group": "HI",
+      "label": "배려하는 기획자",
+      "topics": [
+        "이거 다 끝나고 팀에 예산 10만 원이 생긴다면? 다 같이 맛있는 거 먹기 vs N빵해서 각자 쉬기",
+        "로또 10억에 당첨된다면? 아무에게도 말 안 하고 조용히 vs 바로 쏘고 다 같이 장기 플랜 짜기"
+      ],
+      "quest_id": "Q_CSB_013"
+    },
+    "PSCD": {
+      "group": "PS",
+      "sub_group": "CD",
+      "label": "냉정한 참모",
+      "topics": [
+        "일상에서 은근히 거슬리는 포인트 있나요? PPT 도형 줄 안 맞는 거 vs 메뉴판 맞춤법 틀린 거",
+        "영화나 드라마 볼 때 나는? 설정 구멍 찾기 vs 재밌으면 그만"
+      ],
+      "quest_id": "Q_CSB_014"
+    },
+    "PSCI": {
+      "group": "PS",
+      "sub_group": "CI",
+      "label": "신중한 참모",
+      "topics": [
+        "브라우저 쓸 때 나는? 탭 50개 띄워두는 편 vs 그때그때 다 끄는 편",
+        "쇼핑할 때 나는? 장바구니에 한 달 담고 비교 분석 vs 꽂히면 일단 결제"
+      ],
+      "quest_id": "Q_CSB_015"
+    },
+    "PSHD": {
+      "group": "PS",
+      "sub_group": "HD",
+      "label": "효율 지원자",
+      "topics": [
+        "오늘 집중해야 할 때 책상 위에 꼭 있어야 하는 물건 하나는?",
+        "남들은 잘 모르는 나만의 소소한 효율 꿀팁이 있다면?"
+      ],
+      "quest_id": "Q_CSB_016"
+    },
+    "PSHI": {
+      "group": "PS",
+      "sub_group": "HI",
+      "label": "묵묵한 준비자",
+      "topics": [
+        "진짜 피곤할 때 어떻게 쉬세요? 영상 무지성 시청 vs 방 청소하며 잡생각 없애기",
+        "진짜 피곤할 때 어떻게 쉬세요? 침대와 혼연일체 vs 맛있는 거 먹으며 폭풍 수다"
+      ],
+      "quest_id": "Q_CSB_017"
+    },
+    "ALCD": {
+      "group": "AL",
+      "sub_group": "CD",
+      "label": "돌파형 리더",
+      "topics": [
+        "최근에 가장 충동적으로 저지른 일이나 산 물건 있나요?",
+        "초행길에서 길을 잃었다면? 감을 믿고 일단 직진 vs 그 자리에 서서 지도를 다시 찾기"
+      ],
+      "quest_id": "Q_CSB_018"
+    },
+    "ALCI": {
+      "group": "AL",
+      "sub_group": "CI",
+      "label": "설득하는 개척자",
+      "topics": [
+        "요즘 알고리즘에 제일 많이 뜨는 영상 하나만 추천해 주세요",
+        "대박인 맛집을 발견하면? 동네방네 영업해서 다 데려가기 vs 나만 아는 아지트로 숨겨두기"
+      ],
+      "quest_id": "Q_CSB_019"
+    },
+    "ALHD": {
+      "group": "AL",
+      "sub_group": "HD",
+      "label": "실행 조율자",
+      "topics": [
+        "아침에 일어나서 집 밖으로 나가기까지 최소 몇 분 컷 가능해요?",
+        "새 기기를 샀을 때 나는? 설명서 정독 vs 일단 켜고 눌러보며 익히기"
+      ],
+      "quest_id": "Q_CSB_020"
+    },
+    "ALHI": {
+      "group": "AL",
+      "sub_group": "HI",
+      "label": "분위기 메이커",
+      "topics": [
+        "오늘 하루가 브이로그라면 썸네일 제목은 뭘로 지을래요?",
+        "단톡방에서 나는? 떡밥을 냅다 던지는 사람 vs 던져진 떡밥에 리액션 폭발하는 사람"
+      ],
+      "quest_id": "Q_CSB_021"
+    },
+    "ASCD": {
+      "group": "AS",
+      "sub_group": "CD",
+      "label": "현장 감시자",
+      "topics": [
+        "드라마나 영화 볼 때 '저건 진짜 현실성 없다' 싶었던 장면 있나요?",
+        "둘 중 더 참기 힘든 쪽은? 일은 완벽한데 성격이 어려운 사람 vs 성격은 좋은데 실력이 아직인 사람"
+      ],
+      "quest_id": "Q_CSB_022"
+    },
+    "ASCI": {
+      "group": "AS",
+      "sub_group": "CI",
+      "label": "조용한 관찰자",
+      "topics": [
+        "처음 사람 만날 때 은근히 제일 먼저 보게 되는 것? 목소리, 신발, 눈빛 등등",
+        "지인의 바뀐 헤어스타일이 영 아닐 때? '오 새롭네' 하고 돌려 말하기 vs 솔직하게 말하기"
+      ],
+      "quest_id": "Q_CSB_023"
+    },
+    "ASHD": {
+      "group": "AS",
+      "sub_group": "HD",
+      "label": "군말 없는 실행자",
+      "topics": [
+        "약속 없는 주말엔? 시간 단위로 계획 짜서 움직이기 vs 눈뜨는 시간이 곧 기상 시간",
+        "더 마음이 편한 쪽은? 명확한 리스트를 받았을 때 vs 알아서 자유롭게 하라고 할 때"
+      ],
+      "quest_id": "Q_CSB_024"
+    },
+    "ASHI": {
+      "group": "AS",
+      "sub_group": "HI",
+      "label": "팀의 완충재",
+      "topics": [
+        "RPG 게임할 때 주로 어떤 역할 하세요? 앞에서 맞는 탱커 vs 뒤에서 때리는 딜러 vs 힐러",
+        "더 견디기 힘든 카톡 상황은? 하루 종일 안읽씹 vs 애매하게 읽씹"
+      ],
+      "quest_id": "Q_CSB_025"
+    }
+  },
+  "_runtime": "백엔드는 quests.json만 읽는다. 배정 흐름은 기존 그대로 rule_id -> best_for 매칭 -> 팀 공용 퀘스트 1개이며, 카드 선택 API나 개인별 유형 노출 기능은 없다. 두 질문 중 선택은 팀이 화면에서 눈으로 고르는 진행 안내다.",
+  "_type_assignment_note": "유형은 퀘스트를 만들 때 질문을 묶는 축일 뿐, 배정 입력이 아니다. 배정은 팀 분포에서 나온 rule_id로만 이뤄지므로 개인 유형 판정이나 NEUTRAL 처리 로직이 백엔드에 필요 없다.",
+  "_staging": "유형 퀘스트 16개는 is_active=false로 대기 중이다. 통합·시연 안정본이 E2E를 통과한 뒤 스키마·안전성·배정 분포 검증을 거쳐 하나씩 true로 올린다. 런타임 계약은 그대로다."
+}

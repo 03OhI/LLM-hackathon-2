@@ -1,0 +1,36 @@
+{
+  "_note": "SPEC V5.2 기준 어휘 정본. V5.1의 TeamQuestProfile 패턴 코드 체계(DRIVER_MAJORITY, PLANNING_MIXED 등)는 SPEC §13.1에 따라 폐기하고, backend/knowledge_base/team_rules.yaml의 기존 rule_id를 그대로 재사용한다. 파일명은 rules.enum.json이 정확하지만 커맨드라인 변경을 피하려 유지한다.",
+  "_source": "SPEC §2.3 (rule_ids), SPEC §3 (context_tags), SPEC §2.1 (axes)",
+  "_usage": "python validate_quests.py quest.schema.json quests.json patterns.enum.json",
+
+  "axes": ["PLANNING", "AGENCY", "CONFLICT", "COMMUNICATION"],
+
+  "rule_ids": [
+    "TEAM_BALANCED_AGENCY",
+    "TEAM_BALANCED_CONFLICT",
+    "TEAM_DIVERSE_COMMUNICATION",
+    "TEAM_PLANNING_STABILITY",
+    "TEAM_ADAPTABILITY",
+    "TEAM_DRIVER_ENERGY",
+    "TEAM_HARMONIZER_PRESENCE",
+    "TEAM_TACTFUL_COMMUNICATION",
+    "TEAM_DIRECT_CONCENTRATION",
+    "TEAM_PLANNING_OVERLOAD",
+    "TEAM_LOW_DRIVER",
+    "TEAM_CONFRONTER_MAJORITY",
+    "TEAM_SUPPORTER_MAJORITY",
+    "TEAM_ADAPTER_MAJORITY"
+  ],
+
+  "context_tags": [
+    "FIRST_MEETING",
+    "REMOTE_TEAM",
+    "IN_PERSON",
+    "HACKATHON",
+    "LONG_TERM_PROJECT",
+    "BEFORE_ROLE_ASSIGNMENT",
+    "WORKSPACE_NOT_READY"
+  ],
+
+  "p0_default_context_tags": ["FIRST_MEETING", "HACKATHON"]
+}
