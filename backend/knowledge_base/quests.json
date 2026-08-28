@@ -313,5 +313,41 @@
     "safety_notes": ["과거 팀 경험에 대한 비난이나 실명 사례를 요구하지 않는다."],
     "is_active": true,
     "version": "1.0"
+  },
+  {
+    "quest_id": "CONFLICT_FIRST_SENTENCE",
+    "title": "의견 갈릴 때 첫 문장 정하기",
+    "summary": "가상의 의견 충돌 상황에서 대화를 시작하기 좋은 문장을 골라보며 갈등을 안전하게 여는 법을 연습합니다.",
+    "category": "TEAM_SAFETY",
+    "primary_goal": "의견이 갈릴 때 안전하게 대화를 여는 방법을 미리 정해둔다",
+    "duration_minutes": 8,
+    "team_size": { "min": 3, "max": 10 },
+    "interaction_mode": "HYBRID",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [{ "axis": "conflict", "note": "의견 차이에 대응하는 방식" }],
+    "is_universal": false,
+    "best_for": ["TEAM_CONFRONTER_MAJORITY", "TEAM_BALANCED_CONFLICT"],
+    "also_for": ["TEAM_HARMONIZER_PRESENCE"],
+    "avoid_for": [],
+    "context_tags": ["FIRST_MEETING", "HACKATHON"],
+    "materials": [],
+    "steps": [
+      "가상의 의견 충돌 상황을 보여준다.",
+      "각자 대화를 시작하기 좋은 문장을 선택한다.",
+      "팀 공용 조율 문장 하나를 저장한다."
+    ],
+    "deliverable": "팀 공용 조율 문장 1개",
+    "completion_condition": {
+      "description": "팀원 각자가 투표하고 팀이 조율 문장 하나를 저장한다.",
+      "checks": [
+        { "type": "VOTE", "scope": "PER_MEMBER", "min_count": 1 },
+        { "type": "TEXT_SUBMIT", "scope": "TEAM", "min_count": 1 }
+      ]
+    },
+    "safety_notes": ["실제 갈등 경험이나 과거 팀원을 묻지 않는다."],
+    "is_active": true,
+    "version": "1.0"
   }
 ]
