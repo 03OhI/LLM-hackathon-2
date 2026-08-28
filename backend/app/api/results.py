@@ -33,14 +33,6 @@ router = APIRouter(tags=["results"])
 # ──────────────────────────────────────────────
 
 
-class PairPublic(BaseModel):
-    participant_a_id: str
-    participant_b_id: str
-    category: str
-    code: str
-    axis: str
-
-
 class MemberPositionPublic(BaseModel):
     """팀 성향 지도용 최소 공개 정보. 원응답과 내부 수치는 포함하지 않는다."""
 
@@ -50,15 +42,13 @@ class MemberPositionPublic(BaseModel):
 
 
 class TeamResultResponse(BaseModel):
-    # 최신 기획: team_grade / team_caution_codes / top_caution_pairs 는 공개 API에서 제외한다.
+    # 최신 기획: 팀 점수·등급·규칙 ID·개인 원응답은 공개 API에서 제외한다.
     # (DB(AnalysisResult)에는 계속 저장·계산하되 응답 스키마에만 노출하지 않는다.)
     session_id: str
     status: str  # PROCESSING|COMPLETED|FALLBACK
     distribution: dict | None
     member_positions: list[MemberPositionPublic]
-    team_strength_codes: list[str]
-    top_complement_pairs: list[PairPublic]
-    team_comment: dict | None  # GeneratedInsight.model_dump() 또는 None
+    team_comment: dict | None  # TeamSnapshot(title/formula/scene/keywords) 또는 None
     rule_text_fallback: dict[str, str] | None = None  # AI 코멘트가 전혀 없을 때만
 
 
@@ -80,6 +70,13 @@ def _latest_analysis(session_id: str, db: DBSession) -> AnalysisResult | None:
         .where(AnalysisResult.session_id == session_id)
         .order_by(AnalysisResult.analysis_version.desc())
     ).first()
+
+
+def _strip_internal(payload: dict | None) -> dict | None:
+    """AI 결과에서 내부 규칙 ID를 제거한다."""
+    if payload is None:
+        return None
+    return {key: value for key, value in payload.items() if key != "used_rule_ids"}
 
 
 def _member_positions(session_id: str, db: DBSession) -> list[MemberPositionPublic]:
@@ -115,14 +112,11 @@ def _build_team_result(session_id: str, analysis: AnalysisResult | None, db: DBS
             status="PROCESSING",
             distribution=None,
             member_positions=[],
-            team_strength_codes=[],
-            top_complement_pairs=[],
             team_comment=None,
         )
 
     distribution = json.loads(analysis.distribution_json) if analysis.distribution_json else None
-    pair_results = json.loads(analysis.pair_results_json) if analysis.pair_results_json else {}
-    team_comment = json.loads(analysis.public_report_json) if analysis.public_report_json else None
+    team_comment = _strip_internal(json.loads(analysis.public_report_json)) if analysis.public_report_json else None
 
     rule_text_fallback = None
     if team_comment is None and analysis.status in ("FALLBACK", "PROCESSING"):
@@ -134,8 +128,6 @@ def _build_team_result(session_id: str, analysis: AnalysisResult | None, db: DBS
         status=analysis.status,
         distribution=distribution,
         member_positions=_member_positions(session_id, db),
-        team_strength_codes=json.loads(analysis.team_strength_codes_json),
-        top_complement_pairs=[PairPublic(**p) for p in pair_results.get("top_complement", [])],
         team_comment=team_comment,
         rule_text_fallback=rule_text_fallback,
     )
