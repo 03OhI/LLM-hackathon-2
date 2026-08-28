@@ -83,6 +83,35 @@ describe("QuestPage 관리자 시연 흐름", () => {
     const input = await screen.findByLabelText("내용 제출 입력");
     expect(input).toBeInTheDocument();
   });
+
+  it("퀘스트 시작 → 공동 결과 제출 → 완료 → 협업 시작하기 → /workspace?mode=admin까지 실제로 클릭된다", async () => {
+    window.history.pushState({}, "", "/quest?mode=admin");
+    vi.mocked(getSavedTeamSession).mockReturnValue(null);
+    const assign = vi.fn();
+    vi.stubGlobal("location", { ...window.location, assign });
+
+    render(<QuestPage />);
+
+    // 1) 퀘스트 시작
+    (await screen.findByRole("button", { name: "퀘스트 시작" })).click();
+
+    // 2) 공동 결과 제출(team_checks: TEXT_SUBMIT)
+    const input = await screen.findByLabelText("내용 제출 입력");
+    input.click();
+    const submitButtons = await screen.findAllByRole("button", { name: "제출" });
+    submitButtons[submitButtons.length - 1].click();
+
+    // 3) 완료
+    const completeButton = await screen.findByRole("button", { name: "완료" });
+    await waitFor(() => expect(completeButton).not.toBeDisabled());
+    completeButton.click();
+
+    // 4) 협업 시작하기
+    const goWorkspace = await screen.findByRole("button", { name: "협업 시작하기" });
+    goWorkspace.click();
+
+    await waitFor(() => expect(assign).toHaveBeenCalledWith("/workspace?mode=admin"));
+  });
 });
 
 describe("QuestPage 역할별 버튼", () => {

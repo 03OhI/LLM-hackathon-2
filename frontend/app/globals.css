@@ -6310,3 +6310,262 @@ a {
     margin-top: 28px;
   }
 }
+
+/* ── feature/quest-workspace-survey-design ──────────────────────────────
+   퀘스트/워크스페이스를 설문·결과 페이지와 같은 흐름으로 보이게 하는 추가 스타일.
+   새 색상은 추가하지 않는다 — 기존 토큰(--survey-navy, --survey-action, --line,
+   --muted, --survey-coral/yellow/sage/blue, .intro-note의 크림톤)만 재사용한다. ── */
+
+/* 상단 "N / 4 · 단계명" 흐름 표시 — 설문/결과/퀘스트/협업이 한 서비스로 보이게 한다. */
+.tmti-flow-header {
+  width: min(100% - 40px, 980px);
+  margin: 0 auto 22px;
+  text-align: center;
+}
+.tmti-flow-stage {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 9px 16px;
+  background: #fff1ed;
+  color: var(--survey-action);
+  font: 800 13px Arial, "Malgun Gothic", sans-serif;
+  letter-spacing: 0.2px;
+}
+.tmti-flow-stage b {
+  color: var(--survey-navy);
+}
+.tmti-flow-caption {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+@media (max-width: 700px) {
+  .tmti-flow-header {
+    margin-bottom: 16px;
+  }
+  .tmti-flow-stage {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+  .tmti-flow-caption {
+    font-size: 13px;
+  }
+}
+
+/* 퀘스트 카드 헤더의 상태 배지 */
+.quest-status-pill {
+  display: inline-block;
+  margin-left: 10px;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 800;
+  vertical-align: middle;
+}
+.quest-status-pill-assigned {
+  background: #eef1f4;
+  color: #5c6a83;
+}
+.quest-status-pill-in_progress {
+  background: #fff1ed;
+  color: var(--survey-action);
+}
+.quest-status-pill-completed {
+  background: #eaf6e5;
+  color: #4a7a3f;
+}
+.quest-status-pill-skipped {
+  background: #f1f3f6;
+  color: #5c6a83;
+}
+
+/* 완료·건너뜀 화면 — 배지와 CTA를 가운데 정렬해 성취/안내 톤을 강조한다 */
+.quest-status-panel[data-status="COMPLETED"],
+.quest-status-panel[data-status="SKIPPED"] {
+  text-align: center;
+}
+.quest-complete-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+.quest-complete-hero img {
+  object-fit: contain;
+}
+.quest-complete-hero h2 {
+  margin: 0;
+  color: var(--survey-navy);
+  font-size: 22px;
+  letter-spacing: -0.6px;
+}
+.quest-final-completed {
+  background: #eaf6e5;
+  color: #4a7a3f;
+}
+.quest-cta-strong {
+  display: block;
+  width: max-content;
+  margin: 4px auto 0;
+  padding: 17px 30px;
+  font-size: 16px;
+  box-shadow: 0 12px 26px rgba(255, 131, 116, 0.3);
+}
+
+/* 워크스페이스 히어로 — 팀명과 진행률 요약 */
+.workspace-hero {
+  width: min(100% - 40px, 980px);
+  margin: 0 auto 20px;
+  text-align: center;
+}
+.workspace-hero h1 {
+  margin: 6px 0 4px;
+  color: var(--survey-navy);
+  font-size: 32px;
+  letter-spacing: -1.2px;
+}
+.workspace-hero-team {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.workspace-hero-team b {
+  color: var(--survey-navy);
+}
+.workspace-progress-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+.workspace-summary-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: #fff;
+  color: var(--survey-navy);
+  font-size: 13px;
+  font-weight: 700;
+}
+.workspace-summary-chip b {
+  color: var(--survey-action);
+  font-size: 15px;
+}
+@media (max-width: 700px) {
+  .workspace-hero h1 {
+    font-size: 24px;
+  }
+  .workspace-summary-chip {
+    font-size: 12px;
+    padding: 7px 11px;
+  }
+}
+
+/* 카드 톤을 설문/결과 카드에 더 가깝게 — radius/그림자만 보강, 나머지 규칙은 유지 */
+.workspace-panel,
+.workspace-quicklink-card {
+  border-radius: 20px;
+  box-shadow: 0 10px 28px rgba(34, 48, 75, 0.05);
+}
+.workspace-notice,
+.workspace-timer {
+  border-radius: 20px;
+  box-shadow: 0 10px 28px rgba(34, 48, 75, 0.05);
+}
+
+/* 체크리스트 항목 유형별 색 구분 — 설문 진행 바와 같은 4색(코랄/옐로/세이지/블루)을 재사용 */
+.workspace-checklist-list li.quest-check-row {
+  border-left: 3px solid var(--line);
+}
+.workspace-checklist-list li[data-type="DEMO_URL"] {
+  border-left-color: var(--survey-coral, var(--survey-action));
+}
+.workspace-checklist-list li[data-type="SLIDES"] {
+  border-left-color: var(--survey-yellow, #edbb49);
+}
+.workspace-checklist-list li[data-type="SCRIPT"] {
+  border-left-color: var(--survey-sage, #94aa8c);
+}
+.workspace-checklist-list li[data-type="BACKUP"] {
+  border-left-color: var(--survey-blue, #7f9fba);
+}
+
+/* 할 일 상태 배지 + 상태별 버튼 강조색 */
+.task-status-badge {
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.task-status-badge-todo {
+  background: #eef1f4;
+  color: #5c6a83;
+}
+.task-status-badge-in_progress {
+  background: #fff1ed;
+  color: var(--survey-action);
+}
+.task-status-badge-done {
+  background: #eaf6e5;
+  color: #4a7a3f;
+}
+.task-status-active-todo {
+  border-color: #98a1b0 !important;
+  background: #98a1b0 !important;
+}
+.task-status-active-in_progress {
+  border-color: var(--survey-action) !important;
+  background: var(--survey-action) !important;
+}
+.task-status-active-done {
+  border-color: #5e8059 !important;
+  background: #5e8059 !important;
+}
+
+/* 회의 메모 — "다음 행동"을 별도 강조 영역으로 */
+.workspace-note-next-actions {
+  margin: 8px 0 0;
+  border: 1px solid #f1e4c8;
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: #fff8e8;
+  color: #6c604e;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* 바로가기 카드 — 서비스별 상단 라인만 구분(로고 이미지 없이 CSS로) */
+.workspace-quicklink-card[data-provider="GITHUB"] {
+  border-top: 3px solid #24292f;
+}
+.workspace-quicklink-card[data-provider="FIGMA"] {
+  border-top: 3px solid var(--survey-action);
+}
+.workspace-quicklink-card[data-provider="NOTION"] {
+  border-top: 3px solid var(--survey-navy);
+}
+
+/* 모바일 터치 타깃 최소 44px 보장 */
+@media (max-width: 700px) {
+  .task-status-button,
+  .task-status-active,
+  .workspace-notice-edit,
+  .workspace-timer-mode,
+  .workspace-timer-mode-active,
+  .workspace-timer-controls button,
+  .workspace-decision-option-actions button,
+  .quest-check-row button,
+  .quest-host-actions button,
+  .quest-skip-confirm button {
+    min-height: 44px;
+  }
+}

@@ -52,6 +52,7 @@ export function PresentationChecklist({
           {items.map((item) => (
             <li
               key={item.id}
+              data-type={item.item_type}
               className={item.completed ? "quest-check-row quest-check-done" : "quest-check-row"}
             >
               <label className="workspace-checklist-label">

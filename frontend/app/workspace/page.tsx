@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -53,6 +54,44 @@ const TASK_STATUSES: TaskStatus[] = ["TODO", "IN_PROGRESS", "DONE"];
 const TASK_STATUS_LABEL: Record<TaskStatus, string> = { TODO: "할 일", IN_PROGRESS: "진행 중", DONE: "완료" };
 const PROVIDERS: ResourceProvider[] = ["GITHUB", "FIGMA", "NOTION", "GOOGLE_DRIVE", "DEPLOYMENT", "OTHER"];
 
+// 히어로의 진행률 요약 — 이미 받은 workspace 데이터에서만 계산한다(새 API 없음).
+function WorkspaceHero({
+  teamName,
+  checklist,
+  tasks,
+  decisions,
+}: {
+  teamName: string;
+  checklist: PresentationChecklistItem[];
+  tasks: Task[];
+  decisions: Decision[];
+}) {
+  const doneChecklist = checklist.filter((item) => item.completed).length;
+  const inProgressTasks = tasks.filter((task) => task.status === "IN_PROGRESS").length;
+  const openDecisions = decisions.filter((decision) => decision.status === "OPEN").length;
+
+  return (
+    <header className="workspace-hero">
+      <p className="result-eyebrow">협업 워크스페이스</p>
+      <h1>이제 함께 만들어 볼까요?</h1>
+      <p className="workspace-hero-team">
+        <b>{teamName}</b> 팀의 협업 공간이에요.
+      </p>
+      <div className="workspace-progress-summary">
+        <span className="workspace-summary-chip">
+          발표 준비 <b>{doneChecklist}</b> / {checklist.length}
+        </span>
+        <span className="workspace-summary-chip">
+          진행 중 할 일 <b>{inProgressTasks}</b>개
+        </span>
+        <span className="workspace-summary-chip">
+          열린 결정 <b>{openDecisions}</b>개
+        </span>
+      </div>
+    </header>
+  );
+}
+
 export default function WorkspacePage() {
   const [session, setSession] = useState<TeamSession | null | undefined>(undefined);
   const [roomId, setRoomId] = useState<string | null>(null);
@@ -73,11 +112,24 @@ export default function WorkspacePage() {
 
   return (
     <main className="survey-shell results-shell workspace-shell">
-      <nav className="survey-nav">
+      <nav className="survey-nav result-nav">
         <Link className="survey-home" href="/" aria-label="홈으로">
           ⌂
         </Link>
+        <Image
+          className="tmti-header-brand"
+          src="/tmti-survey-logo.png"
+          alt="TMTI 오리 로고"
+          width={196}
+          height={110}
+          priority
+        />
       </nav>
+      <div className="tmti-flow-header">
+        <span className="tmti-flow-stage">
+          <b>4 / 4</b> · 협업 시작
+        </span>
+      </div>
       {session === undefined ? (
         <LoadingCard />
       ) : administratorMode ? (
@@ -209,10 +261,7 @@ function AdminDemoWorkspaceView() {
 
   return (
     <section className="result-report workspace-card-shell survey-card-enter">
-      <header className="quest-header">
-        <p className="result-eyebrow">협업 워크스페이스</p>
-        <h1>함께 정리하고 공유해요</h1>
-      </header>
+      <WorkspaceHero teamName={ADMIN_DEMO_SESSION.teamName} checklist={checklist} tasks={tasks} decisions={decisions} />
       <div className="workspace-grid">
         <NoticeCard
           notice={notice}
@@ -523,10 +572,12 @@ function WorkspaceView({ session, roomId }: { session: TeamSession; roomId: stri
 
   return (
     <section className="result-report workspace-card-shell survey-card-enter">
-      <header className="quest-header">
-        <p className="result-eyebrow">협업 워크스페이스</p>
-        <h1>함께 정리하고 공유해요</h1>
-      </header>
+      <WorkspaceHero
+        teamName={session.teamName}
+        checklist={workspace.presentation_checklist}
+        tasks={workspace.tasks}
+        decisions={workspace.decisions}
+      />
       <div className="workspace-grid">
         <NoticeCard
           notice={notice}
@@ -702,6 +753,9 @@ function TaskPanel({
             <li key={task.id} className="task-item">
               <div className="task-item-main">
                 <b>{task.title}</b>
+                <span className={`task-status-badge task-status-badge-${task.status.toLowerCase()}`}>
+                  {TASK_STATUS_LABEL[task.status]}
+                </span>
                 <span className="task-assignee">{nicknameFor(task.assignee_participant_id)}</span>
                 {task.due_at && <span className="task-due">마감 {formatDate(task.due_at)}</span>}
               </div>
@@ -710,7 +764,11 @@ function TaskPanel({
                   <button
                     key={status}
                     type="button"
-                    className={task.status === status ? "task-status-active" : "task-status-button"}
+                    className={
+                      task.status === status
+                        ? `task-status-active task-status-active-${status.toLowerCase()}`
+                        : "task-status-button"
+                    }
                     disabled={pendingAction === `update-task-${task.id}`}
                     onClick={() => onUpdate(task.id, { status })}
                   >

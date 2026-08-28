@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -22,6 +23,12 @@ import { startWorkspace } from "@/lib/workspace-api";
 import { usePolling } from "@/lib/use-polling";
 
 const POLL_INTERVAL_MS = 4000;
+const QUEST_STATUS_LABEL: Record<string, string> = {
+  ASSIGNED: "배정됨",
+  IN_PROGRESS: "진행 중",
+  COMPLETED: "완료",
+  SKIPPED: "건너뜀",
+};
 
 export default function QuestPage() {
   const [session, setSession] = useState<TeamSession | null | undefined>(undefined);
@@ -146,11 +153,25 @@ function AdminDemoQuestView() {
 function QuestShell({ children }: { children: React.ReactNode }) {
   return (
     <main className="survey-shell results-shell quest-shell">
-      <nav className="survey-nav">
+      <nav className="survey-nav result-nav">
         <Link className="survey-home" href="/" aria-label="홈으로">
           ⌂
         </Link>
+        <Image
+          className="tmti-header-brand"
+          src="/tmti-survey-logo.png"
+          alt="TMTI 오리 로고"
+          width={196}
+          height={110}
+          priority
+        />
       </nav>
+      <div className="tmti-flow-header">
+        <span className="tmti-flow-stage">
+          <b>3 / 4</b> · 아이스브레이킹
+        </span>
+        <p className="tmti-flow-caption">협업 전에 서로의 방식을 가볍게 알아보세요.</p>
+      </div>
       {children}
     </main>
   );
@@ -336,7 +357,12 @@ function QuestCard({
   return (
     <section className="result-report quest-card survey-card-enter">
       <header className="quest-header">
-        <p className="result-eyebrow">아이스브레이킹 퀘스트</p>
+        <p className="result-eyebrow">
+          아이스브레이킹 퀘스트
+          <span className={`quest-status-pill quest-status-pill-${assignment.status.toLowerCase()}`}>
+            {QUEST_STATUS_LABEL[assignment.status]}
+          </span>
+        </p>
         <h1>{quest.title}</h1>
         <p className="quest-summary">{quest.summary}</p>
         <span className="quest-duration-badge">⏱ 약 {quest.duration_minutes}분</span>
@@ -451,24 +477,32 @@ function StatusSection({
   }
 
   // COMPLETED | SKIPPED
+  const completed = assignment.status === "COMPLETED";
   return (
     <div className="quest-status-panel" data-status={assignment.status}>
-      {assignment.status === "COMPLETED" ? (
-        <p className="quest-final-badge quest-final-completed">✓ 퀘스트를 완료했어요.</p>
+      {completed ? (
+        <div className="quest-complete-hero">
+          <Image src="/duck-face-sparkle.png" alt="" width={72} height={72} />
+          <p className="quest-final-badge quest-final-completed">✓ 퀘스트를 완료했어요.</p>
+          <h2>우리 팀, 이제 협업 준비 완료!</h2>
+        </div>
       ) : (
-        <p className="quest-final-badge quest-final-skipped">건너뛴 퀘스트예요. 불이익은 없어요.</p>
+        <p className="quest-final-badge quest-final-skipped">이번 퀘스트는 가볍게 건너뛰었어요. 불이익은 없어요.</p>
       )}
       {isHost ? (
         <button
           type="button"
-          className="button-next"
+          className="button-next quest-cta-strong"
           disabled={pendingAction === "workspace"}
           onClick={() => void onHostGoWorkspace()}
         >
           {pendingAction === "workspace" ? "준비하는 중…" : "협업 시작하기"}
         </button>
       ) : (
-        <Link href={`/workspace?sessionId=${encodeURIComponent(session.sessionId)}`} className="button-next">
+        <Link
+          href={`/workspace?sessionId=${encodeURIComponent(session.sessionId)}`}
+          className="button-next quest-cta-strong"
+        >
           협업 공간으로 이동
         </Link>
       )}

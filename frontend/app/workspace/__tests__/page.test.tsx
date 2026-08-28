@@ -139,7 +139,7 @@ describe("WorkspacePage room_id 기반 자동 조회", () => {
 
     render(<WorkspacePage />);
 
-    expect(await screen.findByText("함께 정리하고 공유해요")).toBeInTheDocument();
+    expect(await screen.findByText("이제 함께 만들어 볼까요?")).toBeInTheDocument();
     expect(screen.getByText("발표 자료의 핵심 한 문장 정하기")).toBeInTheDocument();
   });
 
@@ -160,7 +160,7 @@ describe("WorkspacePage room_id 기반 자동 조회", () => {
 
     render(<WorkspacePage />);
 
-    expect(await screen.findByText("함께 정리하고 공유해요")).toBeInTheDocument();
+    expect(await screen.findByText("이제 함께 만들어 볼까요?")).toBeInTheDocument();
     expect(getWorkspace).toHaveBeenCalledWith("ws-1");
   });
 
@@ -184,7 +184,7 @@ describe("WorkspacePage 팀원 담당자 선택", () => {
     vi.mocked(getWorkspace).mockResolvedValue(makeWorkspace());
 
     render(<WorkspacePage />);
-    await screen.findByText("함께 정리하고 공유해요");
+    await screen.findByText("이제 함께 만들어 볼까요?");
 
     const select = screen.getByLabelText("담당자") as HTMLSelectElement;
     const optionLabels = Array.from(select.options).map((o) => o.textContent);
@@ -199,7 +199,7 @@ describe("WorkspacePage 팀원 담당자 선택", () => {
     );
 
     render(<WorkspacePage />);
-    await screen.findByText("함께 정리하고 공유해요");
+    await screen.findByText("이제 함께 만들어 볼까요?");
 
     // "재완"은 담당자 select의 옵션으로도 나오므로, task-assignee 배지 쪽만 확인한다.
     const matches = screen.getAllByText("재완");
@@ -402,7 +402,7 @@ describe("WorkspacePage 실제 모드 — 확장 기능 API 연동", () => {
     vi.mocked(getWorkspace).mockResolvedValue(makeWorkspace());
 
     render(<WorkspacePage />);
-    await screen.findByText("함께 정리하고 공유해요");
+    await screen.findByText("이제 함께 만들어 볼까요?");
 
     expect(screen.getByText("등록된 공지가 없어요.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "공지 수정" })).toBeInTheDocument();
@@ -458,7 +458,7 @@ describe("WorkspacePage 실제 모드 — 확장 기능 API 연동", () => {
     });
 
     render(<WorkspacePage />);
-    await screen.findByText("함께 정리하고 공유해요");
+    await screen.findByText("이제 함께 만들어 볼까요?");
 
     await user.click(screen.getByRole("button", { name: "새 회의 메모 추가" }));
     await user.type(screen.getByLabelText("메모 제목"), "킥오프");
@@ -501,7 +501,7 @@ describe("WorkspacePage 모바일 레이아웃(390px)", () => {
 
     render(<WorkspacePage />);
 
-    expect(await screen.findByText("함께 정리하고 공유해요")).toBeInTheDocument();
+    expect(await screen.findByText("이제 함께 만들어 볼까요?")).toBeInTheDocument();
     expect(screen.getByLabelText("고정 공지")).toBeInTheDocument();
     expect(screen.getByLabelText("집중·회의 타이머")).toBeInTheDocument();
     expect(screen.getByLabelText("발표 준비 체크리스트")).toBeInTheDocument();

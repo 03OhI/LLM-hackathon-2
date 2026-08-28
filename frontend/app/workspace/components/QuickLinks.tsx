@@ -24,7 +24,7 @@ export function QuickLinks({
       {QUICK_LINK_PROVIDERS.map(({ provider, label }) => {
         const resource = resources.find((r) => r.provider === provider);
         return (
-          <div key={provider} className="workspace-quicklink-card">
+          <div key={provider} className="workspace-quicklink-card" data-provider={provider}>
             <span className="workspace-quicklink-service">{label}</span>
             {resource ? (
               <>
