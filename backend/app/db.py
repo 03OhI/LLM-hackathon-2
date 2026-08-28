@@ -29,6 +29,11 @@ _ADDITIVE_COLUMNS: dict[str, list[tuple[str, str]]] = {
         ("host_participant_id", "VARCHAR"),
         ("workspace_status", "VARCHAR DEFAULT 'LOCKED'"),
     ],
+    "workspace": [
+        ("notice", "VARCHAR"),
+        ("deadline_at", "TIMESTAMP"),
+        ("presentation_order", "VARCHAR"),
+    ],
 }
 
 

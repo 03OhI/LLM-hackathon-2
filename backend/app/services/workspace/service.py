@@ -25,6 +25,7 @@ from app.errors import (
     app_error,
 )
 from app.models import QuestAssignment, ResourceLink, Session as SessionModel, Workspace, WorkspaceTask, utcnow
+from app.services.workspace import checklist
 
 HOST_SENTINEL = "HOST"
 
@@ -76,6 +77,25 @@ def start_workspace(session_id: str, db: DBSession) -> Workspace:
         if existing is not None:
             return existing
         raise
+    db.refresh(workspace)
+    checklist.create_default_items(workspace.id, db)
+    return workspace
+
+
+def update_notice(
+    workspace_id: str,
+    db: DBSession,
+    *,
+    notice: str | None,
+    deadline_at: datetime | None,
+    presentation_order: str | None,
+) -> Workspace:
+    workspace = get_workspace_or_404(workspace_id, db)
+    workspace.notice = notice
+    workspace.deadline_at = deadline_at
+    workspace.presentation_order = presentation_order
+    db.add(workspace)
+    db.commit()
     db.refresh(workspace)
     return workspace
 
