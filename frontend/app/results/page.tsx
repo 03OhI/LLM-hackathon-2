@@ -317,6 +317,12 @@ export default function ResultsPage() {
           우리 팀 분석
         </button>
       </section>
+      <Link
+        href={administratorMode ? "/quest?mode=admin" : "/quest"}
+        className="result-quest-link"
+      >
+        아이스브레이킹 퀘스트로 이동 <b>→</b>
+      </Link>
       {view === "personal" ? (
         <PersonalReport
           insight={displayedPersonal.insight}
@@ -331,12 +337,6 @@ export default function ResultsPage() {
           onPersonal={() => setView("personal")}
         />
       )}
-      <Link
-        href={administratorMode ? "/quest?mode=admin" : "/quest"}
-        className="result-quest-link"
-      >
-        아이스브레이킹 퀘스트로 이동 <b>→</b>
-      </Link>
     </ResultShell>
   );
 }
