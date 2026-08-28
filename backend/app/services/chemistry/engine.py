@@ -467,15 +467,29 @@ def build_team_comment_input(
     analysis_result_id: str,
     team_size: int,
 ) -> TeamCommentInput:
-    """팀 분석 결과에서 AI 팀 코멘트 입력을 구성한다."""
+    """팀 분석 결과에서 AI 팀 코멘트 입력을 구성한다.
+
+    matched_rule_ids는 strength 코드를 생성하는 규칙만 포함한다.
+    caution/recommendation/evidence/team_grade는 AI에 전달하지 않는다.
+    """
+    # strength 규칙만 필터: 해당 rule이 strength_code를 생성하고
+    # 그 code가 analysis.team_strength_codes에 포함되는 것만 남긴다.
+    rules_data = load_team_rules()
+    rules = rules_data.get("rules", [])
+    strength_rule_ids: list[str] = []
+    for rule in rules:
+        produces = rule.get("produces", {})
+        if "strength_code" in produces:
+            code = produces["strength_code"]
+            if code in analysis.team_strength_codes:
+                rid = rule.get("rule_id", "")
+                if rid in analysis.matched_rule_ids:
+                    strength_rule_ids.append(rid)
+
     return TeamCommentInput(
         analysis_result_id=analysis_result_id,
-        team_grade=analysis.team_grade,
         strength_codes=analysis.team_strength_codes,
-        caution_codes=analysis.team_caution_codes,
-        recommendation_codes=[],  # 팀 코멘트에서는 별도 권장 행동 없음
-        matched_rule_ids=analysis.matched_rule_ids,
-        evidence_levels=analysis.evidence_levels,
+        matched_rule_ids=list(dict.fromkeys(strength_rule_ids)),
         team_size=team_size,
         distribution=analysis.distribution,
     )

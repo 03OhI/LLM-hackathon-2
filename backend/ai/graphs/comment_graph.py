@@ -1,11 +1,10 @@
 """
-LangGraph 코멘트 생성 그래프
+LangGraph 코멘트 생성 그래프 (V2)
 
 생성 → 검증 → (통과 → END | 최초 실패 → 재생성 | 재실패·timeout → fallback → END)
 
-팀 코멘트와 개인 코멘트는 같은 그래프 구조를 사용하되
-서로 다른 입력 스키마·프롬프트·저장소를 사용한다.
-MVP에서는 영속 체크포인트 없이 요청 단위로 그래프를 실행한다.
+audience가 TEAM이면 TeamSnapshot, SELF_ONLY이면 PrivateCard를 처리한다.
+기존 재시도 횟수(1회)와 종료 조건을 유지한다.
 """
 
 from __future__ import annotations
@@ -24,12 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 def _should_continue(state: CommentGraphState) -> Literal["generate_comment", "render_fallback", "__end__"]:
-    """validate 노드 이후의 조건부 라우팅
-
-    - validation_errors가 비어있고 final이 있으면 → END
-    - retry_count < 2 (첫 시도 실패) → generate_comment (재시도)
-    - retry_count >= 2 (재시도도 실패) → render_fallback
-    """
+    """validate 노드 이후의 조건부 라우팅"""
     errors = state.get("validation_errors", [])
     final = state.get("final")
 
@@ -37,7 +31,7 @@ def _should_continue(state: CommentGraphState) -> Literal["generate_comment", "r
     if not errors and final is not None:
         return END
 
-    # LLM 에러 또는 검증 실패 → 재시도 가능 여부 확인
+    # 재시도 가능 여부
     if state["retry_count"] < 2:
         return "generate_comment"
     else:
@@ -46,19 +40,15 @@ def _should_continue(state: CommentGraphState) -> Literal["generate_comment", "r
 
 def build_comment_graph() -> StateGraph:
     """코멘트 생성 LangGraph를 구성하고 컴파일한다."""
-
     graph = StateGraph(CommentGraphState)
 
-    # 노드 등록
     graph.add_node("generate_comment", generate_comment)
     graph.add_node("validate_comment", validate_comment)
     graph.add_node("render_fallback", render_fallback)
 
-    # 엣지 정의
     graph.set_entry_point("generate_comment")
     graph.add_edge("generate_comment", "validate_comment")
 
-    # 조건부 엣지: validate 이후 분기
     graph.add_conditional_edges(
         "validate_comment",
         _should_continue,
@@ -69,13 +59,11 @@ def build_comment_graph() -> StateGraph:
         },
     )
 
-    # fallback은 항상 END
     graph.add_edge("render_fallback", END)
 
     return graph.compile()
 
 
-# 모듈 레벨 컴파일된 그래프 인스턴스
 comment_graph = build_comment_graph()
 
 
@@ -93,7 +81,7 @@ def run_comment_graph(
 
     Returns:
         {
-            "insight": GeneratedInsight,
+            "insight": TeamSnapshot | PrivateCard,
             "used_fallback": bool,
             "validation_errors": list[str],
         }
