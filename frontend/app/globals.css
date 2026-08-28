@@ -6140,12 +6140,91 @@ a {
 @media(max-width:700px){.quest-body-grid{grid-template-columns:1fr}.quest-header h1{font-size:25px}}
 
 /* Workspace screen: two panels side by side on desktop, stacked on mobile (P0 §5). */
-.workspace-card-shell{max-width:1040px}.workspace-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:22px}.workspace-panel{border:1px solid #e7ebed;border-radius:16px;padding:22px;background:#fff}.workspace-panel h2{margin:0 0 16px;color:#344c70;font-size:18px}.workspace-empty{color:#8b96a6;font-size:13px}.workspace-hint{margin-top:16px;color:#a3acb8;font-size:11px;line-height:1.6}
+.workspace-card-shell{max-width:1040px}.workspace-grid{display:grid;grid-template-columns:1fr 1fr;align-items:start;gap:22px;margin-top:22px}.workspace-panel{border:1px solid #e7ebed;border-radius:16px;padding:22px;background:#fff;min-width:0;overflow-wrap:break-word}.workspace-panel h2{margin:0 0 16px;color:#344c70;font-size:18px}.workspace-empty{color:#8b96a6;font-size:13px}.workspace-hint{margin-top:16px;color:#a3acb8;font-size:11px;line-height:1.6}.workspace-span-2{grid-column:1/-1}
 .task-create-form,.resource-create-form{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;margin-bottom:18px}.task-create-form input,.resource-create-form input{min-width:0;border:1px solid #dce4ec;border-radius:9px;padding:10px 11px;font:13px var(--font-ridi-batang),serif}.task-create-form select,.resource-create-form select{border:1px solid #dce4ec;border-radius:9px;padding:0 8px;font:12px Arial,"Malgun Gothic",sans-serif;color:#5c6a83}.resource-create-form{grid-template-columns:1fr 1fr auto auto}
 .task-list,.resource-list{display:grid;gap:10px;margin:0;padding:0;list-style:none}.task-item{border:1px solid #edf0f2;border-radius:12px;padding:13px 15px;background:#fbfcfd}.task-item-main{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-bottom:10px}.task-item-main b{color:#344c70;font-size:14px}.task-assignee{border-radius:999px;padding:3px 9px;background:#eef3f8;color:#5c7ba0;font-size:11px;font-weight:800}.task-due{color:#98a1b0;font-size:11px}
 .task-item-actions{display:flex;flex-wrap:wrap;gap:6px}.task-status-button,.task-status-active{border:1px solid #dce4ec;border-radius:8px;padding:6px 10px;background:#fff;color:#5c6a83;font-size:12px;cursor:pointer}.task-status-active{border-color:var(--survey-action);background:var(--survey-action);color:#fff;font-weight:800}.task-delete-button{margin-left:auto;border:0;background:transparent;color:#be5144;font-size:12px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .resource-item{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #edf0f2;border-radius:12px;padding:12px 15px;background:#fbfcfd}.resource-link{display:flex;align-items:center;gap:10px;color:#344c70;font-size:14px;font-weight:800}.resource-provider{border-radius:999px;padding:4px 9px;background:#eef3f8;color:#5c7ba0;font-size:11px;font-weight:800}
 @media(max-width:700px){.workspace-grid{grid-template-columns:1fr}.task-create-form,.resource-create-form{grid-template-columns:1fr}.task-create-form select,.resource-create-form select{padding:8px}}
+
+/* 협업 대시보드 확장 — 공지/타이머/체크리스트/의사결정/회의메모/바로가기.
+   새 색을 추가하지 않고 기존 토큰(--survey-action, --survey-navy, --ink, --muted, --line)만 재사용한다. */
+.workspace-section-inline-error{margin-top:10px;color:#be5144;font-size:12px}
+
+.workspace-notice{border:1px solid var(--line);border-radius:16px;padding:20px 22px;background:linear-gradient(135deg,rgba(255,131,116,.08),rgba(255,255,255,.9));display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.workspace-notice-body{min-width:0;flex:1}
+.workspace-notice-content{margin:0 0 10px;color:var(--survey-navy);font-size:17px;font-weight:800;line-height:1.5;overflow-wrap:break-word}
+.workspace-notice-meta{display:flex;flex-wrap:wrap;gap:10px 16px;color:var(--muted);font-size:12px}
+.workspace-notice-countdown{color:var(--survey-action);font-weight:800}
+.workspace-notice-edit{flex-shrink:0;border:1px solid var(--survey-action);border-radius:9px;padding:8px 14px;background:#fff;color:var(--survey-action);font-size:12px;font-weight:800;cursor:pointer}
+.workspace-notice-form{display:grid;gap:10px;width:100%}
+.workspace-notice-form textarea{border:1px solid #dce4ec;border-radius:9px;padding:10px 11px;font:14px var(--font-ridi-batang),serif;resize:vertical}
+.workspace-notice-form-row{display:flex;flex-wrap:wrap;gap:14px}
+.workspace-notice-form-row label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.workspace-notice-form-row input{border:1px solid #dce4ec;border-radius:9px;padding:8px 10px;font:13px Arial,sans-serif}
+.workspace-notice-form-actions{display:flex;gap:8px}
+
+.workspace-timer{border:1px solid var(--line);border-radius:16px;padding:20px 22px;background:#fff;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}
+.workspace-timer-modes{display:flex;flex-wrap:wrap;gap:8px}
+.workspace-timer-mode,.workspace-timer-mode-active{border:1px solid #dce4ec;border-radius:999px;padding:7px 14px;background:#fff;color:#5c6a83;font-size:12px;font-weight:700;cursor:pointer}
+.workspace-timer-mode-active{border-color:var(--survey-action);background:var(--survey-action);color:#fff}
+.workspace-timer-display{display:flex;flex-direction:column;align-items:center;min-width:120px}
+.workspace-timer-clock{font:800 36px Arial,sans-serif;color:var(--survey-navy);letter-spacing:1px}
+.workspace-timer-current-mode{color:var(--muted);font-size:11px}
+.workspace-timer-controls{display:flex;gap:8px}
+.workspace-timer-done{width:100%;margin:0;border-radius:10px;padding:10px 14px;background:#f5f9f3;color:#5e8059;font-weight:800;text-align:center}
+
+.workspace-checklist-progress{display:flex;align-items:center;gap:12px;margin-bottom:14px;color:var(--muted);font-size:12px;font-weight:700}
+.workspace-progress-bar{flex:1;height:8px;border-radius:999px;background:#eef1f4;overflow:hidden}
+.workspace-progress-fill{height:100%;border-radius:999px;background:var(--survey-action);transition:width .2s ease}
+.workspace-checklist-list{display:grid;gap:10px;margin:0 0 14px;padding:0;list-style:none}
+.workspace-checklist-list .quest-check-row{flex-wrap:wrap}
+.workspace-checklist-label{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.workspace-checklist-done-text{text-decoration:line-through;color:#9aa4b2}
+.workspace-checklist-url{min-width:0;flex:1;border:1px solid #dce4ec;border-radius:8px;padding:6px 9px;font-size:12px}
+.workspace-checklist-add-form{display:flex;gap:8px}
+.workspace-checklist-add-form input{flex:1;min-width:0;border:1px solid #dce4ec;border-radius:9px;padding:9px 11px;font:13px var(--font-ridi-batang),serif}
+
+.workspace-decision-list{display:grid;gap:16px;margin:0 0 16px;padding:0;list-style:none}
+.workspace-decision-card{position:relative;border:1px solid #edf0f2;border-radius:14px;padding:16px 18px;background:#fbfcfd}
+.workspace-decision-final-badge{display:inline-block;margin-bottom:8px;border-radius:999px;padding:5px 12px;background:#f5f9f3;color:#5e8059;font-size:11px;font-weight:800}
+.workspace-decision-title{display:block;color:var(--survey-navy);font-size:15px;margin-bottom:4px}
+.workspace-decision-description{margin:0 0 12px;color:var(--muted);font-size:12px;line-height:1.6}
+.workspace-decision-options{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.workspace-decision-option{border:1px solid #edf0f2;border-radius:10px;padding:10px 12px;background:#fff}
+.workspace-decision-option-mine{border-color:var(--survey-action);background:#fff6f5}
+.workspace-decision-option-row{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:13px;color:var(--survey-navy);font-weight:700}
+.workspace-decision-option-count{color:var(--muted);font-weight:600}
+.workspace-decision-option-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.workspace-decision-create-form{display:grid;gap:8px;margin-top:12px}
+.workspace-decision-create-form input,.workspace-decision-create-form textarea{border:1px solid #dce4ec;border-radius:9px;padding:9px 11px;font:13px var(--font-ridi-batang),serif;resize:vertical}
+.workspace-decision-option-buttons{display:flex;gap:8px}
+
+.workspace-note-form{display:grid;gap:8px;margin:0 0 16px}
+.workspace-note-form input,.workspace-note-form textarea{border:1px solid #dce4ec;border-radius:9px;padding:9px 11px;font:13px var(--font-ridi-batang),serif;resize:vertical}
+.workspace-note-list{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.workspace-note-item{border:1px solid #edf0f2;border-radius:12px;padding:14px 16px;background:#fbfcfd}
+.workspace-note-item-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.workspace-note-item-header b{color:#344c70;font-size:14px}
+.workspace-note-item-actions{display:flex;gap:10px;flex-shrink:0}
+.workspace-note-discussion{margin:0 0 6px;color:#4b5771;font-size:13px;line-height:1.6;overflow-wrap:break-word}
+.workspace-note-toggle{margin-left:6px;border:0;background:transparent;color:var(--survey-action);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.workspace-note-next-actions{margin:0;color:#5c7ba0;font-size:12px;font-weight:700}
+
+.workspace-quicklinks{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.workspace-quicklink-card{display:flex;flex-direction:column;gap:8px;min-width:0;border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff}
+.workspace-quicklink-service{color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase}
+.workspace-quicklink-title{color:var(--survey-navy);font-size:14px;font-weight:800;overflow-wrap:break-word}
+.workspace-quicklink-open{align-self:flex-start}
+
+@media(max-width:700px){
+  .workspace-notice{flex-direction:column}
+  .workspace-timer{flex-direction:column;align-items:stretch;text-align:center}
+  .workspace-timer-display{align-items:center}
+  .workspace-checklist-add-form{flex-direction:column}
+  .workspace-decision-option-buttons,.workspace-decision-option-actions{flex-direction:column}
+  .workspace-quicklinks{grid-template-columns:1fr}
+}
 
 /* Keep every 6-question stage on the same frame as stage 1 (계획성).
    This final, survey-scoped block wins over older duplicated theme rules. */
