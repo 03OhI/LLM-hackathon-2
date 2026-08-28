@@ -41,12 +41,21 @@ class PairPublic(BaseModel):
     axis: str
 
 
+class MemberPositionPublic(BaseModel):
+    """팀 성향 지도용 최소 공개 정보. 원응답과 내부 수치는 포함하지 않는다."""
+
+    participant_id: str
+    display_name: str
+    self_positions: dict
+
+
 class TeamResultResponse(BaseModel):
     # 최신 기획: team_grade / team_caution_codes / top_caution_pairs 는 공개 API에서 제외한다.
     # (DB(AnalysisResult)에는 계속 저장·계산하되 응답 스키마에만 노출하지 않는다.)
     session_id: str
     status: str  # PROCESSING|COMPLETED|FALLBACK
     distribution: dict | None
+    member_positions: list[MemberPositionPublic]
     team_strength_codes: list[str]
     top_complement_pairs: list[PairPublic]
     team_comment: dict | None  # GeneratedInsight.model_dump() 또는 None
@@ -73,12 +82,39 @@ def _latest_analysis(session_id: str, db: DBSession) -> AnalysisResult | None:
     ).first()
 
 
-def _build_team_result(session_id: str, analysis: AnalysisResult | None) -> TeamResultResponse:
+def _member_positions(session_id: str, db: DBSession) -> list[MemberPositionPublic]:
+    """완료된 팀원의 표시 이름과 4축 위치만 팀 지도에 공개한다."""
+    from app.models import ParticipantProfile
+    from app.services.profile.profile_helpers import canonical_profile_for_participant
+
+    participants = db.exec(
+        select(Participant).where(
+            Participant.session_id == session_id,
+            Participant.submission_status.in_(("SUBMITTED", "LOCKED")),
+        )
+    ).all()
+    result: list[MemberPositionPublic] = []
+    for participant in participants:
+        if db.get(ParticipantProfile, participant.id) is None:
+            continue
+        profile = canonical_profile_for_participant(participant.id, db)
+        result.append(
+            MemberPositionPublic(
+                participant_id=participant.id,
+                display_name=participant.nickname,
+                self_positions=dict(profile.positions.items()),
+            )
+        )
+    return result
+
+
+def _build_team_result(session_id: str, analysis: AnalysisResult | None, db: DBSession) -> TeamResultResponse:
     if analysis is None:
         return TeamResultResponse(
             session_id=session_id,
             status="PROCESSING",
             distribution=None,
+            member_positions=[],
             team_strength_codes=[],
             top_complement_pairs=[],
             team_comment=None,
@@ -97,6 +133,7 @@ def _build_team_result(session_id: str, analysis: AnalysisResult | None) -> Team
         session_id=session_id,
         status=analysis.status,
         distribution=distribution,
+        member_positions=_member_positions(session_id, db),
         team_strength_codes=json.loads(analysis.team_strength_codes_json),
         top_complement_pairs=[PairPublic(**p) for p in pair_results.get("top_complement", [])],
         team_comment=team_comment,
@@ -119,7 +156,7 @@ def get_team_result(
         raise app_error(SESSION_NOT_FOUND, f"세션을 찾을 수 없습니다: {session_id}")
 
     analysis = _latest_analysis(session_id, db)
-    return _build_team_result(session_id, analysis)
+    return _build_team_result(session_id, analysis, db)
 
 
 @router.get("/sessions/{session_id}/results/me", response_model=PrivateResultResponse)
@@ -163,4 +200,4 @@ def get_shared_result(
         raise app_error(INVALID_INVITE_TOKEN, "유효하지 않은 공유 링크입니다.")
 
     analysis = _latest_analysis(session.id, db)
-    return _build_team_result(session.id, analysis)
+    return _build_team_result(session.id, analysis, db)
