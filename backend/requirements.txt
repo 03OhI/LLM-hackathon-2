@@ -15,6 +15,9 @@ langgraph>=0.2.0
 pydantic>=2.5.0
 pydantic-settings>=2.1.0
 
+# DB
+sqlmodel>=0.0.16
+
 # 유틸
 pyyaml>=6.0
 typing-extensions>=4.8.0
