@@ -76,11 +76,11 @@ function SurveyNav() {
         ⌂
       </Link>
       <Image
-        className="survey-brand-image"
+        className="tmti-header-brand"
         src="/tmti-survey-logo.png"
-        alt="TMTI 캐릭터 로고"
-        width={220}
-        height={124}
+        alt="TMTI 오리 로고"
+        width={196}
+        height={110}
         priority
       />
     </nav>
@@ -262,10 +262,8 @@ function getSavedTeamSession(): SavedTeamSession | null {
 
 function WaitingScreen({
   team,
-  onReset,
 }: {
   team: TeamSession;
-  onReset: () => void;
 }) {
   const [status, setStatus] = useState<TeamStatus>({
     joinedMembers: 1,
@@ -367,9 +365,13 @@ function WaitingScreen({
             {copied ? "참여 링크가 복사되었어요" : "팀 참여 링크 복사"}
           </button>
           {team.isHost && <button type="button" className="admin-preview-button" onClick={() => window.location.assign("/results?mode=admin")}>관리자 · 응답 결과 보기 <span aria-hidden="true">→</span></button>}
-          <button type="button" className="button-muted" onClick={onReset}>
-            처음부터 다시 시작
-          </button>
+          <Link className="button-muted" href="/">
+            홈으로
+          </Link>
+          <Link className="button-next waiting-new-test" href="/survey?new=1">
+            <span>새로운 테스트 진행하기</span>
+            <i aria-hidden="true">→</i>
+          </Link>
         </div>
         {statusError && <p className="waiting-demo-note" role="status">{statusError}</p>}
         {team.isHost && <p className="waiting-demo-note">모든 응답이 모이면 분석을 시작하고 결과 화면으로 이동합니다.</p>}
@@ -527,7 +529,10 @@ function TeamLobby({
         </div>
         <div className="survey-actions">
           <Link className="button-muted" href="/">
-            나중에 하기
+            홈으로
+          </Link>
+          <Link className="button-muted lobby-new-test" href="/survey?new=1">
+            새로운 테스트
           </Link>
           <button className="button-next intro-start-button" onClick={onStart}>
             <span>내 설문 시작하기</span>
@@ -554,6 +559,9 @@ export default function SurveyPage() {
     typeof window === "undefined"
       ? ""
       : (new URLSearchParams(window.location.search).get("invite") ?? "");
+  const freshStart =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("new") === "1";
   const [inviteInfo, setInviteInfo] = useState<{
     sessionName: string;
     expectedMembers: number;
@@ -576,6 +584,13 @@ export default function SurveyPage() {
     Number(teamSize) >= 3 &&
     Number(teamSize) <= 10;
   useEffect(() => {
+    if (freshStart) {
+      window.sessionStorage.removeItem(teamSessionStorageKey);
+      window.sessionStorage.removeItem("tmti-session-id");
+      window.localStorage.removeItem(teamSessionStorageKey);
+      window.localStorage.removeItem("tmti-session-id");
+      return;
+    }
     const saved = getSavedTeamSession();
     if (!saved) return;
     setTeamSession(saved.team);
@@ -586,7 +601,7 @@ export default function SurveyPage() {
           ? -2
           : 0,
     );
-  }, []);
+  }, [freshStart]);
   const resetSurvey = () => {
     window.sessionStorage.removeItem(teamSessionStorageKey);
     window.sessionStorage.removeItem("tmti-session-id");
@@ -746,7 +761,6 @@ export default function SurveyPage() {
             isHost: false,
           }
         }
-        onReset={resetSurvey}
       />
     );
 
