@@ -116,7 +116,7 @@ function ResultShell({ children }: { children: React.ReactNode }) {
 }
 
 function ResultLoading() {
-  return <ResultShell><section className="result-message"><Image src="/duck-face-think.png" alt="결과를 준비하는 TMTI 오리" width={112} height={112} priority /><p className="result-eyebrow">결과 준비 중</p><h1>팀의 협업 이야기를 정리하고 있어요.</h1><p>완료되면 이 화면에서 개인 결과와 팀 분석을 함께 볼 수 있어요.</p></section></ResultShell>;
+  return <ResultShell><section className="result-message"><Image src="/duck-face-open.png" alt="결과를 준비하는 TMTI 오리" width={112} height={112} priority /><p className="result-eyebrow">결과 준비 중</p><h1>팀의 협업 이야기를 정리하고 있어요.</h1><p>완료되면 이 화면에서 개인 결과와 팀 분석을 함께 볼 수 있어요.</p></section></ResultShell>;
 }
 
 function ResultError({ message }: { message: string }) {
