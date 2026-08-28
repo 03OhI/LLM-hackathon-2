@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import QRCode from "qrcode";
 import { useEffect, useMemo, useState } from "react";
-import ResultsPage from "../results/page";
 
 const groups = [
   {
@@ -170,29 +169,24 @@ function SurveySidebar({
 }
 
 type TeamSession = {
-  code: string;
+  sessionId: string;
+  inviteToken: string;
   teamName: string;
   expectedMembers: number;
-  memberId: string;
+  participantId: string;
+  isHost: boolean;
 };
 type SavedTeamSession = {
   team: TeamSession;
   phase: "lobby" | "survey" | "waiting";
 };
-type DemoResultSession = {
-  displayName: string;
-  teamName: string;
-  responses: Record<string, number>;
-};
 type TeamStatus = {
   completedMembers: number;
   expectedMembers: number;
-  joinedMembers: number;
-  members: { displayName: string; completed: boolean }[];
-  ready: boolean;
+  analysisStatus: string | null;
 };
 const teamSessionStorageKey = "tmti-active-team-session";
-const demoResultStorageKey = "tmti-demo-result";
+const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? "/backend/api";
 
 function saveTeamSession(team: TeamSession, phase: SavedTeamSession["phase"]) {
   if (typeof window !== "undefined")
@@ -208,34 +202,42 @@ function getSavedTeamSession(): SavedTeamSession | null {
     const saved = JSON.parse(
       window.sessionStorage.getItem(teamSessionStorageKey) ?? "null",
     ) as SavedTeamSession | null;
-    return saved?.team?.code && saved.team.memberId ? saved : null;
+    return saved?.team?.sessionId && saved.team.participantId ? saved : null;
   } catch {
     return null;
   }
-}
-
-function saveDemoResult(result: DemoResultSession) {
-  if (typeof window !== "undefined")
-    window.sessionStorage.setItem(demoResultStorageKey, JSON.stringify(result));
 }
 
 function WaitingScreen({ team }: { team: TeamSession }) {
   const [status, setStatus] = useState<TeamStatus>({
     completedMembers: 1,
     expectedMembers: team.expectedMembers,
-    joinedMembers: 1,
-    members: [],
-    ready: false,
+    analysisStatus: null,
   });
   const [copied, setCopied] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  const [analysisRequested, setAnalysisRequested] = useState(false);
   useEffect(() => {
     const refresh = async () => {
       try {
-        const response = await fetch(`/api/teams/${team.code}`, {
+        const response = await fetch(`${apiBase}/sessions/${team.sessionId}/analysis/status`, {
           cache: "no-store",
+          credentials: "same-origin",
         });
-        if (response.ok) setStatus(await response.json());
+        if (!response.ok) return;
+        const next = await response.json();
+        setStatus({
+          completedMembers: next.submitted_member_count,
+          expectedMembers: next.expected_member_count,
+          analysisStatus: next.analysis_status,
+        });
+        if (next.analysis_status === "COMPLETED" || next.analysis_status === "FALLBACK") {
+          window.location.assign(`/results?sessionId=${encodeURIComponent(team.sessionId)}`);
+          return;
+        }
+        if (team.isHost && !analysisRequested && !next.analysis_status && next.submitted_member_count === next.expected_member_count) {
+          setAnalysisRequested(true);
+          await fetch(`${apiBase}/sessions/${team.sessionId}/analysis`, { method: "POST", credentials: "same-origin" });
+        }
       } catch {
         /* 프론트 시연에서는 대기 UI를 계속 보여 줍니다. */
       }
@@ -243,12 +245,11 @@ function WaitingScreen({ team }: { team: TeamSession }) {
     refresh();
     const timer = window.setInterval(refresh, 3000);
     return () => window.clearInterval(timer);
-  }, [team.code]);
+  }, [analysisRequested, team.isHost, team.sessionId]);
   const invite =
     typeof window === "undefined"
       ? ""
-      : `${window.location.origin}/?team=${team.code}`;
-  if (showPreview) return <ResultsPage />;
+      : `${window.location.origin}/?invite=${team.inviteToken}`;
 
   return (
     <main className="survey-shell">
@@ -269,7 +270,7 @@ function WaitingScreen({ team }: { team: TeamSession }) {
         </div>
         <p className="eyebrow">TEAM ANALYSIS</p>
         <h1>
-          {status.ready
+          {status.analysisStatus === "PROCESSING"
             ? "결과를 준비하고 있어요."
             : "팀원들의 응답을 모으고 있어요."}
         </h1>
@@ -299,20 +300,9 @@ function WaitingScreen({ team }: { team: TeamSession }) {
           >
             {copied ? "참여 링크가 복사되었어요" : "팀 참여 링크 복사"}
           </button>
-          <button
-            type="button"
-            className="admin-preview-button"
-            onClick={() => {
-              window.sessionStorage.setItem("tmti-inline-demo-preview", "1");
-              setShowPreview(true);
-            }}
-          >
-            관리자 · 결과 미리보기 <span aria-hidden="true">→</span>
-          </button>
+          {team.isHost && <button type="button" className="admin-preview-button" onClick={() => window.location.assign(`/results?sessionId=${encodeURIComponent(team.sessionId)}`)}>관리자 · 응답 결과 보기 <span aria-hidden="true">→</span></button>}
         </div>
-        <p className="waiting-demo-note">
-          시연용 버튼이며, 현재 기기에서 작성한 응답으로 결과를 보여 줍니다.
-        </p>
+        {team.isHost && <p className="waiting-demo-note">모든 응답이 모이면 분석을 시작하고 결과 화면으로 이동합니다.</p>}
       </section>
     </main>
   );
@@ -328,27 +318,36 @@ function TeamLobby({
   const [status, setStatus] = useState<TeamStatus>({
     completedMembers: 0,
     expectedMembers: team.expectedMembers,
-    joinedMembers: 1,
-    members: [],
-    ready: false,
+    analysisStatus: null,
   });
   const [copied, setCopied] = useState(false);
   const [qrCode, setQrCode] = useState("");
   const invite =
     typeof window === "undefined"
       ? ""
-      : `${window.location.origin}/?team=${team.code}`;
+      : `${window.location.origin}/?invite=${team.inviteToken}`;
   useEffect(() => {
     const refresh = async () => {
-      const response = await fetch(`/api/teams/${team.code}`, {
-        cache: "no-store",
-      });
-      if (response.ok) setStatus(await response.json());
+      try {
+        const response = await fetch(
+          `${apiBase}/sessions/${team.sessionId}/analysis/status`,
+          { cache: "no-store", credentials: "same-origin" },
+        );
+        if (!response.ok) return;
+        const next = await response.json();
+        setStatus({
+          completedMembers: next.submitted_member_count ?? 0,
+          expectedMembers: next.expected_member_count ?? team.expectedMembers,
+          analysisStatus: next.analysis_status ?? null,
+        });
+      } catch {
+        /* 네트워크가 잠시 끊겨도 초대 화면은 유지합니다. */
+      }
     };
     refresh();
     const timer = window.setInterval(refresh, 3000);
     return () => window.clearInterval(timer);
-  }, [team.code]);
+  }, [team.expectedMembers, team.sessionId]);
   useEffect(() => {
     if (invite)
       QRCode.toDataURL(invite, {
@@ -396,7 +395,7 @@ function TeamLobby({
             ) : (
               <div className="invite-qr loading" />
             )}
-            <p className="invite-code">{team.code}</p>
+            <p className="invite-code">초대 링크를 공유해 주세요</p>
             <button
               className="invite-button lobby-copy"
               onClick={async () => {
@@ -414,17 +413,26 @@ function TeamLobby({
                 <h2>
                   참여 현황{" "}
                   <b>
-                    {status.joinedMembers} / {status.expectedMembers}
+                    {status.completedMembers} / {status.expectedMembers}
                   </b>
                 </h2>
               </div>
               <button
                 className="lobby-refresh"
                 onClick={async () => {
-                  const response = await fetch(`/api/teams/${team.code}`, {
-                    cache: "no-store",
-                  });
-                  if (response.ok) setStatus(await response.json());
+                  const response = await fetch(
+                    `${apiBase}/sessions/${team.sessionId}/analysis/status`,
+                    { cache: "no-store", credentials: "same-origin" },
+                  );
+                  if (response.ok) {
+                    const next = await response.json();
+                    setStatus({
+                      completedMembers: next.submitted_member_count ?? 0,
+                      expectedMembers:
+                        next.expected_member_count ?? team.expectedMembers,
+                      analysisStatus: next.analysis_status ?? null,
+                    });
+                  }
                 }}
                 aria-label="참여 현황 새로고침"
               >
@@ -433,18 +441,12 @@ function TeamLobby({
             </div>
             <ul>
               {Array.from({ length: status.expectedMembers }, (_, index) => {
-                const member = status.members[index];
+                const completed = index < status.completedMembers;
                 return (
-                  <li className={member ? "joined" : "waiting"} key={index}>
-                    <i>{member ? (member.completed ? "✓" : "●") : ""}</i>
-                    <span>{member?.displayName ?? "팀원 참여 대기"}</span>
-                    <small>
-                      {member
-                        ? member.completed
-                          ? "설문 완료"
-                          : "설문 전"
-                        : "대기"}
-                    </small>
+                  <li className={completed ? "joined" : "waiting"} key={index}>
+                    <i>{completed ? "✓" : ""}</i>
+                    <span>{completed ? "응답을 완료한 팀원" : "팀원 응답 대기"}</span>
+                    <small>{completed ? "설문 완료" : "대기"}</small>
                   </li>
                 );
               })}
@@ -483,10 +485,14 @@ export default function SurveyPage() {
   const [teamSession, setTeamSession] = useState<TeamSession | null>(null);
   const [teamError, setTeamError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const inviteCode =
+  const inviteToken =
     typeof window === "undefined"
       ? ""
-      : (new URLSearchParams(window.location.search).get("team") ?? "");
+      : (new URLSearchParams(window.location.search).get("invite") ?? "");
+  const [inviteInfo, setInviteInfo] = useState<{
+    sessionName: string;
+    expectedMembers: number;
+  } | null>(null);
   const current = step >= 0 && step < groups.length ? groups[step] : null;
   const currentAnswered = current
     ? current.items.filter(([id]) => answers[id] !== undefined).length
@@ -516,6 +522,29 @@ export default function SurveyPage() {
           : 0,
     );
   }, []);
+  useEffect(() => {
+    if (!inviteToken) return;
+    const loadInvite = async () => {
+      try {
+        const response = await fetch(`${apiBase}/invites/${inviteToken}`, {
+          cache: "no-store",
+          credentials: "same-origin",
+        });
+        if (!response.ok) {
+          setTeamError("초대 링크를 확인하지 못했어요. 링크를 다시 확인해 주세요.");
+          return;
+        }
+        const invite = await response.json();
+        setInviteInfo({
+          sessionName: invite.session_name,
+          expectedMembers: invite.expected_member_count,
+        });
+      } catch {
+        setTeamError("초대 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.");
+      }
+    };
+    loadInvite();
+  }, [inviteToken]);
   const startSurvey = async () => {
     if (!validTeamSetup) {
       setShowTeamValidation(true);
@@ -523,29 +552,48 @@ export default function SurveyPage() {
     }
     setShowTeamValidation(false);
     setTeamError("");
-    const response = await fetch("/api/teams", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        teamName,
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${apiBase}/sessions`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          name: teamName.trim(),
+          expected_member_count: Number(teamSize),
+          meeting_type: "team_project",
+        }),
+      });
+      if (!response.ok) throw new Error("create-session");
+      const created = await response.json();
+      const participantResponse = await fetch(
+        `${apiBase}/invites/${created.invite_token}/participants`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ nickname: displayName.trim() }),
+        },
+      );
+      if (!participantResponse.ok) throw new Error("create-host-participant");
+      const participant = await participantResponse.json();
+      const session: TeamSession = {
+        sessionId: created.session_id,
+        inviteToken: created.invite_token,
+        teamName: teamName.trim(),
         expectedMembers: Number(teamSize),
-        displayName,
-      }),
-    });
-    if (!response.ok) {
+        participantId: participant.participant_id,
+        isHost: true,
+      };
+      window.sessionStorage.setItem("tmti-session-id", session.sessionId);
+      saveTeamSession(session, "lobby");
+      setTeamSession(session);
+      setStep(-2);
+    } catch {
       setTeamError("팀을 만들지 못했어요. 잠시 후 다시 시도해 주세요.");
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-    const created = await response.json();
-    const session = {
-      code: created.code,
-      teamName: created.teamName,
-      expectedMembers: created.expectedMembers,
-      memberId: created.memberId,
-    };
-    saveTeamSession(session, "lobby");
-    setTeamSession(session);
-    setStep(-2);
   };
   const joinSurvey = async () => {
     if (!displayName.trim()) {
@@ -553,27 +601,33 @@ export default function SurveyPage() {
       return;
     }
     setTeamError("");
-    const response = await fetch(`/api/teams/${inviteCode}`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action: "join", displayName }),
-    });
-    if (!response.ok) {
-      setTeamError(
-        "팀 참여 정보를 확인하지 못했어요. 이름이나 링크를 확인해 주세요.",
-      );
-      return;
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${apiBase}/invites/${inviteToken}/participants`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ nickname: displayName.trim() }),
+      });
+      if (!response.ok) throw new Error("join-session");
+      const joined = await response.json();
+      const session: TeamSession = {
+        sessionId: joined.session_id,
+        inviteToken,
+        teamName: inviteInfo?.sessionName ?? "초대받은 팀",
+        expectedMembers: inviteInfo?.expectedMembers ?? 3,
+        participantId: joined.participant_id,
+        isHost: false,
+      };
+      window.sessionStorage.setItem("tmti-session-id", session.sessionId);
+      saveTeamSession(session, "survey");
+      setTeamSession(session);
+      setStep(0);
+    } catch {
+      setTeamError("팀 참여 정보를 확인하지 못했어요. 이름이나 링크를 확인해 주세요.");
+    } finally {
+      setIsSubmitting(false);
     }
-    const joined = await response.json();
-    const session = {
-      code: joined.code,
-      teamName: joined.teamName,
-      expectedMembers: joined.expectedMembers,
-      memberId: joined.memberId,
-    };
-    saveTeamSession(session, "survey");
-    setTeamSession(session);
-    setStep(0);
   };
 
   if (step === groups.length)
@@ -581,10 +635,12 @@ export default function SurveyPage() {
       <WaitingScreen
         team={
           teamSession ?? {
-            code: "DEMO",
+            sessionId: "",
+            inviteToken: "",
             teamName: teamName || "우리 팀",
             expectedMembers: Number(teamSize) || 3,
-            memberId: "demo",
+            participantId: "",
+            isHost: false,
           }
         }
       />
@@ -643,23 +699,23 @@ export default function SurveyPage() {
             className="team-setup"
             onSubmit={(event) => {
               event.preventDefault();
-              inviteCode ? joinSurvey() : startSurvey();
+              inviteToken ? joinSurvey() : startSurvey();
             }}
           >
             <div className="team-setup-heading">
               <b>
-                {inviteCode
-                  ? "팀에 참여하고 시작해요"
+                {inviteToken
+                  ? `${inviteInfo?.sessionName ?? "팀"}에 참여하고 시작해요`
                   : "팀 정보를 먼저 알려주세요"}
               </b>
               <span>
-                {inviteCode
+                {inviteToken
                   ? "결과에서 사용할 표시 이름을 입력해 주세요."
                   : "팀 전체 결과를 준비하는 데 사용돼요."}
               </span>
             </div>
             <div className="team-fields">
-              {!inviteCode && (
+              {!inviteToken && (
                 <>
                   <label>
                     팀명
@@ -701,7 +757,7 @@ export default function SurveyPage() {
                 />
               </label>
             </div>
-            {!inviteCode && (
+            {!inviteToken && (
               <p id="team-size-help" className="team-setup-help">
                 참여 인원은 모든 팀원이 설문을 마친 뒤 팀 분석을 열기 위한
                 기준입니다.
@@ -709,7 +765,7 @@ export default function SurveyPage() {
             )}
             {showTeamValidation && (
               <p className="team-setup-error" aria-live="polite">
-                {inviteCode
+                {inviteToken
                   ? "팀원에게 보일 이름을 입력해 주세요."
                   : "팀명과 표시 이름을 입력하고, 참여 인원은 3~10명으로 설정해 주세요."}
               </p>
@@ -890,13 +946,34 @@ export default function SurveyPage() {
                   return;
                 }
                 if (step === groups.length - 1) {
-                  saveDemoResult({
-                    displayName: displayName.trim() || "나",
-                    teamName:
-                      teamSession?.teamName || teamName.trim() || "우리 팀",
-                    responses: answers,
-                  });
-                  if (teamSession) saveTeamSession(teamSession, "waiting");
+                  if (!teamSession?.participantId) {
+                    setTeamError("참여 정보를 찾지 못했어요. 처음부터 다시 시작해 주세요.");
+                    return;
+                  }
+                  setIsSubmitting(true);
+                  setTeamError("");
+                  try {
+                    const orderedAnswers = groups.flatMap((group) =>
+                      group.items.map(([id]) => answers[id]),
+                    );
+                    const response = await fetch(
+                      `${apiBase}/participants/${teamSession.participantId}/submissions/survey`,
+                      {
+                        method: "POST",
+                        headers: { "content-type": "application/json" },
+                        credentials: "same-origin",
+                        body: JSON.stringify({ answers: orderedAnswers }),
+                      },
+                    );
+                    if (!response.ok) throw new Error("submit-survey");
+                    saveTeamSession(teamSession, "waiting");
+                    setStep(groups.length);
+                  } catch {
+                    setTeamError("응답을 저장하지 못했어요. 네트워크를 확인한 뒤 다시 시도해 주세요.");
+                  } finally {
+                    setIsSubmitting(false);
+                  }
+                  return;
                 }
                 setStep((previous) => previous + 1);
               }}
@@ -904,7 +981,7 @@ export default function SurveyPage() {
               {isSubmitting
                 ? "응답 저장 중"
                 : step === groups.length - 1
-                  ? "응답 확인"
+                  ? "응답 완료"
                   : "다음"}{" "}
               {!isSubmitting && "→"}
             </button>
