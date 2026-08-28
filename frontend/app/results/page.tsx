@@ -3,10 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { scorePersonal, scoreTeam, type Responses } from "@/lib/scoring";
 
 type AxisKey = "plan" | "drive" | "conflict" | "communication";
 type Personal = { displayName: string; result: { code: string | null; type: { alias: string; strength: string; caution: string; role: string } | null; axes: Record<AxisKey, { label: string; ratio: number; state: string; pole: string | null }> } };
 type Team = { faultline: string; frictions: string[]; axisScores: Record<AxisKey, number> };
+type DemoResultSession = { displayName: string; teamName: string; responses: Responses };
+const demoResultStorageKey = "tmti-demo-result";
 
 const axisOrder: AxisKey[] = ["plan", "drive", "conflict", "communication"];
 const axisMeta: Record<AxisKey, { high: string; low: string; color: string; light: string }> = {
@@ -21,26 +24,36 @@ export default function ResultsPage() {
   const [team, setTeam] = useState<Team | null>(null);
   const [view, setView] = useState<"personal" | "team">("personal");
   const [error, setError] = useState("");
-  const { teamCode, memberId } = useMemo(() => {
-    if (typeof window === "undefined") return { teamCode: "", memberId: "" };
+  const { teamCode, memberId, demo } = useMemo(() => {
+    if (typeof window === "undefined") return { teamCode: "", memberId: "", demo: false };
     const params = new URLSearchParams(window.location.search);
-    return { teamCode: params.get("team") ?? "", memberId: params.get("member") ?? "" };
+    return { teamCode: params.get("team") ?? "", memberId: params.get("member") ?? "", demo: params.get("demo") === "1" };
   }, []);
 
   useEffect(() => {
+    if (demo) {
+      try {
+        const saved = JSON.parse(window.sessionStorage.getItem(demoResultStorageKey) ?? "null") as DemoResultSession | null;
+        if (!saved?.responses) throw new Error("MISSING_DEMO_RESULT");
+        const teammateResponses = Object.fromEntries(Object.entries(saved.responses).map(([key, value], index) => [key, Math.max(1, Math.min(5, value + (index % 3 === 0 ? 1 : index % 3 === 1 ? -1 : 0)))])) as Responses;
+        setPersonal({ displayName: saved.displayName, result: scorePersonal(saved.responses) });
+        setTeam(scoreTeam([{ id: "me", displayName: saved.displayName, responses: saved.responses }, { id: "demo-teammate", displayName: "팀원", responses: teammateResponses }]));
+      } catch { setError("먼저 설문을 완료한 뒤 결과 미리보기를 열어 주세요."); }
+      return;
+    }
     if (!teamCode || !memberId) return;
     Promise.all([
       fetch(`/api/teams/${teamCode}?view=personal&memberId=${memberId}`).then(async (response) => response.ok ? response.json() : Promise.reject()),
       fetch(`/api/teams/${teamCode}?view=team`).then(async (response) => response.ok ? response.json() : Promise.reject()),
     ]).then(([personalData, teamData]) => { setPersonal(personalData); setTeam(teamData); }).catch(() => setError("아직 팀 결과를 준비하고 있어요. 잠시 후 다시 확인해 주세요."));
-  }, [memberId, teamCode]);
+  }, [demo, memberId, teamCode]);
 
-  if (!teamCode || !memberId || error) return <ResultShell><section className="result-message"><Image src="/duck-face-wink.png" alt="" width={110} height={110} /><h1>{error || "결과를 확인할 정보를 찾지 못했어요."}</h1><Link href="/" className="button-next">홈으로</Link></section></ResultShell>;
+  if ((!demo && (!teamCode || !memberId)) || error) return <ResultShell><section className="result-message"><Image src="/duck-face-wink.png" alt="" width={110} height={110} /><h1>{error || "결과를 확인할 정보를 찾지 못했어요."}</h1><Link href="/" className="button-next">홈으로</Link></section></ResultShell>;
   if (!personal || !team) return <ResultShell><section className="result-message"><div className="result-loader" /><p>팀의 협업 결과를 정리하고 있어요.</p></section></ResultShell>;
 
   return <ResultShell>
     <section className="result-tabs" aria-label="결과 보기 방식"><button className={view === "personal" ? "active" : ""} onClick={() => setView("personal")}>개인 결과</button><button className={view === "team" ? "active" : ""} onClick={() => setView("team")}>우리 팀 분석</button></section>
-    {view === "personal" ? <PersonalResult personal={personal} onTeam={() => setView("team")} /> : <TeamResult team={team} onPersonal={() => setView("personal")} />}
+    {view === "personal" ? <PersonalResult personal={personal} onTeam={() => setView("team")} /> : <TeamResult team={team} onPersonal={() => setView("personal")} demo={demo} />}
   </ResultShell>;
 }
 
@@ -73,8 +86,8 @@ function AxisPosition({ axis, score }: { axis: AxisKey; score: Personal["result"
   return <article className="axis-position" style={{ "--axis": meta.color, "--axis-light": meta.light } as React.CSSProperties}><div className="axis-position-title"><b>{score.label}</b><span>{score.pole ? `${score.pole} 쪽이 조금 더 편해요` : "두 방향을 고르게 활용해요"}</span></div><div className="axis-poles"><span>{meta.low}</span><span>{meta.high}</span></div><div className="axis-line"><i style={{ left: `${position}%` }} aria-hidden="true" /></div></article>;
 }
 
-function TeamResult({ team, onPersonal }: { team: Team; onPersonal: () => void }) {
-  return <section className="result-report survey-card-enter"><header className="personal-hero team-hero"><div><p className="result-kicker">우리 팀의 협업 지도</p><h1>함께 맞춰 갈 부분</h1><span>서로의 답을 평가하지 않고, 시작 전에 맞출 행동을 살펴봐요.</span></div><Image src="/duck-face-smile.png" alt="웃는 표정의 TMTI 오리" width={122} height={122} /></header><section className="axis-grid">{axisOrder.map((axis) => <article key={axis}><b>{axisMeta[axis] && { plan: "계획성", drive: "주도성", conflict: "갈등 대응", communication: "소통 직접성" }[axis]}</b><div><i style={{ width: `${team.axisScores[axis] * 100}%` }} /></div><span>팀의 조정 상태</span></article>)}</section><section className="insight-grid"><article><b>먼저 합의할 지점</b><p>{team.frictions.length ? team.frictions.join(" ") : "현재는 큰 방식 차이가 보이지 않아요. 맡을 일과 의사결정 기준부터 정해보세요."}</p></article><article><b>첫 회의에서 물어볼 질문</b><p>누가 최종 결정을 정리할까요?<br />일정이 바뀌면 어디에 먼저 공유할까요?<br />의견이 다를 때 어떤 방식으로 말할까요?</p></article></section><button className="result-team-link" onClick={onPersonal}>내 협업 스타일 보기 <b>→</b></button></section>;
+function TeamResult({ team, onPersonal, demo }: { team: Team; onPersonal: () => void; demo: boolean }) {
+  return <section className="result-report survey-card-enter"><header className="personal-hero team-hero"><div><p className="result-kicker">{demo ? "시연용 팀 분석" : "우리 팀의 협업 지도"}</p><h1>함께 맞춰 갈 부분</h1><span>{demo ? "현재 기기의 응답을 바탕으로 만든 시연 결과예요. 실제 팀원 응답이 모이면 팀 결과로 바뀝니다." : "서로의 답을 평가하지 않고, 시작 전에 맞출 행동을 살펴봐요."}</span></div><Image src="/duck-face-smile.png" alt="웃는 표정의 TMTI 오리" width={122} height={122} /></header><section className="axis-grid">{axisOrder.map((axis) => <article key={axis}><b>{axisMeta[axis] && { plan: "계획성", drive: "주도성", conflict: "갈등 대응", communication: "소통 직접성" }[axis]}</b><div><i style={{ width: `${team.axisScores[axis] * 100}%` }} /></div><span>팀의 조정 상태</span></article>)}</section><section className="insight-grid"><article><b>먼저 합의할 지점</b><p>{team.frictions.length ? team.frictions.join(" ") : "현재는 큰 방식 차이가 보이지 않아요. 맡을 일과 의사결정 기준부터 정해보세요."}</p></article><article><b>첫 회의에서 물어볼 질문</b><p>누가 최종 결정을 정리할까요?<br />일정이 바뀌면 어디에 먼저 공유할까요?<br />의견이 다를 때 어떤 방식으로 말할까요?</p></article></section><button className="result-team-link" onClick={onPersonal}>내 협업 스타일 보기 <b>→</b></button></section>;
 }
 
 function round(value: number) { return Number(value.toFixed(1)); }
