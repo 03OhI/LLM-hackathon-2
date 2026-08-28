@@ -119,56 +119,6 @@ def start_analysis(session_id: str, db: DBSession) -> AnalysisResult:
     return analysis_result
 
 
-def _build_fallback_insight_json(
-    *,
-    audience: str,
-    strength_codes: list[str],
-    caution_codes: list[str],
-    rule_ids: list[str],
-) -> str:
-    """외부 예외(Bedrock/네트워크 등)로 AI 그래프 자체를 실행하지 못한 경우에도
-    결정론적 폴백 콘텐츠(GeneratedInsight)를 생성해 JSON으로 직렬화한다.
-
-    ai/nodes/fallback.py의 템플릿을 그대로 재사용해, 그래프가 정상 실행되어
-    fallback으로 귀결됐을 때와 동일한 형태의 콘텐츠를 보장한다. 이렇게 해야
-    status=FALLBACK인데 결과 JSON이 비어 있는 상황을 방지할 수 있다.
-    """
-    from ai.nodes.fallback import (
-        CAUTION_TEMPLATES,
-        DEFAULT_ACTION,
-        DEFAULT_CAUTION_TEXT,
-        DEFAULT_STRENGTH_TEXT,
-        STRENGTH_TEMPLATES,
-    )
-    from ai.schemas import GeneratedInsight, InsightItem
-
-    strengths = [
-        InsightItem(code=code, text=STRENGTH_TEMPLATES.get(code, DEFAULT_STRENGTH_TEXT))
-        for code in strength_codes
-    ]
-
-    cautions: list[InsightItem] = []
-    for code in caution_codes:
-        if code in CAUTION_TEMPLATES:
-            text, action = CAUTION_TEMPLATES[code]
-        else:
-            text, action = DEFAULT_CAUTION_TEXT, DEFAULT_ACTION
-        cautions.append(InsightItem(code=code, text=text, action=action))
-
-    if audience == "TEAM":
-        summary = "이 팀은 서로 다른 성향이 모여 다양한 관점을 제공할 수 있는 조합이에요."
-    else:
-        summary = "이 팀에서 나의 성향을 잘 활용하면 팀에 기여할 수 있어요."
-
-    insight = GeneratedInsight(
-        summary=summary,
-        strengths=strengths[:5],
-        cautions=cautions[:5],
-        used_rule_ids=rule_ids[:5],
-    )
-    return insight.model_dump_json()
-
-
 def _pair_to_dict(pair: engine.PairResult) -> dict:
     return {
         "participant_a_id": pair.participant_a_id,
@@ -214,6 +164,7 @@ def run_team_comment_generation(analysis_result_id: str) -> None:
             )
             generation = ai_generate_team_comment(team_input)
             analysis_result.status = generation.status
+            # public_report_json 에는 TeamSnapshot.model_dump_json() 을 저장한다.
             analysis_result.public_report_json = generation.insight.model_dump_json()
             analysis_result.prompt_version = generation.prompt_version
             analysis_result.model_id = generation.model_id
@@ -223,15 +174,21 @@ def run_team_comment_generation(analysis_result_id: str) -> None:
             )
         except Exception:  # noqa: BLE001 — Bedrock/네트워크 예외를 흡수해 분석 실패로 전파하지 않는다
             logger.exception("run_team_comment_generation: AI 코멘트 생성 실패, FALLBACK 처리")
+            from ai.nodes.fallback import build_team_fallback
+
             analysis_result.status = "FALLBACK"
             analysis_result.used_fallback = True
             # ★ status만 바꾸지 않고 폴백 콘텐츠를 반드시 채운다 (결과 JSON null 방지)
-            analysis_result.public_report_json = _build_fallback_insight_json(
-                audience="TEAM",
-                strength_codes=json.loads(analysis_result.team_strength_codes_json),
-                caution_codes=json.loads(analysis_result.team_caution_codes_json),
-                rule_ids=json.loads(analysis_result.matched_rule_ids_json),
+            distribution = (
+                json.loads(analysis_result.distribution_json)
+                if analysis_result.distribution_json
+                else {}
             )
+            snapshot = build_team_fallback(
+                distribution=distribution,
+                allowed_rule_ids=json.loads(analysis_result.matched_rule_ids_json),
+            )
+            analysis_result.public_report_json = snapshot.model_dump_json()
             analysis_result.validation_status = "FAILED_THEN_FALLBACK"
 
         db.add(analysis_result)
@@ -310,29 +267,60 @@ def get_private_insight(participant_id: str, analysis_result_id: str, db: DBSess
         _generate_private_insight_now(placeholder, db)
     except Exception:  # noqa: BLE001
         logger.exception("get_private_insight: 개인 인사이트 생성 실패, FALLBACK 처리")
+        from ai.nodes.fallback import build_private_fallback
+
         placeholder.status = "FALLBACK"
         placeholder.used_fallback = True
         # ★ status만 바꾸지 않고 폴백 콘텐츠를 반드시 채운다 (insight_json null 방지)
-        analysis_result = db.get(AnalysisResult, placeholder.analysis_result_id)
-        strength_codes = (
-            json.loads(analysis_result.team_strength_codes_json) if analysis_result else []
+        # 개인 폴백에는 팀 strength/caution code가 아니라 해당 참여자의
+        # self_positions 와 개인 private rule_ids 를 전달한다.
+        self_positions, private_rule_ids = _private_fallback_inputs(placeholder, db)
+        card = build_private_fallback(
+            self_positions=self_positions,
+            allowed_rule_ids=private_rule_ids,
         )
-        caution_codes = (
-            json.loads(analysis_result.team_caution_codes_json) if analysis_result else []
-        )
-        rule_ids = json.loads(analysis_result.matched_rule_ids_json) if analysis_result else []
-        placeholder.insight_json = _build_fallback_insight_json(
-            audience="SELF_ONLY",
-            strength_codes=strength_codes,
-            caution_codes=caution_codes,
-            rule_ids=rule_ids,
-        )
+        # insight_json 에는 PrivateCard.model_dump_json() 을 저장한다.
+        placeholder.insight_json = card.model_dump_json()
         placeholder.validation_status = "FAILED_THEN_FALLBACK"
         db.add(placeholder)
         db.commit()
 
     db.refresh(placeholder)
     return placeholder
+
+
+def _private_fallback_inputs(private_insight, db: DBSession) -> tuple[dict, list[str]]:
+    """개인 외부 예외 폴백 입력을 재구성한다.
+
+    Returns:
+        (self_positions dict, 개인 private rule_ids). 재구성에 실패하면
+        빈 값을 돌려주고, build_private_fallback 이 안전 기본값을 만든다.
+    """
+    from app.services.profile.profile_helpers import canonical_profile_for_participant
+
+    try:
+        analysis_result = db.get(AnalysisResult, private_insight.analysis_result_id)
+        profile = canonical_profile_for_participant(private_insight.participant_id, db)
+        self_positions = profile.positions.to_dict()
+
+        distribution = (
+            json.loads(analysis_result.distribution_json)
+            if analysis_result and analysis_result.distribution_json
+            else {}
+        )
+        team_size = db.exec(
+            select(Participant).where(
+                Participant.session_id == analysis_result.session_id,
+                Participant.submission_status == "LOCKED",
+            )
+        ).all()
+        private_result = engine.match_private_rules(
+            profile, distribution, team_size=len(team_size)
+        )
+        return self_positions, private_result.matched_rule_ids
+    except Exception:  # noqa: BLE001
+        logger.exception("_private_fallback_inputs: 폴백 입력 재구성 실패, 빈 값 사용")
+        return {}, []
 
 
 def _generate_private_insight_now(private_insight, db: DBSession) -> None:
