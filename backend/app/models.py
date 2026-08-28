@@ -214,6 +214,10 @@ class Workspace(SQLModel, table=True):
     session_id: str = Field(foreign_key="session.id", unique=True, index=True)
     status: str = Field(default="ACTIVE")  # P0에서는 ACTIVE만 사용
     started_at: datetime = Field(default_factory=utcnow)
+    # ── 상단 고정 공지 (SPEC_V5.3 §1) — 방장만 수정, 팀원은 조회만 ──
+    notice: str | None = Field(default=None)
+    deadline_at: datetime | None = Field(default=None)
+    presentation_order: str | None = Field(default=None)
 
 
 class WorkspaceTask(SQLModel, table=True):
@@ -239,4 +243,91 @@ class ResourceLink(SQLModel, table=True):
     url: str
     provider: str  # GITHUB|FIGMA|NOTION|GOOGLE_DRIVE|DEPLOYMENT|OTHER
     created_by: str
+    created_at: datetime = Field(default_factory=utcnow)
+
+
+# ──────────────────────────────────────────────
+# MeetingNote — SPEC_V5.3 §2 (워크스페이스 도구 확장)
+# ──────────────────────────────────────────────
+
+
+class MeetingNote(SQLModel, table=True):
+    """회의 메모. created_by는 participant_id 또는 방장이면 'HOST' 리터럴."""
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    title: str
+    content: str
+    next_action: str | None = Field(default=None)
+    created_by: str
+    created_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = Field(default_factory=utcnow)
+
+
+# ──────────────────────────────────────────────
+# PresentationChecklistItem — SPEC_V5.3 §3
+# ──────────────────────────────────────────────
+
+
+class PresentationChecklistItem(SQLModel, table=True):
+    """발표 준비 체크리스트 항목. 워크스페이스 생성 시 기본 4개가 자동 생성된다.
+
+    completed_by는 마지막으로 완료 처리한 사람(participant_id 또는 'HOST')이며,
+    completed=False로 되돌리면 함께 비운다. created_by는 삭제 권한(작성자 또는 방장) 판별용 —
+    기본 4개 항목은 워크스페이스 시작 주체인 방장이 만든 것으로 간주해 'HOST'를 담는다.
+    """
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    item_type: str  # DEMO_URL|SLIDES|SCRIPT|BACKUP|CUSTOM
+    label: str
+    completed: bool = Field(default=False)
+    url: str | None = Field(default=None)
+    completed_by: str | None = Field(default=None)
+    created_by: str = Field(default="HOST")
+    created_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = Field(default_factory=utcnow)
+
+
+# ──────────────────────────────────────────────
+# Decision / DecisionOption / DecisionVote — SPEC_V5.3 §4 (빠른 의사결정 보드)
+# ──────────────────────────────────────────────
+
+
+class Decision(SQLModel, table=True):
+    """의사결정 안건. created_by는 participant_id 또는 방장이면 'HOST' 리터럴."""
+
+    id: str = Field(primary_key=True)
+    workspace_id: str = Field(foreign_key="workspace.id", index=True)
+    title: str
+    description: str | None = Field(default=None)
+    status: str = Field(default="OPEN")  # OPEN|FINALIZED
+    final_result: str | None = Field(default=None)
+    created_by: str
+    created_at: datetime = Field(default_factory=utcnow)
+    finalized_at: datetime | None = Field(default=None)
+
+
+class DecisionOption(SQLModel, table=True):
+    """의사결정 선택지."""
+
+    id: str = Field(primary_key=True)
+    decision_id: str = Field(foreign_key="decision.id", index=True)
+    label: str
+
+
+class DecisionVote(SQLModel, table=True):
+    """참가자별 1표. (decision_id, participant_id) UNIQUE로 재투표 시 갱신을 강제한다.
+
+    방장은 participant 레코드가 없을 수 있어 투표 대상에서 제외한다(퀘스트 응답과 동일 정책).
+    """
+
+    __table_args__ = (
+        UniqueConstraint("decision_id", "participant_id", name="uq_decision_vote_participant"),
+    )
+
+    id: str = Field(primary_key=True)
+    decision_id: str = Field(foreign_key="decision.id", index=True)
+    option_id: str = Field(foreign_key="decisionoption.id", index=True)
+    participant_id: str = Field(foreign_key="participant.id", index=True)
     created_at: datetime = Field(default_factory=utcnow)
