@@ -142,7 +142,9 @@ def trigger_analysis(
     session: SessionModel = Depends(assert_host),
 ) -> dict:
     analysis_result = start_analysis(session_id, db)
-    background_tasks.add_task(run_team_comment_generation, analysis_result.id, db)
+    # 백그라운드 태스크에는 요청 스코프 DB 세션(db)을 넘기지 않는다.
+    # run_team_comment_generation이 내부에서 새 세션을 열고 닫는다.
+    background_tasks.add_task(run_team_comment_generation, analysis_result.id)
     return {"analysis_result_id": analysis_result.id, "status": analysis_result.status}
 
 

@@ -42,14 +42,13 @@ class PairPublic(BaseModel):
 
 
 class TeamResultResponse(BaseModel):
+    # 최신 기획: team_grade / team_caution_codes / top_caution_pairs 는 공개 API에서 제외한다.
+    # (DB(AnalysisResult)에는 계속 저장·계산하되 응답 스키마에만 노출하지 않는다.)
     session_id: str
     status: str  # PROCESSING|COMPLETED|FALLBACK
-    team_grade: str | None
     distribution: dict | None
     team_strength_codes: list[str]
-    team_caution_codes: list[str]
     top_complement_pairs: list[PairPublic]
-    top_caution_pairs: list[PairPublic]
     team_comment: dict | None  # GeneratedInsight.model_dump() 또는 None
     rule_text_fallback: dict[str, str] | None = None  # AI 코멘트가 전혀 없을 때만
 
@@ -79,12 +78,9 @@ def _build_team_result(session_id: str, analysis: AnalysisResult | None) -> Team
         return TeamResultResponse(
             session_id=session_id,
             status="PROCESSING",
-            team_grade=None,
             distribution=None,
             team_strength_codes=[],
-            team_caution_codes=[],
             top_complement_pairs=[],
-            top_caution_pairs=[],
             team_comment=None,
         )
 
@@ -100,12 +96,9 @@ def _build_team_result(session_id: str, analysis: AnalysisResult | None) -> Team
     return TeamResultResponse(
         session_id=session_id,
         status=analysis.status,
-        team_grade=analysis.team_grade,
         distribution=distribution,
         team_strength_codes=json.loads(analysis.team_strength_codes_json),
-        team_caution_codes=json.loads(analysis.team_caution_codes_json),
         top_complement_pairs=[PairPublic(**p) for p in pair_results.get("top_complement", [])],
-        top_caution_pairs=[PairPublic(**p) for p in pair_results.get("top_caution", [])],
         team_comment=team_comment,
         rule_text_fallback=rule_text_fallback,
     )

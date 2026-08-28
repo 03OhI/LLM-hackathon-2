@@ -119,6 +119,56 @@ def start_analysis(session_id: str, db: DBSession) -> AnalysisResult:
     return analysis_result
 
 
+def _build_fallback_insight_json(
+    *,
+    audience: str,
+    strength_codes: list[str],
+    caution_codes: list[str],
+    rule_ids: list[str],
+) -> str:
+    """외부 예외(Bedrock/네트워크 등)로 AI 그래프 자체를 실행하지 못한 경우에도
+    결정론적 폴백 콘텐츠(GeneratedInsight)를 생성해 JSON으로 직렬화한다.
+
+    ai/nodes/fallback.py의 템플릿을 그대로 재사용해, 그래프가 정상 실행되어
+    fallback으로 귀결됐을 때와 동일한 형태의 콘텐츠를 보장한다. 이렇게 해야
+    status=FALLBACK인데 결과 JSON이 비어 있는 상황을 방지할 수 있다.
+    """
+    from ai.nodes.fallback import (
+        CAUTION_TEMPLATES,
+        DEFAULT_ACTION,
+        DEFAULT_CAUTION_TEXT,
+        DEFAULT_STRENGTH_TEXT,
+        STRENGTH_TEMPLATES,
+    )
+    from ai.schemas import GeneratedInsight, InsightItem
+
+    strengths = [
+        InsightItem(code=code, text=STRENGTH_TEMPLATES.get(code, DEFAULT_STRENGTH_TEXT))
+        for code in strength_codes
+    ]
+
+    cautions: list[InsightItem] = []
+    for code in caution_codes:
+        if code in CAUTION_TEMPLATES:
+            text, action = CAUTION_TEMPLATES[code]
+        else:
+            text, action = DEFAULT_CAUTION_TEXT, DEFAULT_ACTION
+        cautions.append(InsightItem(code=code, text=text, action=action))
+
+    if audience == "TEAM":
+        summary = "이 팀은 서로 다른 성향이 모여 다양한 관점을 제공할 수 있는 조합이에요."
+    else:
+        summary = "이 팀에서 나의 성향을 잘 활용하면 팀에 기여할 수 있어요."
+
+    insight = GeneratedInsight(
+        summary=summary,
+        strengths=strengths[:5],
+        cautions=cautions[:5],
+        used_rule_ids=rule_ids[:5],
+    )
+    return insight.model_dump_json()
+
+
 def _pair_to_dict(pair: engine.PairResult) -> dict:
     return {
         "participant_a_id": pair.participant_a_id,
@@ -130,48 +180,62 @@ def _pair_to_dict(pair: engine.PairResult) -> dict:
     }
 
 
-def run_team_comment_generation(analysis_result_id: str, db: DBSession) -> None:
+def run_team_comment_generation(analysis_result_id: str) -> None:
     """백그라운드 태스크 — AI 팀 코멘트를 생성하고 AnalysisResult를 갱신한다.
 
+    ★ 요청 스코프 DB 세션을 재사용하지 않는다. FastAPI BackgroundTasks는 응답 반환
+      이후(요청 세션이 닫힌 뒤)에 실행될 수 있으므로, 여기서 새 세션을 열고 닫는다.
+      호출부는 analysis_result_id만 넘긴다.
+
     Bedrock 실패(timeout/throttle/parse)는 여기서 흡수하고 전체 분석을
-    실패시키지 않는다. ai.chains.team_comment.generate_team_comment 내부의
-    LangGraph가 이미 fallback으로 귀결시키므로, 이 함수에서는 예외가 나더라도
-    FALLBACK 상태로 마감한다.
+    실패시키지 않는다. 예외가 나더라도 FALLBACK 상태로 마감하며, 이때에도
+    public_report_json에는 결정론적 폴백 콘텐츠를 반드시 채운다.
     """
-    analysis_result = db.get(AnalysisResult, analysis_result_id)
-    if analysis_result is None:
-        logger.error("run_team_comment_generation: analysis_result not found (id omitted)")
-        return
+    from app.db import engine as db_engine
 
-    team_size = db.exec(
-        select(Participant).where(
-            Participant.session_id == analysis_result.session_id,
-            Participant.submission_status == "LOCKED",
-        )
-    ).all()
+    with DBSession(db_engine) as db:
+        analysis_result = db.get(AnalysisResult, analysis_result_id)
+        if analysis_result is None:
+            logger.error("run_team_comment_generation: analysis_result not found (id omitted)")
+            return
 
-    engine_result_like = _analysis_result_to_engine_like(analysis_result)
+        team_size = db.exec(
+            select(Participant).where(
+                Participant.session_id == analysis_result.session_id,
+                Participant.submission_status == "LOCKED",
+            )
+        ).all()
 
-    try:
-        team_input = engine.build_team_comment_input(
-            engine_result_like, analysis_result_id, team_size=len(team_size)
-        )
-        generation = ai_generate_team_comment(team_input)
-        analysis_result.status = generation.status
-        analysis_result.public_report_json = generation.insight.model_dump_json()
-        analysis_result.prompt_version = generation.prompt_version
-        analysis_result.model_id = generation.model_id
-        analysis_result.used_fallback = generation.used_fallback
-        analysis_result.validation_status = (
-            "PASSED" if not generation.validation_errors else "FAILED_THEN_FALLBACK"
-        )
-    except Exception:  # noqa: BLE001 — Bedrock/네트워크 예외를 흡수해 분석 실패로 전파하지 않는다
-        logger.exception("run_team_comment_generation: AI 코멘트 생성 실패, FALLBACK 처리")
-        analysis_result.status = "FALLBACK"
-        analysis_result.used_fallback = True
+        engine_result_like = _analysis_result_to_engine_like(analysis_result)
 
-    db.add(analysis_result)
-    db.commit()
+        try:
+            team_input = engine.build_team_comment_input(
+                engine_result_like, analysis_result_id, team_size=len(team_size)
+            )
+            generation = ai_generate_team_comment(team_input)
+            analysis_result.status = generation.status
+            analysis_result.public_report_json = generation.insight.model_dump_json()
+            analysis_result.prompt_version = generation.prompt_version
+            analysis_result.model_id = generation.model_id
+            analysis_result.used_fallback = generation.used_fallback
+            analysis_result.validation_status = (
+                "PASSED" if not generation.validation_errors else "FAILED_THEN_FALLBACK"
+            )
+        except Exception:  # noqa: BLE001 — Bedrock/네트워크 예외를 흡수해 분석 실패로 전파하지 않는다
+            logger.exception("run_team_comment_generation: AI 코멘트 생성 실패, FALLBACK 처리")
+            analysis_result.status = "FALLBACK"
+            analysis_result.used_fallback = True
+            # ★ status만 바꾸지 않고 폴백 콘텐츠를 반드시 채운다 (결과 JSON null 방지)
+            analysis_result.public_report_json = _build_fallback_insight_json(
+                audience="TEAM",
+                strength_codes=json.loads(analysis_result.team_strength_codes_json),
+                caution_codes=json.loads(analysis_result.team_caution_codes_json),
+                rule_ids=json.loads(analysis_result.matched_rule_ids_json),
+            )
+            analysis_result.validation_status = "FAILED_THEN_FALLBACK"
+
+        db.add(analysis_result)
+        db.commit()
 
 
 def _analysis_result_to_engine_like(analysis_result: AnalysisResult):
@@ -247,6 +311,23 @@ def get_private_insight(participant_id: str, analysis_result_id: str, db: DBSess
     except Exception:  # noqa: BLE001
         logger.exception("get_private_insight: 개인 인사이트 생성 실패, FALLBACK 처리")
         placeholder.status = "FALLBACK"
+        placeholder.used_fallback = True
+        # ★ status만 바꾸지 않고 폴백 콘텐츠를 반드시 채운다 (insight_json null 방지)
+        analysis_result = db.get(AnalysisResult, placeholder.analysis_result_id)
+        strength_codes = (
+            json.loads(analysis_result.team_strength_codes_json) if analysis_result else []
+        )
+        caution_codes = (
+            json.loads(analysis_result.team_caution_codes_json) if analysis_result else []
+        )
+        rule_ids = json.loads(analysis_result.matched_rule_ids_json) if analysis_result else []
+        placeholder.insight_json = _build_fallback_insight_json(
+            audience="SELF_ONLY",
+            strength_codes=strength_codes,
+            caution_codes=caution_codes,
+            rule_ids=rule_ids,
+        )
+        placeholder.validation_status = "FAILED_THEN_FALLBACK"
         db.add(placeholder)
         db.commit()
 
