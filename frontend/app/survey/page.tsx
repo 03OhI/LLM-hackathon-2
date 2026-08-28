@@ -208,7 +208,13 @@ function getSavedTeamSession(): SavedTeamSession | null {
   }
 }
 
-function WaitingScreen({ team }: { team: TeamSession }) {
+function WaitingScreen({
+  team,
+  onReset,
+}: {
+  team: TeamSession;
+  onReset: () => void;
+}) {
   const [status, setStatus] = useState<TeamStatus>({
     completedMembers: 1,
     expectedMembers: team.expectedMembers,
@@ -308,6 +314,9 @@ function WaitingScreen({ team }: { team: TeamSession }) {
             {copied ? "참여 링크가 복사되었어요" : "팀 참여 링크 복사"}
           </button>
           {team.isHost && <button type="button" className="admin-preview-button" onClick={() => window.location.assign("/results?mode=admin")}>관리자 · 응답 결과 보기 <span aria-hidden="true">→</span></button>}
+          <button type="button" className="button-muted" onClick={onReset}>
+            처음부터 다시 시작
+          </button>
         </div>
         {statusError && <p className="waiting-demo-note" role="status">{statusError}</p>}
         {team.isHost && <p className="waiting-demo-note">모든 응답이 모이면 분석을 시작하고 결과 화면으로 이동합니다.</p>}
@@ -530,6 +539,15 @@ export default function SurveyPage() {
           : 0,
     );
   }, []);
+  const resetSurvey = () => {
+    window.sessionStorage.removeItem(teamSessionStorageKey);
+    window.sessionStorage.removeItem("tmti-session-id");
+    setAnswers({});
+    setTeamSession(null);
+    setTeamError("");
+    setShowValidation(false);
+    setStep(-1);
+  };
   useEffect(() => {
     if (!inviteToken) return;
     const loadInvite = async () => {
@@ -651,6 +669,7 @@ export default function SurveyPage() {
             isHost: false,
           }
         }
+        onReset={resetSurvey}
       />
     );
 
