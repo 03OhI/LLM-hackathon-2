@@ -1,0 +1,39 @@
+# 4축 성향 포지션 정의
+# 자체 4축 모델: planning, agency, conflict, communication
+# DiSC 코드(D/i/S/C)와 혼동하지 않는다.
+
+axes:
+  - key: planning
+    upper: PLANNER
+    lower: ADAPTER
+    upper_label: "계획형"
+    lower_label: "적응형"
+    description: "목표 달성을 위한 구조화·사전 준비 성향"
+    reference: "Big Five 성실성의 일부 facet 참고"
+
+  - key: agency
+    upper: DRIVER
+    lower: SUPPORTER
+    upper_label: "주도형"
+    lower_label: "지원형"
+    description: "의사결정과 실행에서의 주도·추진 성향"
+    reference: "agency/assertiveness 참고"
+
+  - key: conflict
+    upper: CONFRONTER
+    lower: HARMONIZER
+    upper_label: "직면형"
+    lower_label: "조화형"
+    description: "갈등 상황에서의 대응 방식"
+    reference: "communion/cooperativeness 참고"
+
+  - key: communication
+    upper: DIRECT
+    lower: TACTFUL
+    upper_label: "직설형"
+    lower_label: "배려형"
+    description: "의사소통에서의 표현 스타일"
+    reference: "팀 자체 축, 직접 문헌 근거 없음"
+
+neutral_label: "NEUTRAL"
+neutral_description: "해당 축에서 두 극단 사이의 중간 영역 (비율 0.40~0.60)"

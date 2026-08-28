@@ -1,0 +1,131 @@
+# 페어(2인) 조합 규칙
+# scope: pair
+# 모든 n*(n-1)/2 페어에 대해 규칙을 매칭하고
+# 대표적인 보완·주의 조합을 각각 최대 3개 화면에 노출한다.
+
+rules:
+  # ── 보완(complement) 규칙 ──
+
+  - rule_id: AGENCY_COMPLEMENT
+    scope: pair
+    category: complement
+    when:
+      axis: agency
+      positions: [DRIVER, SUPPORTER]
+    produces:
+      strength_code: INITIATIVE_SUPPORT_BALANCE
+      description: "주도와 지원이 보완되어 과제 추진에 안정감을 줌"
+    evidence_level: limited
+    priority: 1
+
+  - rule_id: CONFLICT_COMPLEMENT
+    scope: pair
+    category: complement
+    when:
+      axis: conflict
+      positions: [CONFRONTER, HARMONIZER]
+    produces:
+      strength_code: CONFLICT_BALANCE
+      description: "갈등 직면과 조화의 균형으로 건설적 토론 가능"
+    evidence_level: limited
+    priority: 2
+
+  - rule_id: PLANNING_COMPLEMENT
+    scope: pair
+    category: complement
+    when:
+      axis: planning
+      positions: [PLANNER, ADAPTER]
+    produces:
+      strength_code: PLANNING_FLEXIBILITY_BALANCE
+      description: "체계적 계획과 유연한 대응이 공존"
+    evidence_level: limited
+    priority: 3
+
+  - rule_id: COMMUNICATION_COMPLEMENT
+    scope: pair
+    category: complement
+    when:
+      axis: communication
+      positions: [DIRECT, TACTFUL]
+    produces:
+      strength_code: DIVERSE_COMMUNICATION
+      description: "직설과 배려가 공존하여 다양한 상황에 대응 가능"
+    evidence_level: limited
+    priority: 4
+
+  # ── 마찰(friction) 규칙 ──
+
+  - rule_id: DOUBLE_DRIVER_FRICTION
+    scope: pair
+    category: friction
+    when:
+      axis: agency
+      positions: [DRIVER, DRIVER]
+    produces:
+      caution_code: DRIVER_COLLISION
+      description: "두 주도형이 만나면 리더십 충돌 가능"
+    evidence_level: limited
+    priority: 1
+
+  - rule_id: DOUBLE_CONFRONTER_FRICTION
+    scope: pair
+    category: friction
+    when:
+      axis: conflict
+      positions: [CONFRONTER, CONFRONTER]
+    produces:
+      caution_code: CONFRONTER_CONCENTRATION
+      description: "갈등 직면형이 둘 이상이면 과열 위험"
+    evidence_level: limited
+    priority: 2
+
+  - rule_id: DIRECT_DIRECT_FRICTION
+    scope: pair
+    category: friction
+    when:
+      axis: communication
+      positions: [DIRECT, DIRECT]
+    produces:
+      caution_code: DIRECT_COMMUNICATION_CONCENTRATION
+      description: "직설형 집중 시 피드백 톤 조절 필요"
+    evidence_level: limited
+    priority: 3
+
+  - rule_id: PLANNER_PLANNER_RIGIDITY
+    scope: pair
+    category: friction
+    when:
+      axis: planning
+      positions: [PLANNER, PLANNER]
+    produces:
+      caution_code: PLANNING_OVERLOAD
+      description: "계획형 과다 시 유연한 대응 지연 가능"
+    evidence_level: team_judgment
+    priority: 4
+
+  # ── 정렬(alignment) 규칙 ──
+
+  - rule_id: SUPPORTER_SUPPORTER_ALIGNMENT
+    scope: pair
+    category: alignment
+    when:
+      axis: agency
+      positions: [SUPPORTER, SUPPORTER]
+    produces:
+      caution_code: SUPPORTER_MAJORITY
+      description: "지원형 집중 시 누군가 먼저 나서기 어려울 수 있음"
+    evidence_level: team_judgment
+    priority: 5
+
+  - rule_id: ADAPTER_ADAPTER_ALIGNMENT
+    scope: pair
+    category: alignment
+    when:
+      axis: planning
+      positions: [ADAPTER, ADAPTER]
+    produces:
+      caution_code: ADAPTER_MAJORITY
+      description: "유연형 집중 시 방향 설정 지연 가능"
+    evidence_level: team_judgment
+    priority: 5

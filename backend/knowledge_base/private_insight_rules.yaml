@@ -1,0 +1,185 @@
+# 개인 전용 인사이트 규칙
+# scope: private
+# 참여자 본인의 포지션과 팀 분포를 비교하여 개인 강점·주의점을 결정한다.
+# audience: SELF_ONLY — 다른 팀원이 열람할 수 없다.
+
+rules:
+  # ── 개인 강점 규칙 ──
+
+  - rule_id: PERSONAL_PLANNER_STABILITY
+    scope: private
+    category: strength
+    when:
+      self.planning: PLANNER
+    produces:
+      strength_code: PLANNING_STABILITY
+      description: "계획을 체계적으로 정리하여 팀에 안정감 제공"
+    audience: SELF_ONLY
+
+  - rule_id: PERSONAL_DRIVER_ENERGY
+    scope: private
+    category: strength
+    when:
+      self.agency: DRIVER
+    produces:
+      strength_code: DRIVER_ENERGY
+      description: "추진력으로 팀의 실행 속도에 기여"
+    audience: SELF_ONLY
+
+  - rule_id: PERSONAL_HARMONIZER_BRIDGE
+    scope: private
+    category: strength
+    when:
+      self.conflict: HARMONIZER
+    produces:
+      strength_code: HARMONIZER_PRESENCE
+      description: "갈등 상황에서 팀 분위기를 조율하는 가교 역할"
+    audience: SELF_ONLY
+
+  - rule_id: PERSONAL_ADAPTER_FLEXIBILITY
+    scope: private
+    category: strength
+    when:
+      self.planning: ADAPTER
+    produces:
+      strength_code: ADAPTABILITY_PRESENT
+      description: "변화에 유연하게 대처하여 팀 전환 속도에 기여"
+    audience: SELF_ONLY
+
+  - rule_id: PERSONAL_TACTFUL_SAFETY
+    scope: private
+    category: strength
+    when:
+      self.communication: TACTFUL
+    produces:
+      strength_code: TACTFUL_COMMUNICATION
+      description: "배려하는 소통으로 팀의 심리적 안전감 향상"
+    audience: SELF_ONLY
+
+  - rule_id: PERSONAL_CONFRONTER_CLARITY
+    scope: private
+    category: strength
+    when:
+      self.conflict: CONFRONTER
+    produces:
+      strength_code: CONFRONTER_CLARITY
+      description: "문제를 명확히 짚어 팀이 핵심에 집중할 수 있게 함"
+    audience: SELF_ONLY
+
+  - rule_id: PERSONAL_DIRECT_EFFICIENCY
+    scope: private
+    category: strength
+    when:
+      self.communication: DIRECT
+    produces:
+      strength_code: DIRECT_EFFICIENCY
+      description: "간결하고 명확한 소통으로 논의 속도에 기여"
+    audience: SELF_ONLY
+
+  - rule_id: PERSONAL_SUPPORTER_STABILITY
+    scope: private
+    category: strength
+    when:
+      self.agency: SUPPORTER
+    produces:
+      strength_code: SUPPORTER_STABILITY
+      description: "팀의 과제를 꾸준히 지원하여 완성도를 높임"
+    audience: SELF_ONLY
+
+  # ── 개인 주의점 규칙 ──
+
+  - rule_id: PERSONAL_DIRECT_IN_TACTFUL_TEAM
+    scope: private
+    category: caution
+    when:
+      self.communication: DIRECT
+      team.communication.majority: TACTFUL
+    produces:
+      caution_code: CHECK_FEEDBACK_TONE
+      recommendation_code: FACT_IMPACT_REQUEST
+      description: "팀의 배려형 다수 환경에서 직설적 표현이 강하게 느껴질 수 있음"
+    audience: SELF_ONLY
+
+  - rule_id: PERSONAL_DRIVER_IN_SUPPORTER_TEAM
+    scope: private
+    category: caution
+    when:
+      self.agency: DRIVER
+      team.agency.majority: SUPPORTER
+    produces:
+      caution_code: CHECK_PACE_PRESSURE
+      recommendation_code: PAUSE_BEFORE_PUSH
+      description: "지원형 다수 팀에서 추진 속도가 부담이 될 수 있음"
+    audience: SELF_ONLY
+
+  - rule_id: PERSONAL_PLANNER_IN_ADAPTER_TEAM
+    scope: private
+    category: caution
+    when:
+      self.planning: PLANNER
+      team.planning.majority: ADAPTER
+    produces:
+      caution_code: CHECK_FLEXIBILITY_EXPECTATION
+      recommendation_code: OPEN_TO_DETOUR
+      description: "적응형 다수 팀에서 계획 강조가 경직되게 느껴질 수 있음"
+    audience: SELF_ONLY
+
+  - rule_id: PERSONAL_CONFRONTER_IN_HARMONIZER_TEAM
+    scope: private
+    category: caution
+    when:
+      self.conflict: CONFRONTER
+      team.conflict.majority: HARMONIZER
+    produces:
+      caution_code: CHECK_CONFRONTATION_LEVEL
+      recommendation_code: SOFTEN_OPENING
+      description: "조화형 다수 팀에서 직면적 접근이 위협적으로 느껴질 수 있음"
+    audience: SELF_ONLY
+
+  - rule_id: PERSONAL_SUPPORTER_IN_DRIVER_TEAM
+    scope: private
+    category: caution
+    when:
+      self.agency: SUPPORTER
+      team.agency.majority: DRIVER
+    produces:
+      caution_code: CHECK_VOICE_OPPORTUNITY
+      recommendation_code: CLAIM_AGENDA_SLOT
+      description: "주도형 다수 팀에서 자신의 의견을 말할 기회가 줄어들 수 있음"
+    audience: SELF_ONLY
+
+  - rule_id: PERSONAL_ADAPTER_IN_PLANNER_TEAM
+    scope: private
+    category: caution
+    when:
+      self.planning: ADAPTER
+      team.planning.majority: PLANNER
+    produces:
+      caution_code: CHECK_STRUCTURE_EXPECTATION
+      recommendation_code: SHARE_PROGRESS_EARLY
+      description: "계획형 다수 팀에서 유연한 방식이 비구조적으로 보일 수 있음"
+    audience: SELF_ONLY
+
+  - rule_id: PERSONAL_TACTFUL_IN_DIRECT_TEAM
+    scope: private
+    category: caution
+    when:
+      self.communication: TACTFUL
+      team.communication.majority: DIRECT
+    produces:
+      caution_code: CHECK_ASSERTION_LEVEL
+      recommendation_code: STATE_NEEDS_EARLY
+      description: "직설형 다수 팀에서 배려하는 표현이 우유부단하게 보일 수 있음"
+    audience: SELF_ONLY
+
+  - rule_id: PERSONAL_HARMONIZER_IN_CONFRONTER_TEAM
+    scope: private
+    category: caution
+    when:
+      self.conflict: HARMONIZER
+      team.conflict.majority: CONFRONTER
+    produces:
+      caution_code: CHECK_AVOIDANCE_RISK
+      recommendation_code: NAME_ONE_CONCERN
+      description: "직면형 다수 팀에서 갈등 회피가 문제 축소로 보일 수 있음"
+    audience: SELF_ONLY
