@@ -498,7 +498,9 @@ export default function SurveyPage() {
   );
   const runnerPosition = Math.min(94, Math.max(6, progress));
   const completeCurrent =
-    step >= 0 && current.items.every(([id]) => answers[id] !== undefined);
+    step >= 0 &&
+    step < groups.length &&
+    current?.items.every(([id]) => answers[id] !== undefined);
   const validTeamSetup =
     teamName.trim().length > 0 &&
     displayName.trim().length > 0 &&
