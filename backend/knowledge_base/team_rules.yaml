@@ -1,0 +1,175 @@
+# 팀 단위 규칙
+# scope: team
+# 4축 분포를 기반으로 팀 강점·위험 코드를 생성한다.
+
+rules:
+  # ── 팀 강점 규칙 ──
+
+  - rule_id: TEAM_BALANCED_AGENCY
+    scope: team
+    category: strength
+    when:
+      axis: agency
+      condition: balanced  # DRIVER와 SUPPORTER가 각각 1명 이상
+    produces:
+      strength_code: INITIATIVE_SUPPORT_BALANCE
+      description: "주도와 지원의 균형이 팀 과제 추진에 안정감 제공"
+    evidence_level: limited
+
+  - rule_id: TEAM_BALANCED_CONFLICT
+    scope: team
+    category: strength
+    when:
+      axis: conflict
+      condition: balanced
+    produces:
+      strength_code: CONFLICT_BALANCE
+      description: "직면과 조화가 공존하여 건설적 토론 가능"
+    evidence_level: limited
+
+  - rule_id: TEAM_DIVERSE_COMMUNICATION
+    scope: team
+    category: strength
+    when:
+      axis: communication
+      condition: balanced
+    produces:
+      strength_code: DIVERSE_COMMUNICATION
+      description: "다양한 소통 스타일이 논의를 풍부하게 함"
+    evidence_level: limited
+
+  - rule_id: TEAM_PLANNING_STABILITY
+    scope: team
+    category: strength
+    when:
+      axis: planning
+      condition: majority_upper  # PLANNER가 과반
+    produces:
+      strength_code: PLANNING_STABILITY
+      description: "계획 중심 구성원이 다수여서 구조적 안정감"
+    evidence_level: team_judgment
+
+  - rule_id: TEAM_ADAPTABILITY
+    scope: team
+    category: strength
+    when:
+      axis: planning
+      condition: has_lower  # ADAPTER가 1명 이상
+    produces:
+      strength_code: ADAPTABILITY_PRESENT
+      description: "유연한 대처가 가능한 구성원 존재"
+    evidence_level: team_judgment
+
+  - rule_id: TEAM_DRIVER_ENERGY
+    scope: team
+    category: strength
+    when:
+      axis: agency
+      condition: has_upper  # DRIVER 1명 이상
+    produces:
+      strength_code: DRIVER_ENERGY
+      description: "추진력 있는 구성원이 실행 속도 제공"
+    evidence_level: limited
+
+  - rule_id: TEAM_HARMONIZER_PRESENCE
+    scope: team
+    category: strength
+    when:
+      axis: conflict
+      condition: has_lower  # HARMONIZER 1명 이상
+    produces:
+      strength_code: HARMONIZER_PRESENCE
+      description: "조화를 중시하는 구성원이 분위기 안정"
+    evidence_level: team_judgment
+
+  - rule_id: TEAM_TACTFUL_COMMUNICATION
+    scope: team
+    category: strength
+    when:
+      axis: communication
+      condition: has_lower  # TACTFUL 1명 이상
+    produces:
+      strength_code: TACTFUL_COMMUNICATION
+      description: "배려하는 소통이 심리적 안전감 제공"
+    evidence_level: team_judgment
+
+  # ── 팀 위험 규칙 ──
+
+  - rule_id: TEAM_DIRECT_CONCENTRATION
+    scope: team
+    category: caution
+    when:
+      axis: communication
+      condition: majority_upper  # DIRECT가 과반
+    produces:
+      caution_code: DIRECT_COMMUNICATION_CONCENTRATION
+      description: "직설형 집중 시 의견 충돌에서 톤 조절 필요"
+    evidence_level: limited
+
+  - rule_id: TEAM_PLANNING_OVERLOAD
+    scope: team
+    category: caution
+    when:
+      axis: planning
+      condition: all_upper  # 전원 PLANNER
+    produces:
+      caution_code: PLANNING_OVERLOAD
+      description: "전원 계획형이면 유연 대응 부족 가능"
+    evidence_level: team_judgment
+
+  - rule_id: TEAM_LOW_DRIVER
+    scope: team
+    category: caution
+    when:
+      axis: agency
+      condition: no_upper  # DRIVER 0명
+    produces:
+      caution_code: LOW_DRIVER_ENERGY
+      description: "추진력 담당 부재 시 의사결정 지연"
+    evidence_level: limited
+
+  - rule_id: TEAM_CONFRONTER_MAJORITY
+    scope: team
+    category: caution
+    when:
+      axis: conflict
+      condition: majority_upper  # CONFRONTER가 과반
+    produces:
+      caution_code: CONFRONTER_CONCENTRATION
+      description: "직면형 과반 시 토론 과열 위험"
+    evidence_level: limited
+
+  - rule_id: TEAM_SUPPORTER_MAJORITY
+    scope: team
+    category: caution
+    when:
+      axis: agency
+      condition: majority_lower  # SUPPORTER가 과반이면서 DRIVER 0
+    produces:
+      caution_code: SUPPORTER_MAJORITY
+      description: "지원형 다수에 주도형 부재 시 실행 지연"
+    evidence_level: team_judgment
+
+  - rule_id: TEAM_ADAPTER_MAJORITY
+    scope: team
+    category: caution
+    when:
+      axis: planning
+      condition: majority_lower  # ADAPTER가 과반
+    produces:
+      caution_code: ADAPTER_MAJORITY
+      description: "적응형 다수 시 방향 설정 지연 가능"
+    evidence_level: team_judgment
+
+# ── 팀 index 가중치 ──
+team_index_weights:
+  balance: 0.30
+  complement: 0.30
+  task_fit: 0.25
+  conflict_risk_inverse: 0.15  # (1 - conflict_risk)
+
+# ── 등급 임계치 ──
+grade_thresholds:
+  HIGH: 0.65
+  MID: 0.40
+  # LOW: < 0.40
