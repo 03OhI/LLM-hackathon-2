@@ -487,20 +487,18 @@ export default function SurveyPage() {
     typeof window === "undefined"
       ? ""
       : (new URLSearchParams(window.location.search).get("team") ?? "");
-  const current = groups[step];
-  const currentAnswered =
-    step >= 0
-      ? groups[step].items.filter(([id]) => answers[id] !== undefined).length
-      : 0;
+  const current = step >= 0 && step < groups.length ? groups[step] : null;
+  const currentAnswered = current
+    ? current.items.filter(([id]) => answers[id] !== undefined).length
+    : 0;
   const progress = useMemo(
     () => (step < 0 ? 0 : ((step + 1) / groups.length) * 100),
     [step],
   );
   const runnerPosition = Math.min(94, Math.max(6, progress));
-  const completeCurrent =
-    step >= 0 &&
-    step < groups.length &&
-    current?.items.every(([id]) => answers[id] !== undefined);
+  const completeCurrent = current?.items.every(
+    ([id]) => answers[id] !== undefined,
+  ) ?? false;
   const validTeamSetup =
     teamName.trim().length > 0 &&
     displayName.trim().length > 0 &&
@@ -737,6 +735,31 @@ export default function SurveyPage() {
               </button>
             </div>
           </form>
+        </section>
+      </main>
+    );
+
+  if (!current)
+    return (
+      <main className="survey-shell">
+        <SurveyNav />
+        <section className="survey-card survey-intro survey-card-enter">
+          <div className="intro-heading">
+            <div>
+              <div className="intro-kicker">
+                <Image src="/duck-face-open.png" alt="" width={48} height={48} />
+                <span>설문을 다시 준비할게요</span>
+              </div>
+              <h1>진행 정보를 다시 확인해 주세요</h1>
+            </div>
+          </div>
+          <p>이전에 저장된 설문 단계 정보를 불러오지 못했어요. 처음 화면에서 다시 시작할 수 있어요.</p>
+          <div className="survey-actions">
+            <Link className="button-next intro-start-button" href="/survey" onClick={() => window.sessionStorage.removeItem(teamSessionStorageKey)}>
+              <span>설문 처음으로</span>
+              <i aria-hidden="true">→</i>
+            </Link>
+          </div>
         </section>
       </main>
     );
