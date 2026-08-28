@@ -70,7 +70,7 @@ const axisMeta: Record<
   },
 };
 
-export default function ResultsPage() {
+export default function ResultsPage({ demoMode = false }: { demoMode?: boolean }) {
   const [personal, setPersonal] = useState<Personal | null>(null);
   const [team, setTeam] = useState<Team | null>(null);
   const [view, setView] = useState<"personal" | "team">("personal");
@@ -82,9 +82,9 @@ export default function ResultsPage() {
     return {
       teamCode: params.get("team") ?? "",
       memberId: params.get("member") ?? "",
-      demo: params.get("demo") === "1",
+      demo: demoMode || params.get("demo") === "1",
     };
-  }, []);
+  }, [demoMode]);
 
   useEffect(() => {
     if (demo) {

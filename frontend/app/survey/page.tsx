@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import QRCode from "qrcode";
 import { useEffect, useMemo, useState } from "react";
+import ResultsPage from "../results/page";
 
 const groups = [
   {
@@ -227,6 +228,7 @@ function WaitingScreen({ team }: { team: TeamSession }) {
     ready: false,
   });
   const [copied, setCopied] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   useEffect(() => {
     const refresh = async () => {
       try {
@@ -242,16 +244,12 @@ function WaitingScreen({ team }: { team: TeamSession }) {
     const timer = window.setInterval(refresh, 3000);
     return () => window.clearInterval(timer);
   }, [team.code]);
-  useEffect(() => {
-    if (status.ready)
-      window.location.replace(
-        `/results?team=${team.code}&member=${team.memberId}`,
-      );
-  }, [status.ready, team.code, team.memberId]);
   const invite =
     typeof window === "undefined"
       ? ""
       : `${window.location.origin}/?team=${team.code}`;
+  if (showPreview) return <ResultsPage demoMode />;
+
   return (
     <main className="survey-shell">
       <SurveyNav />
@@ -301,9 +299,13 @@ function WaitingScreen({ team }: { team: TeamSession }) {
           >
             {copied ? "참여 링크가 복사되었어요" : "팀 참여 링크 복사"}
           </button>
-          <Link className="admin-preview-button" href="/results?demo=1">
+          <button
+            type="button"
+            className="admin-preview-button"
+            onClick={() => setShowPreview(true)}
+          >
             관리자 · 결과 미리보기 <span aria-hidden="true">→</span>
-          </Link>
+          </button>
         </div>
         <p className="waiting-demo-note">
           시연용 버튼이며, 현재 기기에서 작성한 응답으로 결과를 보여 줍니다.
