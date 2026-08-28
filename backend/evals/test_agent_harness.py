@@ -40,7 +40,7 @@ from app.services.chemistry.engine import (
     compute_distribution,
     match_team_rules,
     match_pair_rules,
-    compute_team_index,
+    compute_team_metrics,
     determine_grade,
     match_private_rules,
     run_team_analysis,
