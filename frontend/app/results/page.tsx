@@ -1256,6 +1256,85 @@ function TeamActionGuide({
     </section>
   );
 }
+type MobileTeamSection = "summary" | "distribution" | "members" | "playbook";
+const mobileTeamSections: Array<{
+  key: MobileTeamSection;
+  label: string;
+  icon: string;
+}> = [
+  { key: "summary", label: "요약", icon: "⌂" },
+  { key: "distribution", label: "분포", icon: "◉" },
+  { key: "members", label: "팀원", icon: "♧" },
+  { key: "playbook", label: "플레이북", icon: "▣" },
+];
+function MobileTeamNav({
+  active,
+  onChange,
+  bottom = false,
+}: {
+  active: MobileTeamSection;
+  onChange: (section: MobileTeamSection) => void;
+  bottom?: boolean;
+}) {
+  return (
+    <nav
+      className={
+        bottom ? "mobile-team-nav mobile-team-nav-bottom" : "mobile-team-nav"
+      }
+      aria-label="팀 결과 메뉴"
+    >
+      {mobileTeamSections.map((section) => (
+        <button
+          key={section.key}
+          className={active === section.key ? "active" : ""}
+          onClick={() => onChange(section.key)}
+        >
+          <i>{section.icon}</i>
+          <span>{section.label}</span>
+        </button>
+      ))}
+    </nav>
+  );
+}
+function MobileTeamBalance({
+  distribution,
+}: {
+  distribution: Distribution | null;
+}) {
+  return (
+    <section className="mobile-team-balance">
+      <h2>4가지 축으로 본 팀 밸런스</h2>
+      <div>
+        {axes.map((axis) => {
+          const counts = distribution?.[axis.key] ?? {};
+          const left = counts[axis.leftValue] ?? 0;
+          const neutral = counts.NEUTRAL ?? 0;
+          const right = counts[axis.rightValue] ?? 0;
+          const dominant =
+            left === right ? "균형" : left > right ? axis.left : axis.right;
+          return (
+            <article
+              key={axis.key}
+              style={
+                {
+                  "--axis": axis.color,
+                  "--axis-soft": axis.soft,
+                } as CSSProperties
+              }
+            >
+              <i>{["▣", "⚡", "♧", "●"][axes.indexOf(axis)]}</i>
+              <b>{axis.label}</b>
+              <span>{dominant}</span>
+              <small>
+                {axis.left} {left} · 균형 {neutral} · {axis.right} {right}
+              </small>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 function TeamReport({
   snapshot,
   distribution,
@@ -1268,6 +1347,8 @@ function TeamReport({
   onPersonal: () => void;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [mobileSection, setMobileSection] =
+    useState<MobileTeamSection>("summary");
   if (!snapshot)
     return <ResultError message="팀 결과를 아직 준비하고 있어요." />;
   const selectMember = (member: MemberPosition) =>
@@ -1276,47 +1357,73 @@ function TeamReport({
     );
   return (
     <section className="result-report personal-report survey-card-enter">
-      <header className="personal-hero team-hero">
-        <div>
-          <p className="result-kicker">우리 팀의 협업 이야기</p>
-          <h1>{snapshot.title}</h1>
-          <span>
-            서로를 줄 세우지 않고, 각자의 방식이 만나는 지점을 찾습니다.
-          </span>
-        </div>
-        <Image
-          src="/duck-face-smile.png"
-          alt="웃는 표정의 TMTI 오리"
-          width={122}
-          height={122}
+      <MobileTeamNav active={mobileSection} onChange={setMobileSection} />
+      <div
+        className={`mobile-team-panel mobile-team-summary ${mobileSection === "summary" ? "active" : ""}`}
+      >
+        <header className="personal-hero team-hero">
+          <div>
+            <p className="result-kicker">우리 팀의 협업 이야기</p>
+            <h1>{snapshot.title}</h1>
+            <span>
+              서로를 줄 세우지 않고, 각자의 방식이 만나는 지점을 찾습니다.
+            </span>
+          </div>
+          <Image
+            src="/duck-face-smile.png"
+            alt="웃는 표정의 TMTI 오리"
+            width={122}
+            height={122}
+          />
+        </header>
+        <article className="team-story">
+          <span>우리 팀의 조합</span>
+          <h2>{snapshot.formula}</h2>
+          <p>{snapshot.scene}</p>
+          <div className="keyword-list" aria-label="팀 핵심 키워드">
+            {snapshot.keywords.map((keyword) => (
+              <b key={keyword}>#{keyword}</b>
+            ))}
+          </div>
+        </article>
+        <MobileTeamBalance distribution={distribution} />
+      </div>
+      <div
+        className={`mobile-team-panel mobile-team-distribution ${mobileSection === "distribution" ? "active" : ""}`}
+      >
+        <TeamDistribution distribution={distribution} />
+      </div>
+      <div
+        className={`mobile-team-panel mobile-team-members ${mobileSection === "members" ? "active" : ""}`}
+      >
+        <TeamMembersSection
+          members={memberPositions}
+          selectedId={selectedId}
+          onSelect={selectMember}
         />
-      </header>
-      <article className="team-story">
-        <span>우리 팀의 조합</span>
-        <h2>{snapshot.formula}</h2>
-        <p>{snapshot.scene}</p>
-        <div className="keyword-list" aria-label="팀 핵심 키워드">
-          {snapshot.keywords.map((keyword) => (
-            <b key={keyword}>#{keyword}</b>
-          ))}
-        </div>
-      </article>
-      <TeamDistribution distribution={distribution} />
-      <TeamMembersSection
-        members={memberPositions}
-        selectedId={selectedId}
-        onSelect={selectMember}
+      </div>
+      <div
+        className={`mobile-team-panel mobile-team-playbook ${mobileSection === "playbook" ? "active" : ""}`}
+      >
+        <TeamRoleComposition
+          members={memberPositions}
+          onSelect={selectMember}
+        />
+        <TeamActionGuide
+          members={memberPositions}
+          distribution={distribution}
+          onSelect={selectMember}
+        />
+        <button className="result-team-link" onClick={onPersonal}>
+          내 협업 스타일 보기 <b>→</b>
+        </button>
+        <ResultFooter />
+      </div>
+      <MobileTeamNav
+        active={mobileSection}
+        onChange={setMobileSection}
+        bottom
       />
-      <TeamRoleComposition members={memberPositions} onSelect={selectMember} />
-      <TeamActionGuide
-        members={memberPositions}
-        distribution={distribution}
-        onSelect={selectMember}
-      />
-      <button className="result-team-link" onClick={onPersonal}>
-        내 협업 스타일 보기 <b>→</b>
-      </button>
-      <ResultFooter />
     </section>
   );
 }

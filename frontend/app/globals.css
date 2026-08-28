@@ -834,6 +834,204 @@ a {
     margin-top: 28px;
   }
 }
+
+/* Mobile team-result app navigation. Desktop keeps the complete report flow. */
+.mobile-team-nav,
+.mobile-team-balance {
+  display: none;
+}
+.mobile-team-panel {
+  display: contents;
+}
+@media (max-width: 700px) {
+  .results-shell {
+    padding: 12px 10px 92px;
+    background: #fafaf8;
+  }
+  .results-shell .survey-brand-image {
+    width: 116px;
+    height: auto;
+  }
+  .results-shell > .result-tabs {
+    display: none;
+  }
+  .result-report.personal-report {
+    border-radius: 22px;
+    padding: 18px 14px 28px;
+    box-shadow: 0 8px 25px rgba(47, 63, 85, 0.08);
+  }
+  .mobile-team-nav {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    margin: 0 0 16px;
+    border: 1px solid #e1e7eb;
+    border-radius: 999px;
+    padding: 4px;
+    background: #fff;
+  }
+  .mobile-team-nav button {
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    border: 0;
+    border-radius: 999px;
+    padding: 9px 3px;
+    background: transparent;
+    color: #78859a;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .mobile-team-nav button i {
+    display: none;
+  }
+  .mobile-team-nav button.active {
+    background: #253e70;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(37, 62, 112, 0.2);
+  }
+  .mobile-team-panel {
+    display: none;
+    animation: mobile-team-enter 0.28s ease both;
+  }
+  .mobile-team-panel.active {
+    display: block;
+  }
+  @keyframes mobile-team-enter {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .mobile-team-summary .team-hero {
+    align-items: center;
+    margin: 0;
+    padding: 8px 4px 23px;
+  }
+  .mobile-team-summary .team-hero h1 {
+    max-width: 260px;
+    font-size: 30px;
+    line-height: 1.28;
+    letter-spacing: -1.7px;
+  }
+  .mobile-team-summary .team-hero > img {
+    width: 74px;
+    height: 74px;
+  }
+  .mobile-team-summary .team-story {
+    margin: 18px 0 0;
+    border-radius: 15px;
+    padding: 20px 16px;
+    background: #f7fafc;
+  }
+  .mobile-team-summary .team-story h2 {
+    font-size: 20px;
+    line-height: 1.55;
+  }
+  .mobile-team-summary .keyword-list {
+    gap: 6px;
+  }
+  .mobile-team-balance {
+    display: block;
+    margin-top: 26px;
+  }
+  .mobile-team-balance h2 {
+    margin: 0 0 13px;
+    color: var(--survey-navy);
+    font-size: 17px;
+  }
+  .mobile-team-balance > div {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .mobile-team-balance article {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 4px 8px;
+    border: 1px solid color-mix(in srgb, var(--axis) 26%, white);
+    border-radius: 13px;
+    padding: 13px 10px;
+    background: var(--axis-soft);
+  }
+  .mobile-team-balance article i {
+    grid-row: 1 / 3;
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--axis);
+    color: white;
+    font-style: normal;
+  }
+  .mobile-team-balance article b {
+    color: #344562;
+    font-size: 13px;
+  }
+  .mobile-team-balance article span {
+    color: var(--axis);
+    font-size: 11px;
+    font-weight: 800;
+  }
+  .mobile-team-balance article small {
+    grid-column: 1 / 3;
+    margin-top: 5px;
+    color: #7a8799;
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  .mobile-team-distribution .team-distribution,
+  .mobile-team-members .team-member-maps,
+  .mobile-team-playbook .team-role-composition {
+    margin-top: 0;
+    border-top: 0;
+    padding-top: 4px;
+  }
+  .mobile-team-members .team-member-cards,
+  .mobile-team-playbook .team-action-guide {
+    margin-top: 25px;
+  }
+  .mobile-team-nav-bottom {
+    position: fixed;
+    z-index: 40;
+    right: 10px;
+    bottom: 8px;
+    left: 10px;
+    margin: 0 auto;
+    max-width: 420px;
+    border-radius: 18px;
+    padding: 7px 5px calc(7px + env(safe-area-inset-bottom));
+    box-shadow: 0 10px 30px rgba(42, 56, 76, 0.18);
+  }
+  .mobile-team-nav-bottom button {
+    gap: 2px;
+    border-radius: 12px;
+    padding: 5px 2px;
+    background: transparent;
+  }
+  .mobile-team-nav-bottom button i {
+    display: block;
+    font:
+      17px Arial,
+      sans-serif;
+    font-style: normal;
+  }
+  .mobile-team-nav-bottom button.active {
+    background: #eef3f9;
+    color: #253e70;
+    box-shadow: none;
+  }
+  .mobile-team-playbook .result-footer-actions {
+    margin-bottom: 10px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
