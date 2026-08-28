@@ -11,6 +11,8 @@ from __future__ import annotations
 import hashlib
 import hmac
 import secrets
+from dataclasses import dataclass
+from typing import Literal
 
 from fastapi import Depends, Request
 from sqlmodel import Session as DBSession
@@ -108,6 +110,70 @@ async def assert_participant(
         raise app_error(FORBIDDEN, "본인의 참여자 정보에만 접근할 수 있습니다.")
 
     return participant
+
+
+# ──────────────────────────────────────────────
+# 방(퀘스트/워크스페이스) 단위 권한 — SPEC_V5 §1.2, §5
+# ──────────────────────────────────────────────
+
+
+@dataclass
+class RoomActor:
+    """퀘스트/워크스페이스 API에서 사용하는 요청자 신원.
+
+    role == "HOST"이면 participant는 None이다 (host_secret은 participant 레코드와 무관).
+    """
+
+    role: Literal["HOST", "MEMBER"]
+    session: SessionModel
+    participant: Participant | None
+
+
+def identify_room_actor(session: SessionModel, request: Request, db: DBSession) -> RoomActor:
+    """host_secret 또는 (같은 방의) participant_secret으로 요청자를 특정한다.
+
+    같은 방 소속이 아닌 participant_secret은 무시되고(다른 방 시크릿), 결국
+    아무 것도 일치하지 않으면 UNAUTHORIZED를 던진다 — 다른 방 사용자의 방 존재 여부
+    탐지를 막기 위해 FORBIDDEN 대신 항상 동일한 오류로 통일한다.
+    """
+    host_secret = extract_secret(request, cookie_name="host_secret")
+    if host_secret and verify_secret(host_secret, session.host_secret_hash):
+        return RoomActor(role="HOST", session=session, participant=None)
+
+    participant_secret = extract_secret(request, cookie_name="participant_secret")
+    if participant_secret:
+        candidate_hash = hash_secret(participant_secret)
+        participant = db.exec(
+            select(Participant).where(
+                Participant.participant_secret_hash == candidate_hash,
+                Participant.session_id == session.id,
+            )
+        ).first()
+        if participant is not None:
+            return RoomActor(role="MEMBER", session=session, participant=participant)
+
+    raise app_error(UNAUTHORIZED, "인증 정보가 없거나 이 방에 속하지 않습니다.")
+
+
+def require_host_actor(session: SessionModel, request: Request) -> None:
+    """entity(assignment/task/resource 등)에서 역참조한 session에 대해 host_secret만 검증한다.
+
+    path에 session_id가 없는 엔드포인트(예: /quest-assignments/{id}/complete)에서
+    assert_host와 동일한 검증을 재사용하기 위한 버전이다.
+    """
+    secret = extract_secret(request, cookie_name="host_secret")
+    if not secret or not verify_secret(secret, session.host_secret_hash):
+        raise app_error(UNAUTHORIZED, "주최자 인증에 실패했습니다.")
+
+
+async def assert_room_actor(
+    session_id: str, request: Request, db: DBSession = Depends(get_session)
+) -> RoomActor:
+    """GET .../quests/current 등 room_id가 path에 있는 조회 엔드포인트용 의존성."""
+    session = db.get(SessionModel, session_id)
+    if session is None:
+        raise app_error(SESSION_NOT_FOUND, f"세션을 찾을 수 없습니다: {session_id}")
+    return identify_room_actor(session, request, db)
 
 
 def set_secret_cookie(response, cookie_name: str, secret: str, *, secure: bool, max_age_days: int = 30) -> None:

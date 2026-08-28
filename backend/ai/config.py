@@ -27,6 +27,10 @@ class AISettings(BaseSettings):
     # 프롬프트 버전 관리
     team_prompt_version: str = "team_comment_v1"
     private_prompt_version: str = "private_insight_v1"
+    quest_prompt_version: str = "quest_select_v1"
+
+    # 퀘스트 배정: 후보가 1개면 Bedrock 호출을 생략하고 결정론적으로 선택
+    quest_skip_bedrock_for_single_candidate: bool = True
 
     class Config:
         env_prefix = ""

@@ -1,0 +1,317 @@
+[
+  {
+    "quest_id": "FIND_FIVE_COMMONALITIES",
+    "title": "공통점 다섯 개 찾기",
+    "summary": "처음 만난 팀이 대화만으로 다섯 가지 공통점을 찾아보는 가벼운 아이스브레이킹입니다.",
+    "category": "ICEBREAKER",
+    "primary_goal": "짧은 대화로 팀원 간 심리적 거리를 좁힌다",
+    "duration_minutes": 10,
+    "team_size": { "min": 3, "max": 10 },
+    "interaction_mode": "HYBRID",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [{ "axis": "communication", "note": "대화를 주도하는 방식이 드러날 수 있음" }],
+    "is_universal": false,
+    "best_for": ["TEAM_DIVERSE_COMMUNICATION"],
+    "also_for": ["TEAM_TACTFUL_COMMUNICATION"],
+    "avoid_for": [],
+    "context_tags": ["FIRST_MEETING"],
+    "materials": [],
+    "steps": [
+      "5분간 자유롭게 대화하며 취향, 습관, 경험의 공통점을 찾는다.",
+      "찾은 공통점을 팀 채널에 목록으로 정리해 제출한다.",
+      "각자 목록을 보고 이모지 반응을 남긴다."
+    ],
+    "deliverable": "공통점 다섯 개 목록",
+    "completion_condition": {
+      "description": "팀이 공통점 목록을 제출하고 팀원 각자가 반응을 남긴다.",
+      "checks": [
+        { "type": "TEXT_SUBMIT", "scope": "TEAM", "min_count": 1 },
+        { "type": "REACTION", "scope": "PER_MEMBER", "min_count": 1 }
+      ]
+    },
+    "safety_notes": ["개인 신상 정보나 민감한 경험을 요구하지 않는다."],
+    "is_active": true,
+    "version": "1.0"
+  },
+  {
+    "quest_id": "WORK_STYLE_BALANCE_GAME",
+    "title": "업무 스타일 밸런스 게임",
+    "summary": "간단한 양자택일 질문에 투표하며 팀의 협업 방식 차이를 자연스럽게 확인하는 대표 퀘스트입니다.",
+    "category": "BALANCE_GAME",
+    "primary_goal": "협업 스타일 차이를 평가 없이 드러낸다",
+    "duration_minutes": 15,
+    "team_size": { "min": 3, "max": 10 },
+    "interaction_mode": "HYBRID",
+    "energy_level": "MEDIUM",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [
+      { "axis": "planning", "note": "계획형/즉흥형 성향" },
+      { "axis": "agency", "note": "주도/지원 성향" }
+    ],
+    "is_universal": false,
+    "best_for": ["TEAM_BALANCED_AGENCY", "TEAM_BALANCED_CONFLICT"],
+    "also_for": ["TEAM_ADAPTABILITY"],
+    "avoid_for": ["TEAM_LOW_DRIVER"],
+    "context_tags": ["FIRST_MEETING", "HACKATHON"],
+    "materials": ["밸런스 게임 질문 카드"],
+    "steps": [
+      "제시된 업무 스타일 양자택일 질문 5개에 각자 투표한다.",
+      "결과를 함께 보고 의외였던 항목을 짧게 이야기한다.",
+      "방장이 라운드 종료를 확인한다."
+    ],
+    "deliverable": "팀 투표 결과 요약",
+    "completion_condition": {
+      "description": "팀원 각자가 투표를 1회 완료하고 방장이 결과를 확인한다.",
+      "checks": [
+        { "type": "VOTE", "scope": "PER_MEMBER", "min_count": 1 },
+        { "type": "APPROVE", "scope": "TEAM", "min_count": 1 }
+      ]
+    },
+    "safety_notes": ["우열을 가리는 점수를 공개하지 않는다."],
+    "is_active": true,
+    "version": "1.0"
+  },
+  {
+    "quest_id": "EXPLAIN_RELAY",
+    "title": "설명 전달 릴레이",
+    "summary": "한 명이 규칙을 설명하면 다음 사람이 자기 언어로 다시 설명하는 릴레이로 소통 방식을 확인합니다.",
+    "category": "COMMUNICATION",
+    "primary_goal": "정보 전달 방식의 차이를 관찰한다",
+    "duration_minutes": 15,
+    "team_size": { "min": 3, "max": 10 },
+    "interaction_mode": "HYBRID",
+    "energy_level": "MEDIUM",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [{ "axis": "communication", "note": "직접적/신중한 전달 방식" }],
+    "is_universal": false,
+    "best_for": ["TEAM_DIRECT_CONCENTRATION"],
+    "also_for": ["TEAM_TACTFUL_COMMUNICATION"],
+    "avoid_for": [],
+    "context_tags": ["FIRST_MEETING"],
+    "materials": ["짧은 규칙 설명 카드"],
+    "steps": [
+      "첫 번째 사람이 주어진 규칙을 1분간 설명한다.",
+      "다음 사람이 들은 내용을 자기 언어로 재설명한다.",
+      "설명자를 포함해 전원이 회고 한 줄을 제출한다."
+    ],
+    "deliverable": "팀원별 회고 한 줄",
+    "completion_condition": {
+      "description": "설명자를 포함한 팀원 각자가 회고 한 줄을 제출한다.",
+      "checks": [{ "type": "TEXT_SUBMIT", "scope": "PER_MEMBER", "min_count": 1 }]
+    },
+    "safety_notes": ["틀린 설명을 지적하거나 평가하지 않는다."],
+    "is_active": true,
+    "version": "1.0"
+  },
+  {
+    "quest_id": "SAVEPOINT_CHECKIN",
+    "title": "세이브포인트",
+    "summary": "해커톤처럼 집중 작업이 이어질 때, 정해진 시점마다 짧게 상태를 공유하는 체크인입니다.",
+    "category": "CHECKIN",
+    "primary_goal": "몰입 중에도 팀 상태를 놓치지 않는다",
+    "duration_minutes": 5,
+    "team_size": { "min": 3, "max": 10 },
+    "interaction_mode": "ASYNC",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [],
+    "is_universal": false,
+    "best_for": ["TEAM_DRIVER_ENERGY"],
+    "also_for": ["TEAM_PLANNING_OVERLOAD"],
+    "avoid_for": [],
+    "context_tags": ["HACKATHON"],
+    "materials": [],
+    "steps": [
+      "각자 현재 상태(순조/막힘/도움필요)를 이모지로 남긴다.",
+      "방장이 전체 상태를 한 줄로 요약해 기록한다."
+    ],
+    "deliverable": "팀 상태 요약 한 줄",
+    "completion_condition": {
+      "description": "팀원 각자가 상태 반응을 남기고 방장이 요약을 기록한다.",
+      "checks": [
+        { "type": "REACTION", "scope": "PER_MEMBER", "min_count": 1 },
+        { "type": "COMMENT", "scope": "TEAM", "min_count": 1 }
+      ]
+    },
+    "safety_notes": ["진행 속도를 개인별로 비교하지 않는다."],
+    "is_active": true,
+    "version": "1.0"
+  },
+  {
+    "quest_id": "GROUND_RULES_THREE_SENTENCES",
+    "title": "그라운드 룰 세 문장",
+    "summary": "팀이 함께 지킬 규칙을 세 문장으로 정리합니다. 입력 부담이 있어 방장이 선택할 때만 진행합니다.",
+    "category": "PLANNING",
+    "primary_goal": "협업 규칙에 대한 최소 합의를 만든다",
+    "duration_minutes": 15,
+    "team_size": { "min": 3, "max": 10 },
+    "interaction_mode": "HYBRID",
+    "energy_level": "MEDIUM",
+    "disclosure_level": "MEDIUM",
+    "assignment": "MANUAL",
+    "reveals_axes": [{ "axis": "planning", "note": "규칙에 대한 태도" }],
+    "is_universal": false,
+    "best_for": ["TEAM_PLANNING_STABILITY"],
+    "also_for": [],
+    "avoid_for": ["TEAM_ADAPTER_MAJORITY"],
+    "context_tags": ["BEFORE_ROLE_ASSIGNMENT"],
+    "materials": [],
+    "steps": [
+      "각자 팀에 필요한 규칙 한 문장을 제안한다.",
+      "방장이 취합한 세 문장을 최종 확정한다."
+    ],
+    "deliverable": "그라운드 룰 세 문장",
+    "completion_condition": {
+      "description": "팀원 각자가 문장을 제안하고 방장이 최종안을 승인한다.",
+      "checks": [
+        { "type": "TEXT_SUBMIT", "scope": "PER_MEMBER", "min_count": 1 },
+        { "type": "APPROVE", "scope": "TEAM", "min_count": 1 }
+      ]
+    },
+    "safety_notes": ["규칙 위반 시 불이익을 명시하지 않는다."],
+    "is_active": true,
+    "version": "1.0"
+  },
+  {
+    "quest_id": "TEAM_SIGNATURE_REACTION",
+    "title": "팀 공식 리액션",
+    "summary": "팀만의 공식 리액션(구호·이모지·제스처)을 정해보는 가장 가벼운 기본 퀘스트입니다.",
+    "category": "RITUAL",
+    "primary_goal": "어떤 팀 조합에도 안전하게 적용 가능한 기본값을 제공한다",
+    "duration_minutes": 5,
+    "team_size": { "min": 3, "max": 10 },
+    "interaction_mode": "HYBRID",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [],
+    "is_universal": true,
+    "best_for": [],
+    "also_for": [],
+    "avoid_for": [],
+    "context_tags": ["FIRST_MEETING", "HACKATHON"],
+    "materials": [],
+    "steps": [
+      "이모지나 짧은 구호 후보를 자유롭게 제안한다.",
+      "가장 마음에 드는 후보에 반응을 남겨 팀 공식 리액션으로 정한다."
+    ],
+    "deliverable": "팀 공식 리액션 1개",
+    "completion_condition": {
+      "description": "팀원 각자가 후보에 반응을 남긴다.",
+      "checks": [{ "type": "REACTION", "scope": "PER_MEMBER", "min_count": 1 }]
+    },
+    "safety_notes": ["특정 팀원을 놀리는 표현은 후보에서 제외한다."],
+    "is_active": true,
+    "version": "1.0"
+  },
+  {
+    "quest_id": "VIRTUAL_TIMELINE",
+    "title": "가상 타임라인",
+    "summary": "프로젝트 진행 중 상상 가능한 사건들을 타임라인 카드로 만들어보며 우선순위 감각을 맞춰봅니다.",
+    "category": "PLANNING",
+    "primary_goal": "일정 감각과 우선순위 기준을 맞춘다",
+    "duration_minutes": 20,
+    "team_size": { "min": 3, "max": 10 },
+    "interaction_mode": "HYBRID",
+    "energy_level": "MEDIUM",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [{ "axis": "planning", "note": "일정에 대한 태도" }],
+    "is_universal": false,
+    "best_for": ["TEAM_PLANNING_STABILITY"],
+    "also_for": ["TEAM_ADAPTABILITY"],
+    "avoid_for": ["TEAM_CONFRONTER_MAJORITY"],
+    "context_tags": ["HACKATHON", "LONG_TERM_PROJECT"],
+    "materials": ["가상 타임라인 보드"],
+    "steps": [
+      "각자 프로젝트 중 일어날 법한 사건을 타임라인 카드 1개 이상 추가한다.",
+      "함께 카드 순서를 정리해 최소 3개 이상의 카드로 타임라인을 완성한다."
+    ],
+    "deliverable": "가상 타임라인 보드",
+    "completion_condition": {
+      "description": "팀원 각자가 카드를 추가하고 팀 전체 카드가 3개 이상이다.",
+      "checks": [
+        { "type": "TEXT_SUBMIT", "scope": "PER_MEMBER", "min_count": 1 },
+        { "type": "NODE_CREATE", "scope": "TEAM", "min_count": 3 }
+      ]
+    },
+    "safety_notes": ["실패 시나리오를 특정 팀원 탓으로 연결하지 않는다."],
+    "is_active": true,
+    "version": "1.0"
+  },
+  {
+    "quest_id": "WORKSPACE_SETUP_CHECK",
+    "title": "공동 작업 공간 세팅",
+    "summary": "협업 시작 직전, 공유 링크가 모두 접근 가능한지 팀 전체가 확인하는 퀘스트입니다.",
+    "category": "SETUP",
+    "primary_goal": "협업 시작 전 도구 접근성을 점검한다",
+    "duration_minutes": 10,
+    "team_size": { "min": 3, "max": 10 },
+    "interaction_mode": "ASYNC",
+    "energy_level": "LOW",
+    "disclosure_level": "LOW",
+    "assignment": "AUTO",
+    "reveals_axes": [],
+    "is_universal": false,
+    "best_for": [],
+    "also_for": ["TEAM_DIVERSE_COMMUNICATION"],
+    "avoid_for": [],
+    "context_tags": ["WORKSPACE_NOT_READY"],
+    "materials": [],
+    "steps": [
+      "공유된 작업 공간 링크를 각자 열어 접근을 확인한다.",
+      "방장이 전원 접근 확인 후 세팅 완료를 승인한다."
+    ],
+    "deliverable": "접근 확인 완료",
+    "completion_condition": {
+      "description": "팀원 각자가 링크를 방문하고 방장이 세팅 완료를 승인한다.",
+      "checks": [
+        { "type": "LINK_VISIT", "scope": "PER_MEMBER", "min_count": 1 },
+        { "type": "APPROVE", "scope": "TEAM", "min_count": 1 }
+      ]
+    },
+    "safety_notes": [],
+    "is_active": true,
+    "version": "1.0"
+  },
+  {
+    "quest_id": "STRENGTH_INTERVIEW",
+    "title": "강점 인터뷰",
+    "summary": "짝을 지어 서로의 협업 강점을 짧게 인터뷰하는, 공개 수준이 다소 높은 선택형 퀘스트입니다.",
+    "category": "DEEP_DIVE",
+    "primary_goal": "서로의 강점을 구체적인 질문으로 발견한다",
+    "duration_minutes": 20,
+    "team_size": { "min": 3, "max": 10 },
+    "interaction_mode": "IN_PERSON",
+    "energy_level": "MEDIUM",
+    "disclosure_level": "HIGH",
+    "assignment": "MANUAL",
+    "reveals_axes": [{ "axis": "conflict", "note": "피드백을 주고받는 방식" }],
+    "is_universal": false,
+    "best_for": ["TEAM_HARMONIZER_PRESENCE"],
+    "also_for": ["TEAM_SUPPORTER_MAJORITY"],
+    "avoid_for": [],
+    "context_tags": ["LONG_TERM_PROJECT"],
+    "materials": ["인터뷰 질문 카드"],
+    "steps": [
+      "짝을 지어 상대방에게 협업 강점 관련 질문 1개 이상을 한다.",
+      "들은 내용을 팀에 한 줄로 공유한다."
+    ],
+    "deliverable": "팀원별 강점 한 줄 요약",
+    "completion_condition": {
+      "description": "팀원 각자가 질문을 주고받고 방장이 공유 내용을 확인한다.",
+      "checks": [
+        { "type": "QUESTION", "scope": "PER_MEMBER", "min_count": 1 },
+        { "type": "COMMENT", "scope": "TEAM", "min_count": 1 }
+      ]
+    },
+    "safety_notes": ["과거 팀 경험에 대한 비난이나 실명 사례를 요구하지 않는다."],
+    "is_active": true,
+    "version": "1.0"
+  }
+]

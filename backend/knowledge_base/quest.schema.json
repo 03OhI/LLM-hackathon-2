@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://honam.internal/quest.schema.json",
+  "title": "QuestTemplate",
+  "description": "SPEC_V5_CONTEST_QUEST_AGENT.md §4.1 QuestTemplate 계약. quests.json의 각 항목이 이 스키마를 만족해야 한다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "quest_id",
+    "title",
+    "summary",
+    "category",
+    "primary_goal",
+    "duration_minutes",
+    "team_size",
+    "interaction_mode",
+    "energy_level",
+    "disclosure_level",
+    "assignment",
+    "reveals_axes",
+    "is_universal",
+    "best_for",
+    "also_for",
+    "avoid_for",
+    "context_tags",
+    "steps",
+    "deliverable",
+    "completion_condition",
+    "safety_notes",
+    "is_active",
+    "version"
+  ],
+  "properties": {
+    "quest_id": { "type": "string", "minLength": 1, "pattern": "^[A-Z0-9_]+$" },
+    "title": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "category": { "type": "string", "minLength": 1 },
+    "primary_goal": { "type": "string", "minLength": 1 },
+    "duration_minutes": { "type": "integer", "minimum": 1, "maximum": 240 },
+    "team_size": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "type": "integer", "minimum": 3, "maximum": 10 },
+        "max": { "type": "integer", "minimum": 3, "maximum": 10 }
+      }
+    },
+    "interaction_mode": {
+      "type": "string",
+      "enum": ["IN_PERSON", "REMOTE", "HYBRID", "ASYNC"]
+    },
+    "energy_level": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
+    "disclosure_level": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
+    "assignment": { "type": "string", "enum": ["AUTO", "MANUAL"] },
+    "reveals_axes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "axis": { "type": "string" },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "is_universal": { "type": "boolean" },
+    "best_for": { "type": "array", "items": { "type": "string" } },
+    "also_for": { "type": "array", "items": { "type": "string" } },
+    "avoid_for": { "type": "array", "items": { "type": "string" } },
+    "context_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "FIRST_MEETING",
+          "REMOTE_TEAM",
+          "IN_PERSON",
+          "HACKATHON",
+          "LONG_TERM_PROJECT",
+          "BEFORE_ROLE_ASSIGNMENT",
+          "WORKSPACE_NOT_READY"
+        ]
+      }
+    },
+    "materials": { "type": "array", "items": { "type": "string" } },
+    "steps": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "deliverable": { "type": "string", "minLength": 1 },
+    "completion_condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description", "checks"],
+      "properties": {
+        "description": { "type": "string", "minLength": 1 },
+        "checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "scope"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "VOTE",
+                  "COMMENT",
+                  "TEXT_SUBMIT",
+                  "REACTION",
+                  "APPROVE",
+                  "NODE_CREATE",
+                  "LINK_VISIT",
+                  "QUESTION"
+                ]
+              },
+              "scope": { "type": "string", "enum": ["PER_MEMBER", "TEAM"] },
+              "min_count": { "type": "integer", "minimum": 1 }
+            }
+          }
+        }
+      }
+    },
+    "safety_notes": { "type": "array", "items": { "type": "string" } },
+    "is_active": { "type": "boolean" },
+    "version": { "type": "string", "minLength": 1 }
+  }
+}
