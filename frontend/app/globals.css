@@ -6149,6 +6149,9 @@ a {
 
 /* Keep every 6-question stage on the same frame as stage 1 (계획성).
    This final, survey-scoped block wins over older duplicated theme rules. */
+.survey-shell {
+  width: 100%;
+}
 .survey-workspace {
   width: 100%;
 }
