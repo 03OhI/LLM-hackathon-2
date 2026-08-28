@@ -502,7 +502,7 @@ export default function SurveyPage() {
   const validTeamSetup =
     teamName.trim().length > 0 &&
     displayName.trim().length > 0 &&
-    Number(teamSize) >= 2 &&
+    Number(teamSize) >= 3 &&
     Number(teamSize) <= 10;
   useEffect(() => {
     const saved = getSavedTeamSession();
@@ -583,7 +583,7 @@ export default function SurveyPage() {
           teamSession ?? {
             code: "DEMO",
             teamName: teamName || "우리 팀",
-            expectedMembers: Number(teamSize) || 2,
+            expectedMembers: Number(teamSize) || 3,
             memberId: "demo",
           }
         }
@@ -682,7 +682,7 @@ export default function SurveyPage() {
                         setShowTeamValidation(false);
                       }}
                       inputMode="numeric"
-                      placeholder="2~10명"
+                      placeholder="3~10명"
                       aria-describedby="team-size-help"
                     />
                   </label>
@@ -711,7 +711,7 @@ export default function SurveyPage() {
               <p className="team-setup-error" aria-live="polite">
                 {inviteCode
                   ? "팀원에게 보일 이름을 입력해 주세요."
-                  : "팀명과 표시 이름을 입력하고, 참여 인원은 2~10명으로 설정해 주세요."}
+                  : "팀명과 표시 이름을 입력하고, 참여 인원은 3~10명으로 설정해 주세요."}
               </p>
             )}
             {teamError && (
