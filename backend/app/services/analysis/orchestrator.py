@@ -119,54 +119,41 @@ def start_analysis(session_id: str, db: DBSession) -> AnalysisResult:
     return analysis_result
 
 
-def _build_fallback_insight_json(
-    *,
-    audience: str,
-    strength_codes: list[str],
-    caution_codes: list[str],
-    rule_ids: list[str],
-) -> str:
+def _build_team_fallback_json(analysis_result: AnalysisResult) -> str:
     """외부 예외(Bedrock/네트워크 등)로 AI 그래프 자체를 실행하지 못한 경우에도
-    결정론적 폴백 콘텐츠(GeneratedInsight)를 생성해 JSON으로 직렬화한다.
+    결정론적 폴백 TeamSnapshot을 생성해 JSON으로 직렬화한다.
 
-    ai/nodes/fallback.py의 템플릿을 그대로 재사용해, 그래프가 정상 실행되어
-    fallback으로 귀결됐을 때와 동일한 형태의 콘텐츠를 보장한다. 이렇게 해야
-    status=FALLBACK인데 결과 JSON이 비어 있는 상황을 방지할 수 있다.
+    ai/nodes/fallback.build_team_fallback를 재사용해, 그래프가 정상 실행되어
+    fallback으로 귀결됐을 때와 동일한 형태(TeamSnapshot)의 콘텐츠를 보장한다.
+    이렇게 해야 status=FALLBACK인데 public_report_json이 비어 있는 상황을 방지한다.
     """
-    from ai.nodes.fallback import (
-        CAUTION_TEMPLATES,
-        DEFAULT_ACTION,
-        DEFAULT_CAUTION_TEXT,
-        DEFAULT_STRENGTH_TEXT,
-        STRENGTH_TEMPLATES,
+    from ai.nodes.fallback import build_team_fallback
+
+    distribution = (
+        json.loads(analysis_result.distribution_json) if analysis_result.distribution_json else {}
     )
-    from ai.schemas import GeneratedInsight, InsightItem
+    allowed_rule_ids = json.loads(analysis_result.matched_rule_ids_json)
 
-    strengths = [
-        InsightItem(code=code, text=STRENGTH_TEMPLATES.get(code, DEFAULT_STRENGTH_TEXT))
-        for code in strength_codes
-    ]
-
-    cautions: list[InsightItem] = []
-    for code in caution_codes:
-        if code in CAUTION_TEMPLATES:
-            text, action = CAUTION_TEMPLATES[code]
-        else:
-            text, action = DEFAULT_CAUTION_TEXT, DEFAULT_ACTION
-        cautions.append(InsightItem(code=code, text=text, action=action))
-
-    if audience == "TEAM":
-        summary = "이 팀은 서로 다른 성향이 모여 다양한 관점을 제공할 수 있는 조합이에요."
-    else:
-        summary = "이 팀에서 나의 성향을 잘 활용하면 팀에 기여할 수 있어요."
-
-    insight = GeneratedInsight(
-        summary=summary,
-        strengths=strengths[:5],
-        cautions=cautions[:5],
-        used_rule_ids=rule_ids[:5],
+    snapshot = build_team_fallback(
+        distribution=distribution,
+        allowed_rule_ids=allowed_rule_ids,
     )
-    return insight.model_dump_json()
+    return snapshot.model_dump_json()
+
+
+def _build_private_fallback_json(profile, allowed_rule_ids: list[str]) -> str:
+    """개인 인사이트 생성이 외부 예외로 실패한 경우의 결정론적 폴백 PrivateCard JSON.
+
+    ai/nodes/fallback.build_private_fallback를 재사용해 insight_json이
+    비어 있는 상황(status=FALLBACK인데 콘텐츠 없음)을 방지한다.
+    """
+    from ai.nodes.fallback import build_private_fallback
+
+    card = build_private_fallback(
+        self_positions=dict(profile.positions.items()),
+        allowed_rule_ids=allowed_rule_ids,
+    )
+    return card.model_dump_json()
 
 
 def _pair_to_dict(pair: engine.PairResult) -> dict:
@@ -226,12 +213,8 @@ def run_team_comment_generation(analysis_result_id: str) -> None:
             analysis_result.status = "FALLBACK"
             analysis_result.used_fallback = True
             # ★ status만 바꾸지 않고 폴백 콘텐츠를 반드시 채운다 (결과 JSON null 방지)
-            analysis_result.public_report_json = _build_fallback_insight_json(
-                audience="TEAM",
-                strength_codes=json.loads(analysis_result.team_strength_codes_json),
-                caution_codes=json.loads(analysis_result.team_caution_codes_json),
-                rule_ids=json.loads(analysis_result.matched_rule_ids_json),
-            )
+            #   V2: public_report_json에는 TeamSnapshot JSON을 저장한다.
+            analysis_result.public_report_json = _build_team_fallback_json(analysis_result)
             analysis_result.validation_status = "FAILED_THEN_FALLBACK"
 
         db.add(analysis_result)
@@ -313,20 +296,13 @@ def get_private_insight(participant_id: str, analysis_result_id: str, db: DBSess
         placeholder.status = "FALLBACK"
         placeholder.used_fallback = True
         # ★ status만 바꾸지 않고 폴백 콘텐츠를 반드시 채운다 (insight_json null 방지)
+        #   V2: insight_json에는 PrivateCard JSON을 저장한다.
+        from app.services.profile.profile_helpers import canonical_profile_for_participant
+
         analysis_result = db.get(AnalysisResult, placeholder.analysis_result_id)
-        strength_codes = (
-            json.loads(analysis_result.team_strength_codes_json) if analysis_result else []
-        )
-        caution_codes = (
-            json.loads(analysis_result.team_caution_codes_json) if analysis_result else []
-        )
         rule_ids = json.loads(analysis_result.matched_rule_ids_json) if analysis_result else []
-        placeholder.insight_json = _build_fallback_insight_json(
-            audience="SELF_ONLY",
-            strength_codes=strength_codes,
-            caution_codes=caution_codes,
-            rule_ids=rule_ids,
-        )
+        profile = canonical_profile_for_participant(placeholder.participant_id, db)
+        placeholder.insight_json = _build_private_fallback_json(profile, rule_ids)
         placeholder.validation_status = "FAILED_THEN_FALLBACK"
         db.add(placeholder)
         db.commit()
