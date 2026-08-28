@@ -170,7 +170,7 @@ def get_my_result(
 
     profile = canonical_profile_for_participant(participant.id, db)
 
-    insight = json.loads(private_insight.insight_json) if private_insight.insight_json else None
+    insight = _strip_internal(json.loads(private_insight.insight_json)) if private_insight.insight_json else None
 
     return PrivateResultResponse(
         participant_id=participant.id,
