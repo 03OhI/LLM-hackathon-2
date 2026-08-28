@@ -6146,3 +6146,75 @@ a {
 .task-item-actions{display:flex;flex-wrap:wrap;gap:6px}.task-status-button,.task-status-active{border:1px solid #dce4ec;border-radius:8px;padding:6px 10px;background:#fff;color:#5c6a83;font-size:12px;cursor:pointer}.task-status-active{border-color:var(--survey-action);background:var(--survey-action);color:#fff;font-weight:800}.task-delete-button{margin-left:auto;border:0;background:transparent;color:#be5144;font-size:12px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .resource-item{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #edf0f2;border-radius:12px;padding:12px 15px;background:#fbfcfd}.resource-link{display:flex;align-items:center;gap:10px;color:#344c70;font-size:14px;font-weight:800}.resource-provider{border-radius:999px;padding:4px 9px;background:#eef3f8;color:#5c7ba0;font-size:11px;font-weight:800}
 @media(max-width:700px){.workspace-grid{grid-template-columns:1fr}.task-create-form,.resource-create-form{grid-template-columns:1fr}.task-create-form select,.resource-create-form select{padding:8px}}
+
+/* Keep every 6-question stage on the same frame as stage 1 (계획성).
+   This final, survey-scoped block wins over older duplicated theme rules. */
+.survey-workspace {
+  width: 100%;
+}
+.survey-workspace > .survey-card {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 42px;
+}
+.survey-workspace .survey-topline {
+  min-height: 58px;
+  margin: 0;
+  padding: 0 0 3px;
+}
+.survey-workspace .progress-runway {
+  width: 100%;
+  margin: 15px 0 27px;
+}
+.survey-workspace .question-list {
+  width: 100%;
+  margin: 0;
+  gap: 22px;
+}
+.survey-workspace .question,
+.survey-workspace .question:nth-child(odd),
+.survey-workspace .question:nth-child(even) {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 16px 16px 24px;
+  border-left: 3px solid var(--stage-color);
+  border-radius: 0 12px 12px 0;
+}
+.survey-workspace .question:last-child {
+  padding-bottom: 16px;
+}
+.survey-workspace .question h2 {
+  margin: 8px 0 17px;
+}
+.survey-workspace .scale {
+  width: 100%;
+  margin: 0;
+}
+.survey-workspace .survey-actions {
+  width: 100%;
+  margin: 36px 0 0;
+}
+@media (max-width: 700px) {
+  .survey-workspace > .survey-card {
+    padding: 27px 20px;
+  }
+  .survey-workspace .survey-topline {
+    min-height: 50px;
+  }
+  .survey-workspace .progress-runway {
+    margin: 15px 0 27px;
+  }
+  .survey-workspace .question-list {
+    gap: 22px;
+  }
+  .survey-workspace .question,
+  .survey-workspace .question:nth-child(odd),
+  .survey-workspace .question:nth-child(even) {
+    padding: 16px 14px 22px;
+  }
+  .survey-workspace .survey-actions {
+    margin-top: 28px;
+  }
+}
