@@ -101,7 +101,7 @@ class AnalysisResult(SQLModel, table=True):
     matched_rule_ids_json: str = Field(default="[]")
     analysis_version: int
     status: str = Field(default="PROCESSING")  # PROCESSING|COMPLETED|FALLBACK
-    public_report_json: str | None = Field(default=None)  # AI 팀 코멘트 (GeneratedInsight)
+    public_report_json: str | None = Field(default=None)  # AI 팀 코멘트 (TeamSnapshot)
     prompt_version: str | None = Field(default=None)
     model_id: str | None = Field(default=None)
     validation_status: str | None = Field(default=None)

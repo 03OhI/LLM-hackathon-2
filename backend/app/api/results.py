@@ -33,23 +33,16 @@ router = APIRouter(tags=["results"])
 # ──────────────────────────────────────────────
 
 
-class PairPublic(BaseModel):
-    participant_a_id: str
-    participant_b_id: str
-    category: str
-    code: str
-    axis: str
-
-
 class TeamResultResponse(BaseModel):
-    # 최신 기획: team_grade / team_caution_codes / top_caution_pairs 는 공개 API에서 제외한다.
+    # 최신 기획(INTEGRATION_CONTRACT_V2 §7): 아래 필드는 공개 API에서 제외한다.
     # (DB(AnalysisResult)에는 계속 저장·계산하되 응답 스키마에만 노출하지 않는다.)
+    #   - team_grade / team_caution_codes / top_caution_pairs (75240c8)
+    #   - team_strength_codes (내부 코드)
+    #   - top_complement_pairs (공개 불필요)
     session_id: str
     status: str  # PROCESSING|COMPLETED|FALLBACK
     distribution: dict | None
-    team_strength_codes: list[str]
-    top_complement_pairs: list[PairPublic]
-    team_comment: dict | None  # GeneratedInsight.model_dump() 또는 None
+    team_comment: dict | None  # TeamSnapshot.model_dump() 또는 None
     rule_text_fallback: dict[str, str] | None = None  # AI 코멘트가 전혀 없을 때만
 
 
@@ -57,7 +50,7 @@ class PrivateResultResponse(BaseModel):
     participant_id: str
     status: str  # NOT_REQUESTED|PROCESSING|COMPLETED|FALLBACK
     self_positions: dict | None
-    insight: dict | None  # GeneratedInsight.model_dump()
+    insight: dict | None  # PrivateCard.model_dump()
 
 
 # ──────────────────────────────────────────────
@@ -79,13 +72,10 @@ def _build_team_result(session_id: str, analysis: AnalysisResult | None) -> Team
             session_id=session_id,
             status="PROCESSING",
             distribution=None,
-            team_strength_codes=[],
-            top_complement_pairs=[],
             team_comment=None,
         )
 
     distribution = json.loads(analysis.distribution_json) if analysis.distribution_json else None
-    pair_results = json.loads(analysis.pair_results_json) if analysis.pair_results_json else {}
     team_comment = json.loads(analysis.public_report_json) if analysis.public_report_json else None
 
     rule_text_fallback = None
@@ -97,8 +87,6 @@ def _build_team_result(session_id: str, analysis: AnalysisResult | None) -> Team
         session_id=session_id,
         status=analysis.status,
         distribution=distribution,
-        team_strength_codes=json.loads(analysis.team_strength_codes_json),
-        top_complement_pairs=[PairPublic(**p) for p in pair_results.get("top_complement", [])],
         team_comment=team_comment,
         rule_text_fallback=rule_text_fallback,
     )
