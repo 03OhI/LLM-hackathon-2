@@ -331,11 +331,12 @@ export default function ResultsPage() {
           onPersonal={() => setView("personal")}
         />
       )}
-      {!administratorMode && (
-        <Link href="/quest" className="result-quest-link">
-          아이스브레이킹 퀘스트로 이동 <b>→</b>
-        </Link>
-      )}
+      <Link
+        href={administratorMode ? "/quest?mode=admin" : "/quest"}
+        className="result-quest-link"
+      >
+        아이스브레이킹 퀘스트로 이동 <b>→</b>
+      </Link>
     </ResultShell>
   );
 }

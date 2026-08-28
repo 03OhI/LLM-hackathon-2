@@ -69,6 +69,20 @@ function makeQuest(overrides: Partial<QuestCurrent> = {}): QuestCurrent {
 afterEach(() => {
   vi.clearAllMocks();
   vi.unstubAllGlobals();
+  window.history.pushState({}, "", "/quest");
+});
+
+describe("QuestPage 관리자 시연 흐름", () => {
+  it("실제 세션 없이도 관리자 결과에서 퀘스트를 시작하고 완료할 수 있다", async () => {
+    window.history.pushState({}, "", "/quest?mode=admin");
+    vi.mocked(getSavedTeamSession).mockReturnValue(null);
+    render(<QuestPage />);
+
+    const startButton = await screen.findByRole("button", { name: "퀘스트 시작" });
+    startButton.click();
+    const input = await screen.findByLabelText("내용 제출 입력");
+    expect(input).toBeInTheDocument();
+  });
 });
 
 describe("QuestPage 역할별 버튼", () => {

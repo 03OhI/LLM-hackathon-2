@@ -89,6 +89,16 @@ afterEach(() => {
 });
 
 describe("WorkspacePage room_id 기반 자동 조회", () => {
+  it("관리자 시연 모드는 실제 세션 없이 협업 공간을 보여준다", async () => {
+    setUrl("?mode=admin");
+    vi.mocked(getSavedTeamSession).mockReturnValue(null);
+
+    render(<WorkspacePage />);
+
+    expect(await screen.findByText("함께 정리하고 공유해요")).toBeInTheDocument();
+    expect(screen.getByText("발표 자료의 핵심 한 문장 정하기")).toBeInTheDocument();
+  });
+
   it("LOCKED이면 대기 화면을 보여주고 getWorkspace는 호출하지 않는다", async () => {
     vi.mocked(getSavedTeamSession).mockReturnValue(memberSession);
     vi.mocked(getRoomWorkspace).mockResolvedValue({ status: "LOCKED", workspace_id: null });

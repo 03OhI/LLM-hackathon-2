@@ -25,23 +25,121 @@ const POLL_INTERVAL_MS = 4000;
 
 export default function QuestPage() {
   const [session, setSession] = useState<TeamSession | null | undefined>(undefined);
+  const [administratorMode, setAdministratorMode] = useState(false);
 
   useEffect(() => {
     // 세션은 브라우저 storage에만 있어 서버 렌더 시점엔 알 수 없다. useState 지연
     // 초기화를 쓰면 정적 프리렌더(서버)와 클라이언트 첫 렌더 결과가 달라져 하이드레이션
     // 불일치가 생기므로, 마운트 후 한 번만 채우는 이 패턴을 그대로 둔다(기존 survey/
     // results 페이지와 동일한 관례).
+    const isAdmin = new URLSearchParams(window.location.search).get("mode") === "admin";
     // eslint-disable-next-line react-hooks/set-state-in-effect
+    setAdministratorMode(isAdmin);
     setSession(getSavedTeamSession());
   }, []);
 
   if (session === undefined) return <QuestShell><LoadingCard /></QuestShell>;
+  if (administratorMode) return <QuestShell><AdminDemoQuestView /></QuestShell>;
   if (session === null) return <QuestShell><SessionMissingCard /></QuestShell>;
 
   return (
     <QuestShell>
       <QuestView session={session} />
     </QuestShell>
+  );
+}
+
+const ADMIN_DEMO_SESSION: TeamSession = {
+  sessionId: "admin-demo-room",
+  inviteToken: "admin-demo",
+  teamName: "TMTI 데모 팀",
+  expectedMembers: 4,
+  participantId: "admin-demo-host",
+  isHost: true,
+};
+
+const ADMIN_DEMO_QUEST: QuestCurrent = {
+  quest_id: "WORK_STYLE_BALANCE_GAME",
+  title: "마감 24시간 전, 우리 팀의 선택은?",
+  summary: "완성도와 휴식 사이에서 각자의 작업 스타일을 가볍게 확인해요.",
+  duration_minutes: 6,
+  steps: [
+    "80%에서 마무리하고 다 같이 쉬기와 밤새서 100% 만들기 중 하나를 고릅니다.",
+    "전원이 선택한 이유를 한 문장씩 이야기합니다.",
+    "답이 가장 갈린 지점 하나만 짚고 웃으며 마무리합니다.",
+  ],
+  materials: ["팀 채팅방 또는 메모장", "서로의 답을 들을 열린 마음"],
+  deliverable: "우리 팀의 마감 스타일 한 줄",
+  assignment: {
+    id: "admin-demo-assignment",
+    status: "ASSIGNED",
+    assignment_source: "AGENT",
+    reason: "계획을 세우는 힘과 빠르게 움직이는 에너지가 함께 보여, 서로의 마감 기준을 먼저 맞춰보는 퀘스트를 골랐어요.",
+    intro_message: "본격적인 협업 전에 우리 팀의 마감 본능부터 확인해볼까요?",
+    assigned_at: "2026-08-29T00:00:00Z",
+    started_at: null,
+    completed_at: null,
+  },
+  my_response_status: null,
+  team_completion_status: { satisfied: false, unmet_check_types: ["TEXT_SUBMIT"] },
+  completion_requirements: {
+    member_checks: [],
+    team_checks: [{ type: "TEXT_SUBMIT", min_count: 1 }],
+  },
+};
+
+function AdminDemoQuestView() {
+  const [quest, setQuest] = useState<QuestCurrent>(ADMIN_DEMO_QUEST);
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
+
+  const runAction = useCallback(async (key: string, action: () => Promise<QuestCurrent>) => {
+    // 관리자 시연에서는 실제 API 액션 대신 아래의 로컬 상태 전이를 사용한다.
+    void action;
+    setPendingAction(key);
+    await Promise.resolve();
+    setQuest((current) => {
+      if (key === "start") {
+        return {
+          ...current,
+          assignment: {
+            ...current.assignment,
+            status: "IN_PROGRESS",
+            started_at: new Date().toISOString(),
+          },
+        };
+      }
+      if (key.startsWith("team-")) {
+        return {
+          ...current,
+          team_completion_status: { satisfied: true, unmet_check_types: [] },
+        };
+      }
+      if (key === "complete" || key === "skip") {
+        return {
+          ...current,
+          assignment: {
+            ...current.assignment,
+            status: key === "complete" ? "COMPLETED" : "SKIPPED",
+            completed_at: new Date().toISOString(),
+          },
+        };
+      }
+      return current;
+    });
+    setPendingAction(null);
+  }, []);
+
+  return (
+    <QuestCard
+      quest={quest}
+      session={ADMIN_DEMO_SESSION}
+      pendingAction={pendingAction}
+      actionError={null}
+      runAction={runAction}
+      onHostGoWorkspace={async () => {
+        window.location.assign("/workspace?mode=admin");
+      }}
+    />
   );
 }
 

@@ -32,6 +32,7 @@ const PROVIDERS: ResourceProvider[] = ["GITHUB", "FIGMA", "NOTION", "GOOGLE_DRIV
 export default function WorkspacePage() {
   const [session, setSession] = useState<TeamSession | null | undefined>(undefined);
   const [roomId, setRoomId] = useState<string | null>(null);
+  const [administratorMode, setAdministratorMode] = useState(false);
 
   useEffect(() => {
     // 세션/roomId는 브라우저 storage·URL에만 있어 서버 렌더 시점엔 알 수 없다. 지연
@@ -40,7 +41,9 @@ export default function WorkspacePage() {
     const saved = getSavedTeamSession();
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSession(saved);
-    const fromQuery = new URLSearchParams(window.location.search).get("sessionId");
+    const params = new URLSearchParams(window.location.search);
+    setAdministratorMode(params.get("mode") === "admin");
+    const fromQuery = params.get("sessionId");
     setRoomId(fromQuery ?? saved?.sessionId ?? null);
   }, []);
 
@@ -53,6 +56,8 @@ export default function WorkspacePage() {
       </nav>
       {session === undefined ? (
         <LoadingCard />
+      ) : administratorMode ? (
+        <AdminDemoWorkspaceView />
       ) : session === null ? (
         <InfoCard title="세션 정보가 없어요." body="초대 링크로 다시 들어와 주세요." />
       ) : !roomId ? (
@@ -61,6 +66,110 @@ export default function WorkspacePage() {
         <WorkspaceView session={session} roomId={roomId} />
       )}
     </main>
+  );
+}
+
+const ADMIN_DEMO_SESSION: TeamSession = {
+  sessionId: "admin-demo-room",
+  inviteToken: "admin-demo",
+  teamName: "TMTI 데모 팀",
+  expectedMembers: 4,
+  participantId: "admin-demo-host",
+  isHost: true,
+};
+
+const ADMIN_DEMO_PARTICIPANTS: RoomParticipant[] = [
+  { participant_id: "admin-demo-host", nickname: "나" },
+  { participant_id: "admin-demo-member-1", nickname: "민지" },
+  { participant_id: "admin-demo-member-2", nickname: "지훈" },
+  { participant_id: "admin-demo-member-3", nickname: "서연" },
+];
+
+function AdminDemoWorkspaceView() {
+  const [tasks, setTasks] = useState<Task[]>([
+    {
+      id: "admin-demo-task-1",
+      title: "발표 자료의 핵심 한 문장 정하기",
+      status: "IN_PROGRESS",
+      assignee_participant_id: "admin-demo-member-1",
+      due_at: null,
+      created_by: "admin-demo-host",
+      created_at: "2026-08-29T00:00:00Z",
+      updated_at: "2026-08-29T00:00:00Z",
+    },
+  ]);
+  const [resources, setResources] = useState<ResourceLink[]>([
+    {
+      id: "admin-demo-resource-1",
+      title: "팀 GitHub 저장소",
+      url: "https://github.com/03OhI/LLM-hackathon-2",
+      provider: "GITHUB",
+      created_by: "admin-demo-host",
+      created_at: "2026-08-29T00:00:00Z",
+    },
+  ]);
+
+  return (
+    <section className="result-report workspace-card-shell survey-card-enter">
+      <header className="quest-header">
+        <p className="result-eyebrow">협업 워크스페이스</p>
+        <h1>함께 정리하고 공유해요</h1>
+      </header>
+      <div className="workspace-grid">
+        <TaskPanel
+          tasks={tasks}
+          session={ADMIN_DEMO_SESSION}
+          participants={ADMIN_DEMO_PARTICIPANTS}
+          pendingAction={null}
+          canManage={() => true}
+          onCreate={(input) => {
+            const now = new Date().toISOString();
+            setTasks((current) => [
+              ...current,
+              {
+                id: `admin-demo-task-${Date.now()}`,
+                title: input.title,
+                status: "TODO",
+                assignee_participant_id: input.assignee_participant_id ?? null,
+                due_at: input.due_at ?? null,
+                created_by: ADMIN_DEMO_SESSION.participantId,
+                created_at: now,
+                updated_at: now,
+              },
+            ]);
+          }}
+          onUpdate={(taskId, input) => {
+            setTasks((current) =>
+              current.map((task) =>
+                task.id === taskId
+                  ? { ...task, ...input, updated_at: new Date().toISOString() }
+                  : task,
+              ),
+            );
+          }}
+          onDelete={(taskId) => setTasks((current) => current.filter((task) => task.id !== taskId))}
+        />
+        <ResourcePanel
+          resources={resources}
+          pendingAction={null}
+          canManage={() => true}
+          onCreate={(input) => {
+            setResources((current) => [
+              ...current,
+              {
+                id: `admin-demo-resource-${Date.now()}`,
+                ...input,
+                created_by: ADMIN_DEMO_SESSION.participantId,
+                created_at: new Date().toISOString(),
+              },
+            ]);
+          }}
+          onDelete={(resourceId) =>
+            setResources((current) => current.filter((resource) => resource.id !== resourceId))
+          }
+        />
+      </div>
+    </section>
   );
 }
 
