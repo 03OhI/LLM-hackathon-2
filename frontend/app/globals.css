@@ -835,6 +835,180 @@ a {
   }
 }
 
+/* ── Workspace visual QA follow-up ─────────────────────────────────────
+   새 도구가 추가된 뒤에도 설문 화면처럼 읽히도록 입력/버튼/카드 간격을
+   한 번 더 통일한다. 700~960px 구간에서 2열을 유지해 카드가 찌그러지던
+   문제도 여기서 바로잡는다. */
+.workspace-shell {
+  width: 100%;
+  max-width: 1120px;
+  padding-bottom: 80px;
+  background: linear-gradient(180deg, #fffdfa 0%, #fffaf4 100%);
+}
+
+.workspace-card-shell {
+  width: min(100% - 40px, 1040px);
+}
+
+.workspace-shell .workspace-panel,
+.workspace-shell .workspace-notice,
+.workspace-shell .workspace-timer,
+.workspace-shell .workspace-quicklink-card {
+  border-color: var(--survey-line, var(--line));
+  background-color: var(--survey-paper, #fffdf9);
+  box-shadow: 0 12px 32px rgba(34, 48, 75, 0.06);
+}
+
+.workspace-shell .workspace-panel {
+  padding: 26px;
+}
+
+.workspace-shell .button-next,
+.workspace-shell .button-muted,
+.workspace-shell .task-status-button,
+.workspace-shell .task-status-active,
+.workspace-shell .workspace-notice-edit {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.workspace-shell .button-next {
+  margin-left: 0;
+  border: 1px solid var(--survey-action);
+  background: var(--survey-action);
+  color: #fff;
+  box-shadow: 0 7px 16px rgba(255, 131, 116, 0.2);
+}
+
+.workspace-shell .button-muted {
+  border: 1px solid #dce4ec;
+  background: #f7f9fb;
+  color: #5c6a83;
+}
+
+.workspace-shell input,
+.workspace-shell textarea,
+.workspace-shell select {
+  box-sizing: border-box;
+  outline: none;
+}
+
+.workspace-shell input:focus,
+.workspace-shell textarea:focus,
+.workspace-shell select:focus {
+  border-color: var(--survey-action);
+  box-shadow: 0 0 0 3px rgba(255, 131, 116, 0.12);
+}
+
+.workspace-checklist-list .quest-check-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.1fr) minmax(120px, 0.9fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px;
+}
+
+.workspace-checklist-label {
+  word-break: keep-all;
+  line-height: 1.5;
+}
+
+.workspace-checklist-url {
+  width: 100%;
+  min-height: 40px;
+}
+
+.workspace-checklist-list .task-delete-button {
+  margin-left: 0;
+}
+
+.workspace-timer-controls,
+.workspace-decision-option-actions,
+.workspace-decision-option-buttons,
+.workspace-note-item-actions {
+  align-items: center;
+}
+
+.workspace-timer-controls button {
+  min-width: 80px;
+}
+
+.workspace-decision-option-actions .button-muted,
+.workspace-decision-option-actions .button-next {
+  flex: 1 1 112px;
+}
+
+.workspace-decision-option-row,
+.workspace-note-item-header,
+.resource-item {
+  word-break: keep-all;
+}
+
+@media (max-width: 960px) {
+  .workspace-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workspace-span-2 {
+    grid-column: auto;
+  }
+
+  .workspace-card-shell {
+    width: min(100% - 32px, 820px);
+  }
+
+  .workspace-timer {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 700px) {
+  .workspace-card-shell {
+    width: min(100% - 20px, 640px);
+  }
+
+  .workspace-shell .workspace-panel,
+  .workspace-shell .workspace-notice,
+  .workspace-shell .workspace-timer {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .workspace-checklist-list .quest-check-row {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .workspace-checklist-list .task-delete-button {
+    justify-self: start;
+  }
+
+  .workspace-timer-modes,
+  .workspace-timer-controls {
+    justify-content: center;
+  }
+
+  .workspace-timer-controls button {
+    flex: 1;
+  }
+
+  .workspace-decision-option-actions .button-muted,
+  .workspace-decision-option-actions .button-next {
+    width: 100%;
+  }
+}
+
 /* Mobile team-result app navigation. Desktop keeps the complete report flow. */
 .mobile-team-nav,
 .mobile-team-balance {
@@ -6568,4 +6742,106 @@ a {
   .quest-skip-confirm button {
     min-height: 44px;
   }
+}
+
+/* Final cascade position for workspace visual QA overrides. */
+.workspace-shell {
+  width: 100%;
+  max-width: 1120px;
+  padding-bottom: 80px;
+  background: linear-gradient(180deg, #fffdfa 0%, #fffaf4 100%);
+}
+.workspace-card-shell { width: min(100% - 40px, 1040px); }
+.workspace-shell .workspace-panel,
+.workspace-shell .workspace-notice,
+.workspace-shell .workspace-timer,
+.workspace-shell .workspace-quicklink-card {
+  border-color: var(--survey-line, var(--line));
+  background-color: var(--survey-paper, #fffdf9);
+  box-shadow: 0 12px 32px rgba(34, 48, 75, .06);
+}
+.workspace-shell .workspace-panel { padding: 26px; }
+.workspace-shell .button-next,
+.workspace-shell .button-muted,
+.workspace-shell .task-status-button,
+.workspace-shell .task-status-active,
+.workspace-shell .workspace-notice-edit {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.workspace-shell .button-next {
+  margin-left: 0;
+  border: 1px solid var(--survey-action);
+  background: var(--survey-action);
+  color: #fff;
+  box-shadow: 0 7px 16px rgba(255, 131, 116, .2);
+}
+.workspace-shell .button-muted {
+  border: 1px solid #dce4ec;
+  background: #f7f9fb;
+  color: #5c6a83;
+}
+.workspace-shell input,
+.workspace-shell textarea,
+.workspace-shell select { box-sizing: border-box; outline: none; }
+.workspace-shell input:focus,
+.workspace-shell textarea:focus,
+.workspace-shell select:focus {
+  border-color: var(--survey-action);
+  box-shadow: 0 0 0 3px rgba(255, 131, 116, .12);
+}
+.workspace-checklist-list .quest-check-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.1fr) minmax(120px, .9fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px;
+}
+.workspace-checklist-label { word-break: keep-all; line-height: 1.5; }
+.workspace-checklist-url { width: 100%; min-height: 40px; }
+.workspace-checklist-list .task-delete-button { margin-left: 0; }
+.workspace-timer-controls,
+.workspace-decision-option-actions,
+.workspace-decision-option-buttons,
+.workspace-note-item-actions { align-items: center; }
+.workspace-timer-controls button { min-width: 80px; }
+.workspace-decision-option-actions .button-muted,
+.workspace-decision-option-actions .button-next { flex: 1 1 112px; }
+.workspace-decision-option-row,
+.workspace-note-item-header,
+.resource-item { word-break: keep-all; }
+
+@media (max-width: 960px) {
+  .workspace-grid { grid-template-columns: minmax(0, 1fr); }
+  .workspace-span-2 { grid-column: auto; }
+  .workspace-card-shell { width: min(100% - 32px, 820px); }
+  .workspace-timer { justify-content: center; }
+}
+
+@media (max-width: 700px) {
+  .workspace-card-shell { width: min(100% - 20px, 640px); }
+  .workspace-shell .workspace-panel,
+  .workspace-shell .workspace-notice,
+  .workspace-shell .workspace-timer { padding: 18px; border-radius: 20px; }
+  .workspace-checklist-list .quest-check-row {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+  .workspace-checklist-list .task-delete-button { justify-self: start; }
+  .workspace-timer-modes,
+  .workspace-timer-controls { justify-content: center; }
+  .workspace-timer-controls button { flex: 1; }
+  .workspace-decision-option-actions .button-muted,
+  .workspace-decision-option-actions .button-next { width: 100%; }
 }
