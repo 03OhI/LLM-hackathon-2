@@ -5,6 +5,18 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 
 const typeCodes = ["PLCD", "PLCI", "PLHD", "PLHI", "PSCD", "PSCI", "PSHD", "PSHI", "ALCD", "ALCI", "ALHD", "ALHI", "ASCD", "ASCI", "ASHD", "ASHI"];
+
+const typeLetterInfo: Record<string, { label: string; summary: string }> = {
+  P: { label: "계획형", summary: "일의 순서와 기준을 먼저 정리해요." },
+  A: { label: "적응형", summary: "상황을 보며 방법을 유연하게 조정해요." },
+  L: { label: "주도형", summary: "필요한 결정을 제안하고 실행을 이끌어요." },
+  S: { label: "지원형", summary: "팀의 의견을 잇고 실행을 뒷받침해요." },
+  C: { label: "직면형", summary: "문제를 분명히 짚고 해결을 시도해요." },
+  H: { label: "조율형", summary: "관계를 살피며 합의점을 찾아요." },
+  D: { label: "직설형", summary: "핵심을 바로 말하며 정보를 나눠요." },
+  I: { label: "완곡형", summary: "상대의 맥락을 고려해 부드럽게 말해요." },
+};
+
 type Tab = "home" | "guide" | "survey" | "types" | "results";
 type InvitePreview = { sessionName: string; expectedMembers: number; inviteToken: string };
 const tabs: { id: Tab; icon: string; label: string }[] = [{ id: "home", icon: "⌂", label: "홈" }, { id: "guide", icon: "↝", label: "테스트 방법" }, { id: "survey", icon: "◌", label: "설문 문항" }, { id: "types", icon: "▦", label: "16유형" }, { id: "results", icon: "◷", label: "분석 결과" }];
@@ -29,10 +41,15 @@ function inviteTokenFrom(value: string): string | null {
 function savedSessionId(): string | null {
   if (typeof window === "undefined") return null;
   try {
-    return (
-      window.sessionStorage.getItem("tmti-session-id") ??
-      window.localStorage.getItem("tmti-session-id")
-    );
+    const stores = [window.sessionStorage, window.localStorage];
+    for (const store of stores) {
+      const direct = store.getItem("tmti-session-id");
+      if (direct) return direct;
+      const raw = store.getItem("tmti-active-team-session");
+      const nested = raw ? JSON.parse(raw)?.team?.sessionId : null;
+      if (nested) return nested;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -104,7 +121,14 @@ export default function Home() {
   if (invite) return <InviteConfirm invite={invite} />;
 
   return <main className="dashboard-shell"><section className="dashboard-top">
-    <article className="welcome-card"><div className="welcome-brand"><span className="brand-text">TMTI+</span><span>TEAM · MATCH · TYPE · INDICATOR</span></div><div className="welcome-main"><div className="welcome-logo"><Image src="/tmti-hero.png" alt="TMTI 캐릭터 로고" width={620} height={620} priority /></div><div className="welcome-copy"><p className="welcome-eyebrow">팀 프로젝트, 시작 전에</p><h1>우리 팀의 협업 방식을 <strong>알아보세요</strong></h1><p className="welcome-description">24개 문항으로 서로의 일하는 방식과 대화 방식을 살펴봐요.</p><div className="entry-actions"><Link href="/survey" className="start-button home-action-primary"><PeopleIcon /><span className="action-copy"><b>테스트 방 만들기</b><small>새로운 팀 프로젝트를 시작해보세요.</small></span><em>→</em></Link><form className="invite-entry home-action-secondary" onSubmit={openInvite}><LinkIcon /><div className="invite-fields"><label htmlFor="invite-link">팀원 · 초대 링크 접속하기</label><div><input id="invite-link" value={inviteInput} onChange={(event) => setInviteInput(event.target.value)} placeholder="초대 링크 붙여넣기" /><button type="submit">확인</button></div></div></form><button className="result-button home-action-result" onClick={() => setActiveTab("results")}><ReportIcon /><span>기존 팀 분석 결과 불러오기</span><em>→</em></button></div>{error && <p className="invite-entry-error">{error}</p>}<div className="welcome-links"><button onClick={() => setActiveTab("survey")}>▣ 설문 문항 미리보기</button><i /><button onClick={() => setActiveTab("types")}>▦ 16유형 미리보기</button></div></div></div></article>
+    <article className="welcome-card"><div className="welcome-brand"><span className="brand-text">TMTI+</span><span>TEAM · MATCH · TYPE · INDICATOR</span></div><div className="welcome-main"><div className="welcome-logo"><Image src="/tmti-hero.png" alt="TMTI 캐릭터 로고" width={620} height={620} priority /></div><div className="welcome-copy"><p className="welcome-eyebrow">팀 프로젝트, 시작 전에</p><h1>우리 팀의 협업 방식을 <strong>알아보세요</strong></h1><p className="welcome-description">24개 문항으로 서로의 일하는 방식과 대화 방식을 살펴봐요.</p><div className="entry-actions"><Link href="/survey" className="start-button home-action-primary"><PeopleIcon /><span className="action-copy"><b>테스트 방 만들기</b><small>새로운 팀 프로젝트를 시작해보세요.</small></span><em>→</em></Link><form className="invite-entry home-action-secondary" onSubmit={openInvite}><LinkIcon /><div className="invite-fields"><label htmlFor="invite-link">팀원 · 초대 링크 접속하기</label><div><input id="invite-link" value={inviteInput} onChange={(event) => setInviteInput(event.target.value)} placeholder="초대 링크 붙여넣기" /><button type="submit">확인</button></div></div></form><button className="result-button home-action-result" onClick={() => {
+      const sessionId = savedSessionId();
+      if (sessionId) {
+        window.location.assign(`/results?sessionId=${encodeURIComponent(sessionId)}`);
+        return;
+      }
+      setActiveTab("results");
+    }}><ReportIcon /><span>기존 팀 분석 결과 불러오기</span><em>→</em></button></div>{error && <p className="invite-entry-error">{error}</p>}<div className="welcome-links"><button onClick={() => setActiveTab("survey")}>▣ 설문 문항 미리보기</button><i /><button onClick={() => setActiveTab("types")}>▦ 16유형 미리보기</button></div></div></div></article>
     <article className="workspace-card" aria-label="TMTI 미리보기"><aside className="workspace-nav"><b>TMTI+</b>{tabs.map((tab) => <button key={tab.id} className={activeTab === tab.id ? "nav-active" : ""} onClick={() => setActiveTab(tab.id)}><span aria-hidden="true">{tab.icon}</span>{tab.label}</button>)}</aside><div className="workspace-content">{activeTab === "home" && <HomePanel />}{activeTab === "guide" && <GuidePanel />}{activeTab === "survey" && <SurveyPanel />}{activeTab === "types" && <TypesPanel />}{activeTab === "results" && <ResultsPanel />}</div></article>
   </section></main>;
 }
@@ -118,7 +142,40 @@ function ReportIcon() { return <svg className="home-action-icon" viewBox="0 0 48
 function HomePanel() { return <><p className="workspace-greeting">새로운 팀 분석을 시작해볼까요?</p><div className="workspace-start"><span className="clipboard">✓</span><div><h2>새로운 팀 분석 시작</h2><p>팀프로젝트 전, 서로의 협업 방식을 살펴보세요.</p></div><Link href="/survey">테스트 방 만들기 <span>→</span></Link></div><div className="workspace-steps"><p>테스트는 이렇게 진행돼요</p><ol><li><b>1</b> 테스트 방 만들기</li><li><b>2</b> 초대 링크 공유</li><li><b>3</b> 팀 결과 확인</li></ol></div></>; }
 function GuidePanel() { return <section className="tab-panel guide-panel" aria-labelledby="guide-heading"><header className="tab-heading"><div><p>테스트 방법</p><h2 id="guide-heading">이렇게 진행돼요</h2></div></header><ol><li><b>1</b><div><strong>테스트 방 만들기</strong><span>팀장이 팀명과 참여 인원을 입력해요.</span></div></li><li><b>2</b><div><strong>링크 또는 QR 공유</strong><span>팀원은 초대 링크를 확인한 뒤 참여해요.</span></div></li><li><b>3</b><div><strong>각자 24문항 응답</strong><span>평소 협업할 때의 모습에 가깝게 골라요.</span></div></li><li><b>4</b><div><strong>팀 결과 함께 보기</strong><span>모두 완료되면 개인·팀 결과가 준비돼요.</span></div></li></ol></section>; }
 function SurveyPanel() { return <section className="tab-panel" aria-labelledby="survey-heading"><header className="tab-heading"><div><p>설문 문항 미리보기</p><h2 id="survey-heading">01 <span>/ 24</span></h2></div><Link href="/survey">전체 문항 보기 →</Link></header><div className="tab-question"><p className="quote-mark">“</p><h3>새로운 과제를 받았을 때,<br />나는 어떻게 시작하는 편인가?</h3><p>본인의 평소 모습에 가장 가까운 답을 골라주세요.</p><div className="tab-scale">{["매우 아니다", "아니다", "보통이다", "그렇다", "매우 그렇다"].map((label, index) => <span key={label}><b>{index + 1}</b>{label}</span>)}</div></div></section>; }
-function TypesPanel() { return <section className="tab-panel" aria-labelledby="types-heading"><header className="tab-heading"><div><p>16유형 미리보기</p><h2 id="types-heading">협업 스타일 16가지</h2></div></header><p className="type-description">계획성·주도성·갈등 대응·소통 직접성의 조합으로 팀 안에서의 협업 방식을 살펴봅니다.</p><div className="type-grid">{typeCodes.map((type, index) => <span key={type} className={`type-chip chip-${index % 4}`}>{type}</span>)}</div></section>; }
+function TypesPanel() {
+  const [activeType, setActiveType] = useState(typeCodes[0]);
+  return (
+    <section className="tab-panel type-panel" aria-labelledby="types-heading">
+      <header className="tab-heading">
+        <div><p>16유형 미리보기</p><h2 id="types-heading">협업 스타일 16가지</h2></div>
+      </header>
+      <p className="type-description">유형 카드를 선택하면 알파벳이 뜻하는 협업 성향을 확인할 수 있어요.</p>
+      <div className="type-grid" aria-label="협업 스타일 유형 목록">
+        {typeCodes.map((type, index) => (
+          <button
+            type="button"
+            key={type}
+            className={`type-chip chip-${index % 4} ${activeType === type ? "is-active" : ""}`}
+            onFocus={() => setActiveType(type)}
+            onClick={() => setActiveType(type)}
+            aria-pressed={activeType === type}
+          >
+            {type}
+          </button>
+        ))}
+      </div>
+      <article className="type-explainer" aria-live="polite">
+        <p><b>{activeType}</b>는 이렇게 읽어요</p>
+        <div>
+          {activeType.split("").map((letter) => {
+            const info = typeLetterInfo[letter];
+            return <span key={letter}><b>{letter}</b><strong>{info.label}</strong><small>{info.summary}</small></span>;
+          })}
+        </div>
+      </article>
+    </section>
+  );
+}
 function ResultsPanel() {
   // 결과 탭은 사용자가 클릭해야 마운트되므로(클라이언트 전용) 지연 초기화로 저장소를 읽는다.
   const [sessionId] = useState<string | null>(() => savedSessionId());
