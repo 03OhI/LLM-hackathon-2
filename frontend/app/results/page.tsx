@@ -216,6 +216,17 @@ function resultCode(positions: Positions | null) {
     .join("-");
 }
 
+function fallbackInsight(positions: Positions | null): PrivateCard | null {
+  if (!positions) return null;
+  return {
+    card_title: `${resultCode(positions)} · 나의 협업 성향`,
+    contribution:
+      "네 가지 협업 성향을 바탕으로, 팀에서 편안하게 기여할 수 있는 방식을 정리했어요.",
+    optional_try: null,
+    used_rule_ids: [],
+  };
+}
+
 export default function ResultsPage() {
   const [view, setView] = useState<View>("team");
   const [teamResult, setTeamResult] = useState<TeamResult | null>(null);
@@ -296,22 +307,28 @@ export default function ResultsPage() {
           pollTimer = window.setTimeout(load, 3000);
           return;
         }
+
+        // 팀 분석은 개인 문구 생성보다 먼저 준비될 수 있다.
+        // 개인 API가 늦거나 실패해도 팀원 지도와 플레이북을 숨기지 않는다.
+        setIsLoading(false);
         const personalResponse = await fetch(
           `${apiBase}/sessions/${encodeURIComponent(sessionId)}/results/me`,
           { credentials: "same-origin" },
         );
-        if (!personalResponse.ok) {
-          setIsLoading(false);
-          return;
-        }
+        if (!personalResponse.ok) return;
         const nextPersonal = (await personalResponse.json()) as PersonalResult;
         if (cancelled) return;
-        setPersonalResult(nextPersonal);
+        const resolvedPersonal =
+          nextPersonal.status !== "PROCESSING" && !nextPersonal.insight
+            ? {
+                ...nextPersonal,
+                insight: fallbackInsight(nextPersonal.self_positions),
+              }
+            : nextPersonal;
+        setPersonalResult(resolvedPersonal);
         if (nextPersonal.status === "PROCESSING") {
           pollTimer = window.setTimeout(load, 3000);
-          return;
         }
-        setIsLoading(false);
       } catch {
         if (!cancelled) {
           setError("결과를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.");
@@ -510,8 +527,18 @@ function PersonalReport({
   positions: Positions | null;
   onTeam: () => void;
 }) {
-  if (!insight)
-    return <ResultError message="개인 결과를 아직 준비하고 있어요." />;
+  const displayedInsight = insight ?? fallbackInsight(positions);
+  if (!displayedInsight)
+    return (
+      <section className="result-report personal-report survey-card-enter">
+        <div className="result-message">
+          <Image src="/duck-face-wink.png" alt="" width={108} height={108} />
+          <p className="result-eyebrow">개인 결과 준비 중</p>
+          <h1>이 브라우저에서 설문을 완료한 참여자의 결과를 확인할 수 있어요.</h1>
+          <button className="button-next" onClick={onTeam}>우리 팀 분석 보기</button>
+        </div>
+      </section>
+    );
   return (
     <section className="result-report personal-report result-dashboard survey-card-enter">
       <header className="result-dashboard-hero">
@@ -520,7 +547,7 @@ function PersonalReport({
             <span>나의 협업 유형</span>
             <b>{resultCode(positions)}</b>
           </div>
-          <h1>{insight.card_title}</h1>
+          <h1>{displayedInsight.card_title}</h1>
           <p>
             점수로 평가하지 않고, 팀에서 편하게 함께하는 방식을 보여주는 성향
             지도예요.
@@ -640,12 +667,12 @@ function PersonalReport({
       <section className="personal-actions">
         <article className="insight-strength">
           <span>팀에 기여하는 방식</span>
-          <p>{insight.contribution}</p>
+          <p>{displayedInsight.contribution}</p>
         </article>
-        {insight.optional_try && (
+        {displayedInsight.optional_try && (
           <article className="insight-caution">
             <span>함께 시도해 볼 점</span>
-            <p>{insight.optional_try}</p>
+            <p>{displayedInsight.optional_try}</p>
           </article>
         )}
         <article className="insight-role">

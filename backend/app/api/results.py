@@ -41,6 +41,9 @@ class TeamResultResponse(BaseModel):
     session_id: str
     status: str  # PROCESSING|COMPLETED|FALLBACK
     distribution: dict | None
+    # 팀원에게 공개하기로 한 표시 이름과 4축 성향만 반환한다.
+    # 원응답·점수·등급·내부 규칙은 포함하지 않는다.
+    member_positions: list[dict] = []
     team_comment: dict | None  # TeamSnapshot(title/formula/scene/keywords) 또는 None
     rule_text_fallback: dict[str, str] | None = None  # AI 코멘트가 전혀 없을 때만
 
@@ -72,7 +75,37 @@ def _strip_internal(payload: dict | None) -> dict | None:
     return {k: v for k, v in payload.items() if k != "used_rule_ids"}
 
 
-def _build_team_result(session_id: str, analysis: AnalysisResult | None) -> TeamResultResponse:
+def _public_member_positions(session_id: str, db: DBSession) -> list[dict]:
+    """팀 결과에 허용된 최소 공개 정보만 만든다."""
+    from app.services.profile.profile_helpers import canonical_profile_for_participant
+
+    participants = db.exec(
+        select(Participant).where(
+            Participant.session_id == session_id,
+            Participant.submission_status.in_(["SUBMITTED", "LOCKED"]),
+        )
+    ).all()
+
+    positions: list[dict] = []
+    for participant in participants:
+        try:
+            profile = canonical_profile_for_participant(participant.id, db)
+        except Exception:
+            # 제출 상태와 프로필 행이 잠시 동기화되지 않은 참여자는 다음 조회에서 반영한다.
+            continue
+        positions.append(
+            {
+                "participant_id": participant.id,
+                "display_name": participant.nickname,
+                "self_positions": dict(profile.positions.items()),
+            }
+        )
+    return positions
+
+
+def _build_team_result(
+    session_id: str, analysis: AnalysisResult | None, db: DBSession
+) -> TeamResultResponse:
     if analysis is None:
         return TeamResultResponse(
             session_id=session_id,
@@ -97,6 +130,11 @@ def _build_team_result(session_id: str, analysis: AnalysisResult | None) -> Team
         session_id=session_id,
         status=analysis.status,
         distribution=distribution,
+        member_positions=(
+            _public_member_positions(session_id, db)
+            if analysis.status != "PROCESSING"
+            else []
+        ),
         team_comment=team_comment,
         rule_text_fallback=rule_text_fallback,
     )
@@ -117,7 +155,7 @@ def get_team_result(
         raise app_error(SESSION_NOT_FOUND, f"세션을 찾을 수 없습니다: {session_id}")
 
     analysis = _latest_analysis(session_id, db)
-    return _build_team_result(session_id, analysis)
+    return _build_team_result(session_id, analysis, db)
 
 
 @router.get("/sessions/{session_id}/results/me", response_model=PrivateResultResponse)
@@ -165,4 +203,4 @@ def get_shared_result(
         raise app_error(INVALID_INVITE_TOKEN, "유효하지 않은 공유 링크입니다.")
 
     analysis = _latest_analysis(session.id, db)
-    return _build_team_result(session.id, analysis)
+    return _build_team_result(session.id, analysis, db)
