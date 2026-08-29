@@ -21,7 +21,6 @@ from sqlmodel import select, update
 
 from app.errors import (
     ANALYSIS_NOT_READY,
-    COMPLETION_CONDITION_NOT_MET,
     NO_ACTIVE_QUEST,
     QUEST_ALREADY_FINALIZED,
     QUEST_ASSIGNMENT_NOT_FOUND,
@@ -368,23 +367,12 @@ def _finalize(session_id: str, assignment_id: str, db: DBSession, *, to_status: 
 
 
 def complete_assignment(assignment_id: str, db: DBSession) -> QuestAssignment:
+    """완료 조건(체크 충족 여부)은 더 이상 완료를 막지 않는다 — 방장이 언제든
+    완료로 넘길 수 있게 하기 위한 의도적 정책 완화. 진행 상황 자체는
+    completion.unmet_checks()로 화면에 계속 보여준다."""
     assignment = get_assignment_or_404(assignment_id, db)
     if assignment.status in TERMINAL_STATUSES:
         raise app_error(QUEST_ALREADY_FINALIZED, f"이미 {assignment.status} 상태로 종료된 퀘스트입니다.")
-
-    template = get_quest_template(assignment.quest_template_id)
-    if template is None:
-        raise app_error(QUEST_CATALOG_UNAVAILABLE, "완료 조건을 확인할 퀘스트 정의를 찾을 수 없습니다.")
-
-    member_ids = [p.id for p in _locked_participants(assignment.session_id, db)]
-    result = completion.load_result(assignment.result_json)
-    checks = template.completion_condition.get("checks", [])
-
-    if not completion.is_completion_satisfied(checks, result, member_ids):
-        raise app_error(
-            COMPLETION_CONDITION_NOT_MET,
-            "완료 조건을 아직 충족하지 못했습니다.",
-        )
 
     return _finalize(assignment.session_id, assignment_id, db, to_status="COMPLETED")
 

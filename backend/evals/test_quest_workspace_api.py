@@ -315,14 +315,15 @@ def test_cross_room_workspace_access_blocked():
 # ──────────────────────────────────────────────
 
 
-def test_complete_rejected_when_condition_not_met():
+def test_complete_allowed_even_when_condition_not_met():
+    """완료 조건 충족 여부와 무관하게 방장이 바로 완료할 수 있다(의도적 정책)."""
     team = build_team(3)
     assigned = assign_quest(team["session_id"], team["host_secret"])
     assignment_id = assigned["assignment"]["id"]
 
     resp = client.post(f"/api/quest-assignments/{assignment_id}/complete", headers=_auth(team["host_secret"]))
-    assert resp.status_code == 409
-    assert resp.json()["error"]["code"] == "COMPLETION_CONDITION_NOT_MET"
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["assignment"]["status"] == "COMPLETED"
 
 
 def test_no_state_change_after_completion():

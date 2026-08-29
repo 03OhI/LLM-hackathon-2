@@ -174,9 +174,13 @@ function AdminDemoQuestView() {
         isHost
         recommendations={ADMIN_DEMO_RECOMMENDATIONS}
         pendingQuestId={null}
+        skipPending={false}
         error={null}
         onAssign={(questId) => {
           setQuest(ADMIN_DEMO_QUESTS.find((item) => item.quest_id === questId) ?? ADMIN_DEMO_QUEST);
+        }}
+        onSkip={() => {
+          window.location.assign("/workspace?mode=admin");
         }}
       />
     );
@@ -191,6 +195,9 @@ function AdminDemoQuestView() {
       runAction={runAction}
       onHostGoWorkspace={async () => {
         window.location.assign("/workspace?mode=admin");
+      }}
+      onPickAgain={async () => {
+        setQuest(null);
       }}
     />
   );
@@ -232,10 +239,22 @@ function QuestView({ session }: { session: TeamSession }) {
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const pendingRef = useRef<string | null>(null);
+  // 완료/건너뜀 후 "다른 퀘스트 선택하기"를 누르면 이 배정 id를 기억해 둔다.
+  // 폴링이 4초마다 같은(이미 종료된) 배정을 다시 불러와 추천 화면을 덮어쓰지
+  // 않도록 막는 용도 — 새 배정이 생기면(id가 달라지면) 자동으로 해제된다.
+  const dismissedAssignmentIdRef = useRef<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
       const next = await getCurrentQuest(session.sessionId);
+      if (
+        dismissedAssignmentIdRef.current &&
+        next.assignment.id === dismissedAssignmentIdRef.current
+      ) {
+        setLoadError(null);
+        return;
+      }
+      dismissedAssignmentIdRef.current = null;
       setQuest(next);
       setNotAssignedYet(false);
       setLoadError(null);
@@ -278,6 +297,7 @@ function QuestView({ session }: { session: TeamSession }) {
     setActionError(null);
     try {
       const next = await action();
+      dismissedAssignmentIdRef.current = null;
       setQuest(next);
       setNotAssignedYet(false);
     } catch (error) {
@@ -287,6 +307,24 @@ function QuestView({ session }: { session: TeamSession }) {
       setPendingAction(null);
     }
   }, []);
+
+  const pickAgain = useCallback(async () => {
+    if (pendingRef.current) return;
+    pendingRef.current = "pick-again";
+    setPendingAction("pick-again");
+    setActionError(null);
+    try {
+      const result = await getQuestRecommendations(session.sessionId);
+      dismissedAssignmentIdRef.current = quest?.assignment.id ?? null;
+      setRecommendations(result.recommendations);
+      setNotAssignedYet(true);
+    } catch (error) {
+      setActionError(friendlyErrorMessage(error));
+    } finally {
+      pendingRef.current = null;
+      setPendingAction(null);
+    }
+  }, [session.sessionId, quest]);
 
   const handleHostGoWorkspace = useCallback(async () => {
     if (pendingRef.current) return;
@@ -312,10 +350,12 @@ function QuestView({ session }: { session: TeamSession }) {
         isHost={session.isHost}
         recommendations={recommendations}
         pendingQuestId={pendingAction?.startsWith("assign-") ? pendingAction.slice(7) : null}
+        skipPending={pendingAction === "workspace"}
         error={actionError}
         onAssign={(questId) =>
           runAction(`assign-${questId}`, () => assignQuest(session.sessionId, questId))
         }
+        onSkip={handleHostGoWorkspace}
       />
     );
   }
@@ -328,6 +368,7 @@ function QuestView({ session }: { session: TeamSession }) {
       actionError={actionError}
       runAction={runAction}
       onHostGoWorkspace={handleHostGoWorkspace}
+      onPickAgain={pickAgain}
     />
   );
 }
@@ -371,14 +412,18 @@ function NotAssignedCard({
   isHost,
   recommendations,
   pendingQuestId,
+  skipPending,
   error,
   onAssign,
+  onSkip,
 }: {
   isHost: boolean;
   recommendations: QuestRecommendation[];
   pendingQuestId: string | null;
+  skipPending: boolean;
   error: string | null;
   onAssign: (questId: string) => void;
+  onSkip: () => void;
 }) {
   return (
     <section className="result-report quest-card quest-not-assigned">
@@ -401,7 +446,7 @@ function NotAssignedCard({
               <button
                 type="button"
                 className="button-next"
-                disabled={pendingQuestId !== null}
+                disabled={pendingQuestId !== null || skipPending}
                 onClick={() => onAssign(item.quest_id)}
               >
                 {pendingQuestId === item.quest_id ? "선택하는 중…" : "이 퀘스트 선택"}
@@ -410,6 +455,16 @@ function NotAssignedCard({
           </article>
         ))}
       </div>
+      {isHost && (
+        <button
+          type="button"
+          className="quest-skip-all"
+          disabled={pendingQuestId !== null || skipPending}
+          onClick={onSkip}
+        >
+          {skipPending ? "준비하는 중…" : "지금은 건너뛰고 협업 시작하기 →"}
+        </button>
+      )}
       {error && <p className="quest-action-error">{error}</p>}
     </section>
   );
@@ -422,6 +477,7 @@ function QuestCard({
   actionError,
   runAction,
   onHostGoWorkspace,
+  onPickAgain,
 }: {
   quest: QuestCurrent;
   session: TeamSession;
@@ -429,6 +485,7 @@ function QuestCard({
   actionError: string | null;
   runAction: (key: string, action: () => Promise<QuestCurrent>) => Promise<void>;
   onHostGoWorkspace: () => Promise<void>;
+  onPickAgain: () => Promise<void>;
 }) {
   const { assignment } = quest;
 
@@ -484,6 +541,7 @@ function QuestCard({
         pendingAction={pendingAction}
         runAction={runAction}
         onHostGoWorkspace={onHostGoWorkspace}
+        onPickAgain={onPickAgain}
       />
 
       {actionError && <p className="quest-action-error">{actionError}</p>}
@@ -498,12 +556,14 @@ function StatusSection({
   pendingAction,
   runAction,
   onHostGoWorkspace,
+  onPickAgain,
 }: {
   quest: QuestCurrent;
   session: TeamSession;
   pendingAction: string | null;
   runAction: (key: string, action: () => Promise<QuestCurrent>) => Promise<void>;
   onHostGoWorkspace: () => Promise<void>;
+  onPickAgain: () => Promise<void>;
 }) {
   const { assignment } = quest;
   const isHost = session.isHost;
@@ -568,14 +628,24 @@ function StatusSection({
         <p className="quest-final-badge quest-final-skipped">이번 퀘스트는 가볍게 건너뛰었어요. 불이익은 없어요.</p>
       )}
       {isHost ? (
-        <button
-          type="button"
-          className="button-next quest-cta-strong"
-          disabled={pendingAction === "workspace"}
-          onClick={() => void onHostGoWorkspace()}
-        >
-          {pendingAction === "workspace" ? "준비하는 중…" : "협업 시작하기"}
-        </button>
+        <div className="quest-terminal-actions">
+          <button
+            type="button"
+            className="button-next quest-cta-strong"
+            disabled={pendingAction === "workspace" || pendingAction === "pick-again"}
+            onClick={() => void onHostGoWorkspace()}
+          >
+            {pendingAction === "workspace" ? "준비하는 중…" : "협업 시작하기"}
+          </button>
+          <button
+            type="button"
+            className="button-muted quest-pick-again"
+            disabled={pendingAction === "workspace" || pendingAction === "pick-again"}
+            onClick={() => void onPickAgain()}
+          >
+            {pendingAction === "pick-again" ? "불러오는 중…" : "다른 퀘스트 선택하기"}
+          </button>
+        </div>
       ) : (
         <Link
           href={`/workspace?sessionId=${encodeURIComponent(session.sessionId)}`}
@@ -706,15 +776,14 @@ function HostInProgressPanel({
         role="status"
       >
         {teamStatus.satisfied
-          ? "✓ 완료 조건을 모두 채웠어요. 이제 완료 버튼을 누를 수 있어요."
-          : `완료하려면 ${unmetLabels.join(", ")} 항목을 먼저 제출해 주세요.`}
+          ? "✓ 완료 조건을 모두 채웠어요."
+          : `아직 ${unmetLabels.join(", ")} 항목이 남았지만, 원하면 바로 완료할 수 있어요.`}
       </p>
       <div className="quest-host-actions">
         <button
           type="button"
           className="button-next"
-          disabled={!teamStatus.satisfied || pendingAction === "complete"}
-          title={teamStatus.satisfied ? undefined : "아직 완료 조건을 채우지 못했어요."}
+          disabled={pendingAction === "complete"}
           onClick={() => runAction("complete", () => completeQuest(assignmentId))}
         >
           {pendingAction === "complete" ? "완료하는 중…" : "완료"}

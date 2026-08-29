@@ -2825,23 +2825,48 @@ a {
 .quest-recommendation-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 18px;
   margin-top: 24px;
 }
 .quest-recommendation-card {
+  position: relative;
   display: flex;
   min-width: 0;
   min-height: 300px;
   flex-direction: column;
-  padding: 20px;
-  border: 1px solid var(--survey-line, #e7ebf0);
-  border-radius: 20px;
-  background: var(--survey-paper, #fffdf9);
-  box-shadow: 0 8px 22px rgba(34, 48, 75, .045);
+  padding: 24px 22px;
+  border: 1px solid rgba(34, 48, 75, .05);
+  border-radius: 28px;
+  background: linear-gradient(180deg, #fffefc 0%, var(--survey-paper, #fffdf9) 100%);
+  box-shadow: 0 10px 26px rgba(34, 48, 75, .06);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.quest-recommendation-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 36px rgba(34, 48, 75, .11);
+}
+.quest-recommendation-card:first-child {
+  border-color: rgba(255, 131, 116, .18);
+  background: linear-gradient(180deg, #fff6f2 0%, var(--survey-paper, #fffdf9) 100%);
+  box-shadow: 0 14px 32px rgba(255, 131, 116, .16);
+}
+.quest-recommendation-card:first-child::after {
+  content: "베스트 매치";
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  padding: 5px 13px;
+  border-radius: 999px;
+  background: var(--survey-action, #ff8374);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: -.2px;
+  box-shadow: 0 6px 16px rgba(255, 131, 116, .38);
 }
 .quest-recommendation-rank {
   align-self: flex-start;
-  padding: 6px 10px;
+  padding: 6px 11px;
   border-radius: 999px;
   background: #fff0ed;
   color: var(--survey-action, #ff8374);
@@ -2861,26 +2886,67 @@ a {
   line-height: 1.65;
 }
 .quest-recommendation-card > small {
-  margin-top: 12px;
-  color: #7a8799;
+  display: inline-flex;
+  align-self: flex-start;
+  margin-top: 14px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: #f1f5fa;
+  color: #4772a9;
+  font-size: 12px;
+  font-weight: 700;
 }
 .quest-recommendation-card > b {
   margin: 14px 0 18px;
-  padding: 10px 12px;
-  border-radius: 12px;
+  padding: 11px 13px;
+  border-radius: 16px;
   background: #f4f8f1;
   color: #6e8c68;
   font-size: 12px;
+  font-weight: 600;
   line-height: 1.5;
 }
 .quest-recommendation-card .button-next {
   width: 100%;
   margin-top: auto;
   justify-content: center;
+  border-radius: 999px;
+}
+.quest-skip-all {
+  display: block;
+  width: max-content;
+  margin: 22px auto 0;
+  border: 0;
+  background: transparent;
+  color: #8794a8;
+  font: 700 13px inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.quest-skip-all:disabled {
+  opacity: .5;
+  cursor: not-allowed;
 }
 @media (max-width: 900px) {
   .quest-recommendation-grid { grid-template-columns: 1fr; }
   .quest-recommendation-card { min-height: 0; }
+}
+
+/* 완료/건너뜀 후: 협업 시작 or 다른 퀘스트 선택 */
+.quest-terminal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.quest-terminal-actions .quest-cta-strong {
+  margin: 0;
+}
+.quest-pick-again {
+  border-radius: 999px;
 }
 
 /* Use the dashboard's bright card surface throughout the survey setup. */

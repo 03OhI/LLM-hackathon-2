@@ -160,7 +160,7 @@ describe("QuestPage 역할별 버튼", () => {
     expect(screen.queryByRole("button", { name: "퀘스트 시작" })).not.toBeInTheDocument();
   });
 
-  it("완료 조건이 부족하면 방장의 완료 버튼이 비활성 상태다", async () => {
+  it("완료 조건이 부족해도 방장의 완료 버튼은 눌러서 바로 완료할 수 있다", async () => {
     vi.mocked(getSavedTeamSession).mockReturnValue(hostSession);
     vi.mocked(getCurrentQuest).mockResolvedValue(
       makeQuest({
@@ -175,7 +175,7 @@ describe("QuestPage 역할별 버튼", () => {
     render(<QuestPage />);
 
     const completeButton = await screen.findByRole("button", { name: "완료" });
-    expect(completeButton).toBeDisabled();
+    expect(completeButton).not.toBeDisabled();
   });
 
   it("완료 조건이 모두 충족되면 완료 버튼이 활성화된다", async () => {
