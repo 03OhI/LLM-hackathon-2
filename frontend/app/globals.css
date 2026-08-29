@@ -2946,7 +2946,24 @@ a {
   margin: 0;
 }
 .quest-pick-again {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid #d7ddea;
   border-radius: 999px;
+  padding: 15px 26px;
+  background: #f3f5f9;
+  color: var(--survey-navy, #334166);
+  font: 800 15px inherit;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+.quest-pick-again:hover:not(:disabled) {
+  background: #e9ecf3;
+  border-color: #c7cfe0;
+}
+.quest-pick-again:disabled {
+  opacity: .5;
+  cursor: not-allowed;
 }
 
 /* Use the dashboard's bright card surface throughout the survey setup. */

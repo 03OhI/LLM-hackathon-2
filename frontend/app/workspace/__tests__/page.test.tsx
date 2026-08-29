@@ -240,7 +240,10 @@ describe("WorkspacePage 링크 등록·삭제", () => {
     render(<WorkspacePage />);
     await screen.findByText("공유 링크");
 
+    // 폼은 팀 노션 링크로 기본 채워져 있으므로(원클릭 등록용) 다른 링크를 넣으려면 먼저 지운다.
+    await user.clear(screen.getByLabelText("링크 이름"));
     await user.type(screen.getByLabelText("링크 이름"), "디자인 시안");
+    await user.clear(screen.getByLabelText("링크 주소"));
     await user.type(screen.getByLabelText("링크 주소"), "https://figma.com/x");
     await user.selectOptions(screen.getByLabelText("링크 종류"), "FIGMA");
     await user.click(screen.getByRole("button", { name: "링크 추가" }));

@@ -576,7 +576,7 @@ function StatusSection({
             <p>팀원들과 함께 볼 준비가 되면 퀘스트를 시작해 주세요.</p>
             <button
               type="button"
-              className="button-next"
+              className="button-next quest-cta-strong"
               disabled={pendingAction === "start"}
               onClick={() => runAction("start", () => startQuest(assignment.id))}
             >
@@ -639,7 +639,7 @@ function StatusSection({
           </button>
           <button
             type="button"
-            className="button-muted quest-pick-again"
+            className="quest-pick-again"
             disabled={pendingAction === "workspace" || pendingAction === "pick-again"}
             onClick={() => void onPickAgain()}
           >

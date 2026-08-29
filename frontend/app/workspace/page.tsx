@@ -821,9 +821,9 @@ function ResourcePanel({
   onCreate: (input: { title: string; url: string; provider: ResourceProvider }) => void;
   onDelete: (resourceId: string) => void;
 }) {
-  const [title, setTitle] = useState("");
-  const [url, setUrl] = useState("");
-  const [provider, setProvider] = useState<ResourceProvider>("OTHER");
+  const [title, setTitle] = useState("팀 노션");
+  const [url, setUrl] = useState("https://app.notion.com/p/2-3cbeb06e3d72804ebe47ea4cf5e53a1c?source=copy_link");
+  const [provider, setProvider] = useState<ResourceProvider>("NOTION");
   const formRef = useRef<HTMLFormElement | null>(null);
   const titleInputRef = useRef<HTMLInputElement | null>(null);
 
