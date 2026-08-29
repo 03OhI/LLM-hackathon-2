@@ -7325,6 +7325,34 @@ a {
 
 
 /* All desktop preview tabs share one frame and one inner canvas. */
+.dashboard-shell,
+.dashboard-top,
+.dashboard-top > .welcome-card,
+.dashboard-top > .workspace-card,
+.workspace-content,
+.workspace-content > .tab-panel,
+.type-panel,
+.type-panel .type-grid,
+.type-explainer {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dashboard-top > .welcome-card,
+.dashboard-top > .workspace-card,
+.workspace-content,
+.workspace-content > .tab-panel {
+  width: 100%;
+}
+
+.dashboard-top > .workspace-card {
+  grid-template-columns: 200px minmax(0, 1fr);
+}
+
+.type-panel .type-grid {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+
 @media (min-width: 701px) {
   .dashboard-top > .workspace-card {
     height: 650px;
