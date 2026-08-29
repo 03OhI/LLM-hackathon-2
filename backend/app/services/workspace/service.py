@@ -40,7 +40,9 @@ def get_workspace_by_session(session_id: str, db: DBSession) -> Workspace | None
 def start_workspace(session_id: str, db: DBSession) -> Workspace:
     """POST /rooms/{id}/workspace/start — 멱등.
 
-    조건(§6): 팀 분석 완료 + 활성 퀘스트가 COMPLETED/SKIPPED로 종료.
+    조건: 팀 분석 완료. 퀘스트를 하나도 안 골랐거나 아직 안 끝냈어도 방장은
+    언제든 협업을 시작할 수 있다(의도적 정책 완화) — 진행 중이던 퀘스트가
+    있으면 시작하면서 자동으로 SKIPPED 처리해 상태를 남긴다.
     """
     existing = get_workspace_by_session(session_id, db)
     if existing is not None:
@@ -57,13 +59,10 @@ def start_workspace(session_id: str, db: DBSession) -> Workspace:
         )
     ).first()
     if active_quest is not None:
-        raise app_error(WORKSPACE_NOT_READY, "퀘스트를 완료하거나 건너뛴 후에 협업을 시작할 수 있습니다.")
-
-    any_quest = db.exec(
-        select(QuestAssignment).where(QuestAssignment.session_id == session_id)
-    ).first()
-    if any_quest is None:
-        raise app_error(WORKSPACE_NOT_READY, "퀘스트가 배정된 적이 없습니다.")
+        active_quest.status = "SKIPPED"
+        active_quest.completed_at = utcnow()
+        db.add(active_quest)
+        db.commit()
 
     workspace = Workspace(id=str(uuid.uuid4()), session_id=session_id, status="ACTIVE")
     db.add(workspace)

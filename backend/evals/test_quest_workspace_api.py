@@ -362,13 +362,29 @@ def test_skip_has_no_penalty_data():
 # ──────────────────────────────────────────────
 
 
-def test_workspace_start_requires_quest_finished():
+def test_workspace_start_auto_skips_unfinished_quest():
+    """방장은 퀘스트를 끝내지 않아도 바로 협업을 시작할 수 있다(의도적 정책).
+    진행 중이던 퀘스트는 시작하면서 자동으로 SKIPPED 처리된다."""
     team = build_team(3)
-    assign_quest(team["session_id"], team["host_secret"])
+    assigned = assign_quest(team["session_id"], team["host_secret"])
+    assignment_id = assigned["assignment"]["id"]
 
     resp = client.post(f"/api/rooms/{team['session_id']}/workspace/start", headers=_auth(team["host_secret"]))
-    assert resp.status_code == 409
-    assert resp.json()["error"]["code"] == "WORKSPACE_NOT_READY"
+    assert resp.status_code == 200, resp.text
+
+    current = client.get(
+        f"/api/rooms/{team['session_id']}/quests/current", headers=_auth(team["host_secret"])
+    ).json()
+    assert current["assignment"]["id"] == assignment_id
+    assert current["assignment"]["status"] == "SKIPPED"
+
+
+def test_workspace_start_works_with_no_quest_assigned_at_all():
+    """퀘스트를 한 번도 고르지 않았어도 협업을 시작할 수 있다."""
+    team = build_team(3)
+
+    resp = client.post(f"/api/rooms/{team['session_id']}/workspace/start", headers=_auth(team["host_secret"]))
+    assert resp.status_code == 200, resp.text
 
 
 def test_workspace_start_idempotent_after_quest_completed():
