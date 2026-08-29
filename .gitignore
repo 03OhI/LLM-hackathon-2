@@ -1,4 +1,4 @@
-﻿# Python
+# ── Python ──────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
@@ -10,8 +10,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
 parts/
 sdist/
 var/
@@ -20,51 +18,52 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual Environment
+# 가상환경
 venv/
+.venv/
 ENV/
 env/
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
+# ── Node / Next.js (frontend) ───────────────────────────
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+coverage/
 
-# Streamlit
-.streamlit/
-
-# AWS
+# ── 시크릿 · 환경설정 ───────────────────────────────────
+.env
+.env.*
+!.env.example
 *.pem
+*.key
+config/
 
-# FAISS
+# ── 로컬 DB · 인덱스 산출물 ─────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
 faiss_index/
 *.index
 *.pkl
 
-# Logs
+# ── 배포용 PDF (용량 커서 저장소에 넣지 않음) ───────────
+*.pdf
+
+# ── 로그 · 임시 파일 ────────────────────────────────────
 *.log
 nohup.out
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Temporary files
 downloaded_context.txt
 create_bucket.py
 get-pip.py
 
-# Data files
-data/
+# ── 에디터 · OS ─────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
 
-# Config files
-config/
-
-# Documentation PDFs
-*.pdf
-
-# environment files (do not commit real secrets/config)
-.env
-backend/.env
-*.pem
+# ── Streamlit ───────────────────────────────────────────
+.streamlit/
