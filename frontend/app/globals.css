@@ -6917,3 +6917,85 @@ a {
     width: min(100%, 300px);
   }
 }
+
+/* Quest completion controls: explain the gate and use the survey's rounded CTA language. */
+.quest-completion-guide {
+  margin: -4px 0 0;
+  border: 1px solid #f1e4c8;
+  border-radius: 14px;
+  padding: 12px 15px;
+  background: #fff8e8;
+  color: #7a684d;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.55;
+}
+.quest-completion-guide-ready {
+  border-color: #dcebd6;
+  background: #f3f8f0;
+  color: #5e8059;
+}
+.quest-status-panel .quest-check-row {
+  border-radius: 18px;
+  padding: 12px 14px;
+}
+.quest-status-panel .quest-check-row input {
+  min-height: 46px;
+  border-radius: 14px;
+  padding: 10px 14px;
+}
+.quest-status-panel .quest-check-row .button-muted,
+.quest-host-actions > .button-next,
+.quest-host-actions > .button-muted,
+.quest-skip-confirm .button-muted {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px !important;
+  padding: 11px 20px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.quest-status-panel .quest-check-row .button-muted {
+  min-width: 86px;
+}
+.quest-host-actions {
+  gap: 12px;
+}
+.quest-host-actions > .button-next,
+.quest-host-actions > .button-muted {
+  min-width: 112px;
+}
+.quest-host-actions .button-next:disabled,
+.quest-status-panel .quest-check-row button:disabled {
+  border-color: #e2e5e9 !important;
+  background: #eef0f3 !important;
+  color: #a1a8b3 !important;
+  box-shadow: none;
+}
+.quest-cta-strong {
+  display: inline-flex;
+  width: auto;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 15px 30px;
+  text-decoration: none;
+}
+
+@media (max-width: 700px) {
+  .quest-status-panel .quest-check-row {
+    align-items: stretch;
+  }
+  .quest-status-panel .quest-check-row .button-muted {
+    min-width: 76px;
+  }
+  .quest-host-actions > .button-next,
+  .quest-host-actions > .button-muted {
+    flex: 1 1 120px;
+  }
+}

@@ -577,6 +577,7 @@ function HostInProgressPanel({
 }) {
   const [skipConfirm, setSkipConfirm] = useState(false);
   const unmet = new Set(teamStatus.unmet_check_types);
+  const unmetLabels = [...unmet].map((type) => CHECK_TYPE_LABEL[type] ?? type);
 
   return (
     <div className="quest-host-panel">
@@ -622,6 +623,14 @@ function HostInProgressPanel({
           ))}
         </div>
       )}
+      <p
+        className={`quest-completion-guide ${teamStatus.satisfied ? "quest-completion-guide-ready" : ""}`}
+        role="status"
+      >
+        {teamStatus.satisfied
+          ? "✓ 완료 조건을 모두 채웠어요. 이제 완료 버튼을 누를 수 있어요."
+          : `완료하려면 ${unmetLabels.join(", ")} 항목을 먼저 제출해 주세요.`}
+      </p>
       <div className="quest-host-actions">
         <button
           type="button"
@@ -695,7 +704,11 @@ function CheckSubmitRow({
           aria-label={`${CHECK_TYPE_LABEL[type] ?? type} 입력`}
         />
       )}
-      <button type="submit" className="button-muted" disabled={pending}>
+      <button
+        type="submit"
+        className="button-muted"
+        disabled={pending || (needsText && value.trim().length === 0)}
+      >
         {pending ? "제출 중…" : "제출"}
       </button>
     </form>

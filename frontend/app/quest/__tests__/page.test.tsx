@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "@/lib/api";
@@ -97,7 +97,7 @@ describe("QuestPage 관리자 시연 흐름", () => {
 
     // 2) 공동 결과 제출(team_checks: TEXT_SUBMIT)
     const input = await screen.findByLabelText("내용 제출 입력");
-    input.click();
+    fireEvent.change(input, { target: { value: "우리 팀은 80% 완성 후 함께 쉬기로 했어요." } });
     const submitButtons = await screen.findAllByRole("button", { name: "제출" });
     submitButtons[submitButtons.length - 1].click();
 
