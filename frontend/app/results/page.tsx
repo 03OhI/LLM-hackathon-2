@@ -38,6 +38,7 @@ type TeamResult = {
   distribution: Distribution | null;
   member_positions: MemberPosition[];
   team_comment: TeamSnapshot | null;
+  rule_text_fallback?: Record<string, string> | null;
 };
 type PersonalResult = {
   participant_id: string;
@@ -236,7 +237,17 @@ export default function ResultsPage() {
       params.get("sessionId") ??
       params.get("session") ??
       window.sessionStorage.getItem(sessionStorageKey) ??
-      ""
+      window.localStorage.getItem(sessionStorageKey) ??
+      (() => {
+        try {
+          const raw =
+            window.sessionStorage.getItem("tmti-active-team-session") ??
+            window.localStorage.getItem("tmti-active-team-session");
+          return raw ? JSON.parse(raw)?.team?.sessionId ?? "" : "";
+        } catch {
+          return "";
+        }
+      })()
     );
   }, []);
 
@@ -260,8 +271,28 @@ export default function ResultsPage() {
         if (!teamResponse.ok) throw new Error("TEAM_RESULT_FAILED");
         const nextTeam = (await teamResponse.json()) as TeamResult;
         if (cancelled) return;
-        setTeamResult(nextTeam);
-        if (nextTeam.status === "PROCESSING") {
+        // FALLBACK is a completed, displayable result. Some older analyses omit
+        // team_comment, so turn the public fallback text into a safe snapshot.
+        const fallbackLines = Object.values(nextTeam.rule_text_fallback ?? {}).filter(
+          (value): value is string => typeof value === "string" && value.trim().length > 0,
+        );
+        const resolvedTeam =
+          nextTeam.status !== "PROCESSING" && !nextTeam.team_comment
+            ? {
+                ...nextTeam,
+                team_comment: {
+                  title: "우리 팀의 협업 결과",
+                  formula: "함께 확인한 협업 방식",
+                  scene:
+                    fallbackLines[0] ??
+                    "서로의 일하는 방식을 바탕으로 팀의 다음 대화를 준비했어요.",
+                  keywords: ["협업", "대화", "다음 단계"],
+                  used_rule_ids: [],
+                },
+              }
+            : nextTeam;
+        setTeamResult(resolvedTeam);
+        if (resolvedTeam.status === "PROCESSING") {
           pollTimer = window.setTimeout(load, 3000);
           return;
         }
@@ -269,7 +300,10 @@ export default function ResultsPage() {
           `${apiBase}/sessions/${encodeURIComponent(sessionId)}/results/me`,
           { credentials: "same-origin" },
         );
-        if (!personalResponse.ok) throw new Error("PERSONAL_RESULT_FAILED");
+        if (!personalResponse.ok) {
+          setIsLoading(false);
+          return;
+        }
         const nextPersonal = (await personalResponse.json()) as PersonalResult;
         if (cancelled) return;
         setPersonalResult(nextPersonal);
@@ -299,8 +333,7 @@ export default function ResultsPage() {
     ? administratorPreview.personal
     : personalResult;
   if (!administratorMode && isLoading) return <ResultLoading />;
-  if (error || !displayedTeam || !displayedPersonal)
-    return <ResultError message={error} />;
+  if (error || !displayedTeam) return <ResultError message={error} />;
   return (
     <ResultShell>
       <section className="result-tabs" aria-label="결과 보기 방식">
@@ -329,8 +362,8 @@ export default function ResultsPage() {
       </Link>
       {view === "personal" ? (
         <PersonalReport
-          insight={displayedPersonal.insight}
-          positions={displayedPersonal.self_positions}
+          insight={displayedPersonal?.insight ?? null}
+          positions={displayedPersonal?.self_positions ?? null}
           onTeam={() => setView("team")}
         />
       ) : (
@@ -716,7 +749,7 @@ function ResultFooter() {
   return (
     <footer className="result-footer-actions">
       <Link href="/">홈으로</Link>
-      <Link href="/">
+      <Link href="/survey?new=1">
         새로운 테스트하기 <b>→</b>
       </Link>
     </footer>

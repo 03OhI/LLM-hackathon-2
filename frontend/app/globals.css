@@ -7451,3 +7451,35 @@ a {
     align-content: start;
   }
 }
+
+/* Keep desktop team-result headings readable without character-by-character wrapping. */
+@media (min-width: 1080px) {
+  .results-shell:has(.team-result-layout) { max-width: 1380px; }
+  .team-result-layout { width: min(100% - 48px, 1340px); grid-template-columns: 205px minmax(0, 1fr); }
+  .team-report-main { padding: 40px 46px 48px; }
+  .team-result-layout .personal-hero { gap: 22px; }
+  .team-result-layout .personal-hero > div { max-width: none; min-width: 0; }
+  .team-result-layout .personal-hero h1,
+  .team-story h2,
+  .team-member-cards h2,
+  .team-role-composition h2,
+  .team-action-guide h2,
+  .team-distribution h2 { word-break: keep-all; overflow-wrap: normal; }
+  .team-result-layout .personal-hero h1 { white-space: nowrap; font-size: clamp(34px, 3vw, 44px); letter-spacing: -2.35px; }
+  .team-story h2,
+  .team-member-cards h2,
+  .team-role-composition h2,
+  .team-action-guide h2,
+  .team-distribution h2 { white-space: nowrap; }
+}
+@media (min-width: 701px) and (max-width: 1079px) {
+  .team-result-layout { width: min(100% - 28px, 1060px); grid-template-columns: 176px minmax(0, 1fr); }
+  .team-report-main { padding: 34px 30px 42px; }
+  .team-result-layout .personal-hero h1,
+  .team-story h2,
+  .team-member-cards h2,
+  .team-role-composition h2,
+  .team-action-guide h2,
+  .team-distribution h2 { word-break: keep-all; overflow-wrap: normal; }
+  .team-result-layout .personal-hero h1 { font-size: clamp(30px, 3.55vw, 38px); letter-spacing: -2px; }
+}

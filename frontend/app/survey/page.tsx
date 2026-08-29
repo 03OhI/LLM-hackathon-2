@@ -260,6 +260,16 @@ function getSavedTeamSession(): SavedTeamSession | null {
   }
 }
 
+function beginNewTest() {
+  // 이전 팀 데이터는 서버에 남기고, 현재 브라우저의 참여 상태만 비운다.
+  // Link의 클라이언트 전환 대신 문서를 새로 열어 대기 화면 상태가 재사용되지 않게 한다.
+  window.sessionStorage.removeItem(teamSessionStorageKey);
+  window.sessionStorage.removeItem("tmti-session-id");
+  window.localStorage.removeItem(teamSessionStorageKey);
+  window.localStorage.removeItem("tmti-session-id");
+  window.location.replace("/survey?new=1");
+}
+
 function WaitingScreen({
   team,
 }: {
@@ -368,10 +378,10 @@ function WaitingScreen({
           <Link className="button-muted" href="/">
             홈으로
           </Link>
-          <Link className="button-next waiting-new-test" href="/survey?new=1">
+          <button type="button" className="button-next waiting-new-test" onClick={beginNewTest}>
             <span>새로운 테스트 진행하기</span>
             <i aria-hidden="true">→</i>
-          </Link>
+          </button>
         </div>
         {statusError && <p className="waiting-demo-note" role="status">{statusError}</p>}
         {team.isHost && <p className="waiting-demo-note">모든 응답이 모이면 분석을 시작하고 결과 화면으로 이동합니다.</p>}
@@ -531,9 +541,9 @@ function TeamLobby({
           <Link className="button-muted" href="/">
             홈으로
           </Link>
-          <Link className="button-muted lobby-new-test" href="/survey?new=1">
+          <button type="button" className="button-muted lobby-new-test" onClick={beginNewTest}>
             새로운 테스트
-          </Link>
+          </button>
           <button className="button-next intro-start-button" onClick={onStart}>
             <span>내 설문 시작하기</span>
             <i aria-hidden="true">→</i>
@@ -585,10 +595,20 @@ export default function SurveyPage() {
     Number(teamSize) <= 10;
   useEffect(() => {
     if (freshStart) {
+      // 같은 /survey 경로에서 쿼리만 바뀌면 Next.js가 기존 컴포넌트를 재사용한다.
+      // 따라서 저장소만 지우지 말고 메모리 상태도 초기 팀 생성 화면으로 즉시 되돌린다.
+      // 기존 팀/DB 데이터를 삭제하지 않고, 이 브라우저의 새 테스트 시작 상태만 초기화한다.
       window.sessionStorage.removeItem(teamSessionStorageKey);
       window.sessionStorage.removeItem("tmti-session-id");
       window.localStorage.removeItem(teamSessionStorageKey);
       window.localStorage.removeItem("tmti-session-id");
+      setAnswers({});
+      setTeamSession(null);
+      setTeamError("");
+      setShowValidation(false);
+      setShowTeamValidation(false);
+      setStep(-1);
+      window.history.replaceState(null, "", "/survey");
       return;
     }
     const saved = getSavedTeamSession();

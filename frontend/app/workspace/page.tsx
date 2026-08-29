@@ -72,21 +72,29 @@ function WorkspaceHero({
 
   return (
     <header className="workspace-hero">
-      <p className="result-eyebrow">협업 워크스페이스</p>
-      <h1>이제 함께 만들어 볼까요?</h1>
-      <p className="workspace-hero-team">
-        <b>{teamName}</b> 팀의 협업 공간이에요.
-      </p>
-      <div className="workspace-progress-summary">
-        <span className="workspace-summary-chip">
-          발표 준비 <b>{doneChecklist}</b> / {checklist.length}
-        </span>
-        <span className="workspace-summary-chip">
-          진행 중 할 일 <b>{inProgressTasks}</b>개
-        </span>
-        <span className="workspace-summary-chip">
-          열린 결정 <b>{openDecisions}</b>개
-        </span>
+      <div className="workspace-hero-copy">
+        <p className="result-eyebrow">협업 워크스페이스</p>
+        <h1>이제 함께 만들어 볼까요?</h1>
+        <p className="workspace-hero-team">
+          <b>{teamName}</b> 팀의 협업 공간이에요. 오늘의 흐름을 한곳에서 맞춰 봐요.
+        </p>
+        <div className="workspace-progress-summary" aria-label="현재 협업 현황">
+          <span className="workspace-summary-chip">
+            발표 준비 <b>{doneChecklist}</b> / {checklist.length}
+          </span>
+          <span className="workspace-summary-chip">
+            진행 중 할 일 <b>{inProgressTasks}</b>개
+          </span>
+          <span className="workspace-summary-chip">
+            열린 결정 <b>{openDecisions}</b>개
+          </span>
+        </div>
+      </div>
+      <div className="workspace-hero-visual" aria-hidden="true">
+        <span className="workspace-hero-spark workspace-hero-spark-coral">+</span>
+        <span className="workspace-hero-spark workspace-hero-spark-sage">+</span>
+        <span className="workspace-hero-spark workspace-hero-spark-blue">+</span>
+        <Image src="/duck-run-3.png" alt="" width={176} height={176} priority />
       </div>
     </header>
   );
