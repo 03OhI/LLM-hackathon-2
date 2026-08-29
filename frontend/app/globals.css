@@ -6845,3 +6845,75 @@ a {
   .workspace-decision-option-actions .button-muted,
   .workspace-decision-option-actions .button-next { width: 100%; }
 }
+
+/* Waiting room actions: use the invite-copy button as the shared frame. */
+.waiting-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(100%, 820px);
+  margin: 0 auto;
+  gap: 10px;
+}
+.waiting-actions > .invite-button,
+.waiting-actions > .admin-preview-button,
+.waiting-actions > .button-muted,
+.waiting-actions > .waiting-new-test {
+  box-sizing: border-box;
+  display: inline-flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  margin: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font: 800 14px/1.35 RIDIBatang, "Malgun Gothic", sans-serif;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.waiting-actions > .invite-button {
+  border-color: #dbe2e8;
+  background: #fff;
+  color: var(--survey-navy);
+}
+.waiting-actions > .admin-preview-button {
+  border-color: #d4e1d1;
+  background: #f6faf4;
+  color: #668160;
+}
+.waiting-actions > .button-muted {
+  border-color: #dbe2e8;
+  background: #f7f9fb;
+  color: #61708a;
+}
+.waiting-actions > .waiting-new-test {
+  border-color: var(--survey-action);
+  background: var(--survey-action);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(255, 131, 116, .2);
+}
+.waiting-actions > .admin-preview-button span,
+.waiting-actions > .waiting-new-test i {
+  flex: 0 0 auto;
+  font: 18px/1 Arial, sans-serif;
+  font-style: normal;
+}
+
+@media (max-width: 900px) {
+  .waiting-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: min(100%, 560px);
+  }
+}
+
+@media (max-width: 520px) {
+  .waiting-actions {
+    grid-template-columns: minmax(0, 1fr);
+    width: min(100%, 300px);
+  }
+}
