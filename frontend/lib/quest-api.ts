@@ -57,14 +57,32 @@ export type QuestCurrent = {
   completion_requirements: CompletionRequirements;
 };
 
+export type QuestRecommendation = {
+  quest_id: string;
+  title: string;
+  summary: string;
+  duration_minutes: number;
+  category: string;
+  match_reason: string;
+};
+
+export type QuestRecommendations = { recommendations: QuestRecommendation[] };
+
 export type CheckSubmission = { type: string; count?: number; value?: string | null };
 
 export function getCurrentQuest(roomId: string): Promise<QuestCurrent> {
   return requestJson(`/rooms/${encodeURIComponent(roomId)}/quests/current`);
 }
 
-export function assignQuest(roomId: string): Promise<QuestCurrent> {
-  return requestJson(`/rooms/${encodeURIComponent(roomId)}/quests/assign`, { method: "POST" });
+export function getQuestRecommendations(roomId: string): Promise<QuestRecommendations> {
+  return requestJson(`/rooms/${encodeURIComponent(roomId)}/quests/recommendations`);
+}
+
+export function assignQuest(roomId: string, questId?: string): Promise<QuestCurrent> {
+  return requestJson(`/rooms/${encodeURIComponent(roomId)}/quests/assign`, {
+    method: "POST",
+    body: JSON.stringify({ quest_id: questId ?? null }),
+  });
 }
 
 export function startQuest(assignmentId: string): Promise<QuestCurrent> {

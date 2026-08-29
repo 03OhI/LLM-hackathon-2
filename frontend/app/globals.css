@@ -2821,6 +2821,68 @@ a {
   }
 }
 
+/* Team-matched quest recommendations */
+.quest-recommendation-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+.quest-recommendation-card {
+  display: flex;
+  min-width: 0;
+  min-height: 300px;
+  flex-direction: column;
+  padding: 20px;
+  border: 1px solid var(--survey-line, #e7ebf0);
+  border-radius: 20px;
+  background: var(--survey-paper, #fffdf9);
+  box-shadow: 0 8px 22px rgba(34, 48, 75, .045);
+}
+.quest-recommendation-rank {
+  align-self: flex-start;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #fff0ed;
+  color: var(--survey-action, #ff8374);
+  font-size: 12px;
+  font-weight: 800;
+}
+.quest-recommendation-card h2 {
+  margin: 16px 0 10px;
+  color: var(--survey-navy, #334166);
+  font-size: 21px;
+  line-height: 1.35;
+}
+.quest-recommendation-card > p {
+  margin: 0;
+  color: #69758b;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.quest-recommendation-card > small {
+  margin-top: 12px;
+  color: #7a8799;
+}
+.quest-recommendation-card > b {
+  margin: 14px 0 18px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f4f8f1;
+  color: #6e8c68;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.quest-recommendation-card .button-next {
+  width: 100%;
+  margin-top: auto;
+  justify-content: center;
+}
+@media (max-width: 900px) {
+  .quest-recommendation-grid { grid-template-columns: 1fr; }
+  .quest-recommendation-card { min-height: 0; }
+}
+
 /* Use the dashboard's bright card surface throughout the survey setup. */
 .survey-shell {
   --survey-paper: rgba(255, 255, 255, 0.82);

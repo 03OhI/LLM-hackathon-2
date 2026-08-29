@@ -3,6 +3,7 @@
 
 - build_match_context: 규칙 엔진 결과 → QuestMatchContext 어댑터 (§3)
 - decide_assignment: 필터·점수·AI 선택·검증·폴백까지 이어지는 배정 결정 (§5)
+- recommend_quests_for_room: 팀 성향 점수 기반 공개 후보 3개
 - assign_quest_for_room: 배정 결과를 QuestAssignment로 저장, 멱등/중복 방지 (§6)
 - start/complete/skip: 상태 전이 + 완료 조건 재검사 + 동시 확정 방지 (§6)
 """
@@ -34,11 +35,30 @@ from app.services.quests import completion
 from app.services.quests.ai_client import build_minimal_fallback_decision, try_agent_decision
 from app.services.quests.catalog import get_active_quest_templates, get_quest_template
 from app.services.quests.schemas import DEFAULT_CONTEXT_TAGS, QuestAssignmentDecision, QuestMatchContext
+from ai.quest_assignment.filter import filter_candidates, matched_candidates
+from ai.quest_assignment.scoring import rank_candidates
 
 logger = logging.getLogger(__name__)
 
 ACTIVE_STATUSES = ("ASSIGNED", "IN_PROGRESS")
 TERMINAL_STATUSES = ("COMPLETED", "SKIPPED")
+
+_TEAM_RULE_PUBLIC_LABELS = {
+    "TEAM_BALANCED_AGENCY": "역할 주도성이 균형 잡힌",
+    "TEAM_BALANCED_CONFLICT": "의견 조율 방식이 균형 잡힌",
+    "TEAM_DIVERSE_COMMUNICATION": "소통 방식이 다양한",
+    "TEAM_PLANNING_STABILITY": "계획 성향이 안정적인",
+    "TEAM_ADAPTABILITY": "상황 적응력이 높은",
+    "TEAM_DRIVER_ENERGY": "추진 에너지가 높은",
+    "TEAM_HARMONIZER_PRESENCE": "조율 성향이 두드러지는",
+    "TEAM_TACTFUL_COMMUNICATION": "배려형 소통이 강한",
+    "TEAM_DIRECT_CONCENTRATION": "직접적인 소통이 강한",
+    "TEAM_PLANNING_OVERLOAD": "계획 성향이 강한",
+    "TEAM_CONFRONTER_MAJORITY": "의견을 분명히 표현하는",
+    "TEAM_LOW_DRIVER": "신중하게 합의하는",
+    "TEAM_SUPPORTER_MAJORITY": "협력과 지원을 중시하는",
+    "TEAM_ADAPTER_MAJORITY": "유연하게 대응하는",
+}
 
 
 def _locked_participants(session_id: str, db: DBSession) -> list[Participant]:
@@ -104,6 +124,75 @@ async def decide_assignment(context: QuestMatchContext) -> QuestAssignmentDecisi
     return build_minimal_fallback_decision(catalog, context)
 
 
+def recommend_quests_for_room(session_id: str, db: DBSession, *, limit: int = 3) -> list[dict]:
+    """팀 규칙 점수 기준 상위 퀘스트를 공개 화면용으로 반환한다.
+
+    우선 실제 rule_id가 겹친 맞춤 후보를 점수순으로 배치하고, 3개가 안 되면
+    동일한 안전·인원 필터를 통과한 보완 후보로 채운다. 내부 rule_id와 점수는
+    응답에 포함하지 않는다.
+    """
+    session = db.get(SessionModel, session_id)
+    analysis = db.exec(
+        select(AnalysisResult)
+        .where(AnalysisResult.session_id == session_id)
+        .order_by(AnalysisResult.analysis_version.desc())
+    ).first()
+    if session is None or analysis is None or session.status != "COMPLETED":
+        raise app_error(ANALYSIS_NOT_READY, "팀 분석이 완료된 후에만 퀘스트를 추천할 수 있습니다.")
+
+    context = build_match_context(session_id, analysis, db)
+    catalog = get_active_quest_templates()
+    if not catalog:
+        raise app_error(QUEST_CATALOG_UNAVAILABLE, "추천 가능한 퀘스트가 없습니다.")
+
+    safe = filter_candidates(catalog, context)
+    matched = matched_candidates(safe, context)
+    ordered_matched = rank_candidates(matched, context, catalog, limit=len(matched))
+    matched_ids = {q.quest_id for q in ordered_matched}
+    ordered_fill = rank_candidates(
+        [q for q in safe if q.quest_id not in matched_ids],
+        context,
+        catalog,
+        limit=len(safe),
+    )
+    ordered = ordered_matched + ordered_fill
+
+    # 일반 후보가 부족한 극단적인 카탈로그에서도 범용 퀘스트로 빈자리를 채운다.
+    if len(ordered) < limit:
+        ordered.extend(
+            q
+            for q in catalog
+            if q.is_active
+            and q.is_universal
+            and q.assignment == "AUTO"
+            and q.disclosure_level != "HIGH"
+            and q.team_size.get("min", 99) <= context.team_size <= q.team_size.get("max", -1)
+            and q.quest_id not in {item.quest_id for item in ordered}
+        )
+
+    recommendations: list[dict] = []
+    rule_ids = set(context.matched_rule_ids)
+    for quest in ordered[:limit]:
+        used_rule_ids = sorted(rule_ids & (set(quest.best_for) | set(quest.also_for)))
+        public_traits = [
+            _TEAM_RULE_PUBLIC_LABELS[rule_id]
+            for rule_id in used_rule_ids
+            if rule_id in _TEAM_RULE_PUBLIC_LABELS
+        ][:2]
+        recommendations.append(
+            {
+                "template": quest,
+                "used_rule_ids": used_rule_ids,
+                "match_reason": (
+                    f"{', '.join(public_traits)} 팀에 잘 맞는 퀘스트예요."
+                    if public_traits
+                    else "지금 팀이 부담 없이 함께 시작하기 좋은 보완 퀘스트예요."
+                ),
+            }
+        )
+    return recommendations
+
+
 def find_active_assignment(session_id: str, db: DBSession) -> QuestAssignment | None:
     return db.exec(
         select(QuestAssignment).where(
@@ -113,7 +202,9 @@ def find_active_assignment(session_id: str, db: DBSession) -> QuestAssignment | 
     ).first()
 
 
-async def assign_quest_for_room(session_id: str, db: DBSession) -> QuestAssignment:
+async def assign_quest_for_room(
+    session_id: str, db: DBSession, selected_quest_id: str | None = None
+) -> QuestAssignment:
     """POST /rooms/{id}/quests/assign — 멱등. 이미 활성 배정이 있으면 그대로 반환한다."""
     existing = find_active_assignment(session_id, db)
     if existing is not None:
@@ -130,7 +221,28 @@ async def assign_quest_for_room(session_id: str, db: DBSession) -> QuestAssignme
         raise app_error(ANALYSIS_NOT_READY, "팀 분석이 완료된 후에만 퀘스트를 배정할 수 있습니다.")
 
     context = build_match_context(session_id, analysis, db)
-    decision = await decide_assignment(context)
+    if selected_quest_id:
+        recommendation = next(
+            (
+                item
+                for item in recommend_quests_for_room(session_id, db)
+                if item["template"].quest_id == selected_quest_id
+            ),
+            None,
+        )
+        if recommendation is None:
+            from app.errors import VALIDATION_ERROR
+
+            raise app_error(VALIDATION_ERROR, "현재 팀에 추천된 퀘스트 중에서 선택해 주세요.")
+        decision = QuestAssignmentDecision(
+            quest_id=selected_quest_id,
+            reason=recommendation["match_reason"],
+            intro_message="세 가지 추천 중 우리 팀이 고른 아이스브레이킹을 시작해볼까요?",
+            used_rule_ids=recommendation["used_rule_ids"],
+            assignment_source="RULE",
+        )
+    else:
+        decision = await decide_assignment(context)
     template = get_quest_template(decision.quest_id)
     if template is None:
         raise app_error(QUEST_CATALOG_UNAVAILABLE, "배정된 퀘스트를 카탈로그에서 찾을 수 없습니다.")

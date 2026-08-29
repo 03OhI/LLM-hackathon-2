@@ -10,9 +10,11 @@ import {
   CHECK_TYPE_NEEDS_TEXT,
   CompletionCheckRequirement,
   QuestCurrent,
+  QuestRecommendation,
   assignQuest,
   completeQuest,
   getCurrentQuest,
+  getQuestRecommendations,
   skipQuest,
   startQuest,
   submitMyResponse,
@@ -95,8 +97,37 @@ const ADMIN_DEMO_QUEST: QuestCurrent = {
   },
 };
 
+const ADMIN_DEMO_QUESTS: QuestCurrent[] = [
+  ADMIN_DEMO_QUEST,
+  {
+    ...ADMIN_DEMO_QUEST,
+    quest_id: "WORK_STYLE_BALANCE_GAME",
+    title: "업무 스타일 밸런스 게임",
+    summary: "완성도와 속도 사이에서 우리 팀이 선호하는 방식을 가볍게 비교합니다.",
+    duration_minutes: 6,
+    assignment: { ...ADMIN_DEMO_QUEST.assignment, id: "admin-demo-assignment-2" },
+  },
+  {
+    ...ADMIN_DEMO_QUEST,
+    quest_id: "SAVEPOINT_CHECKIN",
+    title: "세이브포인트 정하기",
+    summary: "진행이 막힐 때 빠르게 도움을 요청할 팀 공용 신호를 정합니다.",
+    duration_minutes: 7,
+    assignment: { ...ADMIN_DEMO_QUEST.assignment, id: "admin-demo-assignment-3" },
+  },
+];
+
+const ADMIN_DEMO_RECOMMENDATIONS: QuestRecommendation[] = ADMIN_DEMO_QUESTS.map((quest) => ({
+  quest_id: quest.quest_id,
+  title: quest.title,
+  summary: quest.summary,
+  duration_minutes: quest.duration_minutes,
+  category: "ICEBREAKING",
+  match_reason: "데모 팀의 협업 성향과 잘 맞는 퀘스트예요.",
+}));
+
 function AdminDemoQuestView() {
-  const [quest, setQuest] = useState<QuestCurrent>(ADMIN_DEMO_QUEST);
+  const [quest, setQuest] = useState<QuestCurrent | null>(null);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
 
   const runAction = useCallback(async (key: string, action: () => Promise<QuestCurrent>) => {
@@ -105,6 +136,7 @@ function AdminDemoQuestView() {
     setPendingAction(key);
     await Promise.resolve();
     setQuest((current) => {
+      if (current === null) return current;
       if (key === "start") {
         return {
           ...current,
@@ -135,6 +167,20 @@ function AdminDemoQuestView() {
     });
     setPendingAction(null);
   }, []);
+
+  if (quest === null) {
+    return (
+      <NotAssignedCard
+        isHost
+        recommendations={ADMIN_DEMO_RECOMMENDATIONS}
+        pendingQuestId={null}
+        error={null}
+        onAssign={(questId) => {
+          setQuest(ADMIN_DEMO_QUESTS.find((item) => item.quest_id === questId) ?? ADMIN_DEMO_QUEST);
+        }}
+      />
+    );
+  }
 
   return (
     <QuestCard
@@ -179,6 +225,7 @@ function QuestShell({ children }: { children: React.ReactNode }) {
 
 function QuestView({ session }: { session: TeamSession }) {
   const [quest, setQuest] = useState<QuestCurrent | null>(null);
+  const [recommendations, setRecommendations] = useState<QuestRecommendation[]>([]);
   const [notAssignedYet, setNotAssignedYet] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<ApiError | null>(null);
@@ -196,7 +243,17 @@ function QuestView({ session }: { session: TeamSession }) {
       if (error instanceof ApiError && error.code === "NO_ACTIVE_QUEST") {
         setQuest(null);
         setNotAssignedYet(true);
-        setLoadError(null);
+        try {
+          const result = await getQuestRecommendations(session.sessionId);
+          setRecommendations(result.recommendations);
+          setLoadError(null);
+        } catch (recommendationError) {
+          setLoadError(
+            recommendationError instanceof ApiError
+              ? recommendationError
+              : new ApiError("UNKNOWN_ERROR", "", 0),
+          );
+        }
       } else {
         setLoadError(error instanceof ApiError ? error : new ApiError("UNKNOWN_ERROR", "", 0));
       }
@@ -253,9 +310,12 @@ function QuestView({ session }: { session: TeamSession }) {
     return (
       <NotAssignedCard
         isHost={session.isHost}
-        pending={pendingAction === "assign"}
+        recommendations={recommendations}
+        pendingQuestId={pendingAction?.startsWith("assign-") ? pendingAction.slice(7) : null}
         error={actionError}
-        onAssign={() => runAction("assign", () => assignQuest(session.sessionId))}
+        onAssign={(questId) =>
+          runAction(`assign-${questId}`, () => assignQuest(session.sessionId, questId))
+        }
       />
     );
   }
@@ -309,29 +369,47 @@ function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void 
 
 function NotAssignedCard({
   isHost,
-  pending,
+  recommendations,
+  pendingQuestId,
   error,
   onAssign,
 }: {
   isHost: boolean;
-  pending: boolean;
+  recommendations: QuestRecommendation[];
+  pendingQuestId: string | null;
   error: string | null;
-  onAssign: () => void;
+  onAssign: (questId: string) => void;
 }) {
   return (
     <section className="result-report quest-card quest-not-assigned">
       <p className="result-eyebrow">아이스브레이킹 퀘스트</p>
-      <h1>{isHost ? "팀에 어울리는 퀘스트를 준비해볼까요?" : "방장이 퀘스트를 준비하고 있어요."}</h1>
-      {isHost ? (
-        <>
-          <p>팀 분석 결과를 바탕으로 지금 팀에 어울리는 퀘스트 하나를 배정해요.</p>
-          <button type="button" className="button-next" disabled={pending} onClick={onAssign}>
-            {pending ? "배정하는 중…" : "퀘스트 배정하기"}
-          </button>
-        </>
-      ) : (
-        <p>잠시만 기다려 주세요. 방장이 퀘스트를 배정하면 자동으로 화면이 바뀌어요.</p>
-      )}
+      <h1>우리 팀에 어울리는 퀘스트 3개를 골랐어요.</h1>
+      <p>
+        {isHost
+          ? "팀 성향과 인원에 맞춘 후보예요. 함께 해보고 싶은 하나를 선택해 주세요."
+          : "팀 성향과 인원에 맞춘 후보예요. 방장이 하나를 선택하면 자동으로 시작 화면이 열려요."}
+      </p>
+      <div className="quest-recommendation-grid">
+        {recommendations.map((item, index) => (
+          <article className="quest-recommendation-card" key={item.quest_id}>
+            <span className="quest-recommendation-rank">추천 {index + 1}</span>
+            <h2>{item.title}</h2>
+            <p>{item.summary}</p>
+            <small>⏱ 약 {item.duration_minutes}분</small>
+            <b>{item.match_reason}</b>
+            {isHost && (
+              <button
+                type="button"
+                className="button-next"
+                disabled={pendingQuestId !== null}
+                onClick={() => onAssign(item.quest_id)}
+              >
+                {pendingQuestId === item.quest_id ? "선택하는 중…" : "이 퀘스트 선택"}
+              </button>
+            )}
+          </article>
+        ))}
+      </div>
       {error && <p className="quest-action-error">{error}</p>}
     </section>
   );

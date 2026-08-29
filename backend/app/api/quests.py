@@ -2,6 +2,7 @@
 퀘스트 API — SPEC_V5_CONTEST_QUEST_AGENT.md §5, §6, §9
 
 GET  /api/rooms/{id}/quests/current              — 같은 방 팀원/방장
+GET  /api/rooms/{id}/quests/recommendations      — 팀 성향 기반 상위 3개
 POST /api/rooms/{id}/quests/assign               — 방장, 멱등
 POST /api/quest-assignments/{id}/start           — 방장
 PUT  /api/quest-assignments/{id}/responses/me    — 본인
@@ -44,6 +45,10 @@ class CheckSubmission(BaseModel):
 
 class ResponseSubmitRequest(BaseModel):
     checks: list[CheckSubmission]
+
+
+class QuestAssignRequest(BaseModel):
+    quest_id: str | None = None
 
 
 class AssignmentInfo(BaseModel):
@@ -90,6 +95,19 @@ class QuestCurrentResponse(BaseModel):
     my_response_status: dict[str, bool] | None
     team_completion_status: CompletionStatus
     completion_requirements: CompletionRequirements
+
+
+class QuestRecommendationPublic(BaseModel):
+    quest_id: str
+    title: str
+    summary: str
+    duration_minutes: int
+    category: str
+    match_reason: str
+
+
+class QuestRecommendationsResponse(BaseModel):
+    recommendations: list[QuestRecommendationPublic]
 
 
 # ──────────────────────────────────────────────
@@ -185,13 +203,42 @@ def get_current_quest(
     return _build_response(assignment, actor, db)
 
 
+@router.get(
+    "/rooms/{session_id}/quests/recommendations",
+    response_model=QuestRecommendationsResponse,
+)
+def get_quest_recommendations(
+    session_id: str,
+    db: DBSession = Depends(get_session),
+    actor: RoomActor = Depends(assert_room_actor),
+) -> QuestRecommendationsResponse:
+    del actor  # 권한 검증용 dependency
+    items = service.recommend_quests_for_room(session_id, db)
+    return QuestRecommendationsResponse(
+        recommendations=[
+            QuestRecommendationPublic(
+                quest_id=item["template"].quest_id,
+                title=item["template"].title,
+                summary=item["template"].summary,
+                duration_minutes=item["template"].duration_minutes,
+                category=item["template"].category,
+                match_reason=item["match_reason"],
+            )
+            for item in items
+        ]
+    )
+
+
 @router.post("/rooms/{session_id}/quests/assign", response_model=QuestCurrentResponse)
 async def assign_quest(
     session_id: str,
+    body: QuestAssignRequest | None = None,
     db: DBSession = Depends(get_session),
     session: SessionModel = Depends(assert_host),
 ) -> QuestCurrentResponse:
-    assignment = await service.assign_quest_for_room(session_id, db)
+    assignment = await service.assign_quest_for_room(
+        session_id, db, selected_quest_id=body.quest_id if body else None
+    )
     actor = RoomActor(role="HOST", session=session, participant=None)
     return _build_response(assignment, actor, db)
 

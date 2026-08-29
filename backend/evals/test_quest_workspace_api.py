@@ -191,6 +191,53 @@ def test_assign_quest_is_idempotent():
     assert first["assignment"]["id"] == second["assignment"]["id"]
 
 
+def test_recommendations_return_three_distinct_public_quests():
+    team = build_team(4)
+    resp = client.get(
+        f"/api/rooms/{team['session_id']}/quests/recommendations",
+        headers=_auth(team["host_secret"]),
+    )
+    assert resp.status_code == 200, resp.text
+    items = resp.json()["recommendations"]
+    assert len(items) == 3
+    assert len({item["quest_id"] for item in items}) == 3
+    assert all(
+        set(item)
+        == {"quest_id", "title", "summary", "duration_minutes", "category", "match_reason"}
+        for item in items
+    )
+    assert all("rule_id" not in json.dumps(item) for item in items)
+
+
+def test_host_can_select_one_of_three_recommendations():
+    team = build_team(4)
+    recommendations = client.get(
+        f"/api/rooms/{team['session_id']}/quests/recommendations",
+        headers=_auth(team["host_secret"]),
+    ).json()["recommendations"]
+    selected = recommendations[1]
+
+    resp = client.post(
+        f"/api/rooms/{team['session_id']}/quests/assign",
+        json={"quest_id": selected["quest_id"]},
+        headers=_auth(team["host_secret"]),
+    )
+    assert resp.status_code == 200, resp.text
+    result = resp.json()
+    assert result["quest_id"] == selected["quest_id"]
+    assert result["assignment"]["assignment_source"] == "RULE"
+
+
+def test_unrecommended_quest_cannot_be_forced_by_request_body():
+    team = build_team(4)
+    resp = client.post(
+        f"/api/rooms/{team['session_id']}/quests/assign",
+        json={"quest_id": "NOT_A_REAL_RECOMMENDATION"},
+        headers=_auth(team["host_secret"]),
+    )
+    assert resp.status_code == 422
+
+
 def test_only_one_active_assignment_enforced_by_db_constraint():
     team = build_team(4)
     active = assign_quest(team["session_id"], team["host_secret"])

@@ -13,6 +13,7 @@ vi.mock("@/lib/quest-api", async () => {
   return {
     ...actual,
     getCurrentQuest: vi.fn(),
+    getQuestRecommendations: vi.fn(),
     assignQuest: vi.fn(),
     startQuest: vi.fn(),
     completeQuest: vi.fn(),
@@ -27,7 +28,7 @@ vi.mock("@/lib/workspace-api", async () => {
 });
 
 import { getSavedTeamSession } from "@/lib/session";
-import { getCurrentQuest } from "@/lib/quest-api";
+import { assignQuest, getCurrentQuest, getQuestRecommendations } from "@/lib/quest-api";
 import QuestPage from "../page";
 
 const hostSession: TeamSession = {
@@ -78,6 +79,7 @@ describe("QuestPage 관리자 시연 흐름", () => {
     vi.mocked(getSavedTeamSession).mockReturnValue(null);
     render(<QuestPage />);
 
+    (await screen.findAllByRole("button", { name: "이 퀘스트 선택" }))[0].click();
     const startButton = await screen.findByRole("button", { name: "퀘스트 시작" });
     startButton.click();
     const input = await screen.findByLabelText("내용 제출 입력");
@@ -91,6 +93,9 @@ describe("QuestPage 관리자 시연 흐름", () => {
     vi.stubGlobal("location", { ...window.location, assign });
 
     render(<QuestPage />);
+
+    // 0) 추천 3개 중 하나 선택
+    (await screen.findAllByRole("button", { name: "이 퀘스트 선택" }))[0].click();
 
     // 1) 퀘스트 시작
     (await screen.findByRole("button", { name: "퀘스트 시작" })).click();
@@ -115,6 +120,29 @@ describe("QuestPage 관리자 시연 흐름", () => {
 });
 
 describe("QuestPage 역할별 버튼", () => {
+  it("아직 배정 전이면 팀 성향 추천 3개를 보여주고 선택한 퀘스트를 배정한다", async () => {
+    vi.mocked(getSavedTeamSession).mockReturnValue(hostSession);
+    vi.mocked(getCurrentQuest).mockRejectedValue(new ApiError("NO_ACTIVE_QUEST", "", 404));
+    vi.mocked(getQuestRecommendations).mockResolvedValue({
+      recommendations: [
+        { quest_id: "Q1", title: "추천 하나", summary: "첫 번째", duration_minutes: 5, category: "A", match_reason: "팀 성향과 잘 맞아요." },
+        { quest_id: "Q2", title: "추천 둘", summary: "두 번째", duration_minutes: 7, category: "B", match_reason: "팀 성향과 잘 맞아요." },
+        { quest_id: "Q3", title: "추천 셋", summary: "세 번째", duration_minutes: 9, category: "C", match_reason: "팀 성향과 잘 맞아요." },
+      ],
+    });
+    vi.mocked(assignQuest).mockResolvedValue(makeQuest({ quest_id: "Q2", title: "추천 둘" }));
+
+    render(<QuestPage />);
+
+    expect(await screen.findByText("추천 하나")).toBeInTheDocument();
+    expect(screen.getByText("추천 둘")).toBeInTheDocument();
+    expect(screen.getByText("추천 셋")).toBeInTheDocument();
+    const selectButtons = screen.getAllByRole("button", { name: "이 퀘스트 선택" });
+    selectButtons[1].click();
+    await waitFor(() => expect(assignQuest).toHaveBeenCalledWith("room-1", "Q2"));
+    expect(await screen.findByRole("button", { name: "퀘스트 시작" })).toBeInTheDocument();
+  });
+
   it("ASSIGNED 상태에서 방장에게만 '퀘스트 시작' 버튼을 보여준다", async () => {
     vi.mocked(getSavedTeamSession).mockReturnValue(hostSession);
     vi.mocked(getCurrentQuest).mockResolvedValue(makeQuest());
