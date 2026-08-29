@@ -7325,7 +7325,6 @@ a {
 
 
 /* All desktop preview tabs share one frame and one inner canvas. */
-.dashboard-shell,
 .dashboard-top,
 .dashboard-top > .welcome-card,
 .dashboard-top > .workspace-card,
@@ -7336,6 +7335,15 @@ a {
 .type-explainer {
   min-width: 0;
   max-width: 100%;
+}
+
+/* RootLayout의 body가 flex-column이므로 auto 너비를 두면 활성 유형의
+   문구 길이에 따라 이 flex item이 shrink-to-fit 된다. 뷰포트 기준으로 고정한다. */
+.dashboard-shell {
+  flex: 0 0 auto;
+  width: calc(100% - 20px);
+  max-width: 1680px;
+  min-width: 0;
 }
 
 .dashboard-top > .welcome-card,
