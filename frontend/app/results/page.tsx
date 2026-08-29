@@ -1345,19 +1345,30 @@ function MobileTeamBalance({
     </section>
   );
 }
-function TeamDesktopSidebar() {
-  const moveTo = (id: string) =>
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+function TeamDesktopSidebar({
+  active,
+  onChange,
+}: {
+  active: MobileTeamSection;
+  onChange: (section: MobileTeamSection) => void;
+}) {
   return (
-    <aside className="team-desktop-sidebar" aria-label="팀 결과 탐색">
+    <aside className="team-desktop-sidebar" aria-label="Team result navigation">
       <div className="team-sidebar-brand">TMTI<span>+</span></div>
       <nav>
-        <button onClick={() => moveTo("team-overview")}>⌂ <span>팀 개요</span></button>
-        <button onClick={() => moveTo("team-balance")}>◈ <span>팀 밸런스</span></button>
-        <button onClick={() => moveTo("team-members")}>♧ <span>팀원 성향 지도</span></button>
-        <button onClick={() => moveTo("team-roles")}>✦ <span>역할 추천 · 플레이북</span></button>
+        {mobileTeamSections.map((section) => (
+          <button
+            key={section.key}
+            className={active === section.key ? "active" : ""}
+            aria-pressed={active === section.key}
+            onClick={() => onChange(section.key)}
+          >
+            <i aria-hidden="true">{section.icon}</i>
+            <span>{section.label}</span>
+          </button>
+        ))}
       </nav>
-      <p>팀의 강점과 서로 다른 방식을 한눈에 살펴보세요.</p>
+      <p>필요한 팀 결과만 골라 짧게 확인해 보세요.</p>
     </aside>
   );
 }
@@ -1374,7 +1385,7 @@ function TeamReport({
   onPersonal: () => void;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [mobileSection, setMobileSection] =
+  const [activeSection, setActiveSection] =
     useState<MobileTeamSection>("summary");
   if (!snapshot)
     return <ResultError message="팀 결과를 아직 준비하고 있어요." />;
@@ -1384,12 +1395,12 @@ function TeamReport({
     );
   return (
     <section className="result-report personal-report team-result-layout survey-card-enter">
-      <TeamDesktopSidebar />
+      <TeamDesktopSidebar active={activeSection} onChange={setActiveSection} />
       <div className="team-report-main">
-        <MobileTeamNav active={mobileSection} onChange={setMobileSection} />
+        <MobileTeamNav active={activeSection} onChange={setActiveSection} />
       <div
         id="team-overview"
-        className={`mobile-team-panel mobile-team-summary ${mobileSection === "summary" ? "active" : ""}`}
+        className={`mobile-team-panel mobile-team-summary ${activeSection === "summary" ? "active" : ""}`}
       >
         <header className="personal-hero team-hero">
           <div>
@@ -1420,13 +1431,13 @@ function TeamReport({
       </div>
       <div
         id="team-balance"
-        className={`mobile-team-panel mobile-team-distribution ${mobileSection === "distribution" ? "active" : ""}`}
+        className={`mobile-team-panel mobile-team-distribution ${activeSection === "distribution" ? "active" : ""}`}
       >
         <TeamDistribution distribution={distribution} />
       </div>
       <div
         id="team-members"
-        className={`mobile-team-panel mobile-team-members ${mobileSection === "members" ? "active" : ""}`}
+        className={`mobile-team-panel mobile-team-members ${activeSection === "members" ? "active" : ""}`}
       >
         <TeamMembersSection
           members={memberPositions}
@@ -1436,7 +1447,7 @@ function TeamReport({
       </div>
       <div
         id="team-roles"
-        className={`mobile-team-panel mobile-team-playbook ${mobileSection === "playbook" ? "active" : ""}`}
+        className={`mobile-team-panel mobile-team-playbook ${activeSection === "playbook" ? "active" : ""}`}
       >
         <TeamRoleComposition
           members={memberPositions}
@@ -1453,8 +1464,8 @@ function TeamReport({
         <ResultFooter />
       </div>
       <MobileTeamNav
-        active={mobileSection}
-        onChange={setMobileSection}
+        active={activeSection}
+        onChange={setActiveSection}
         bottom
       />
       </div>

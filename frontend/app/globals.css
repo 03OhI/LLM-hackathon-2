@@ -1015,7 +1015,10 @@ a {
   display: none;
 }
 .mobile-team-panel {
-  display: contents;
+  display: none;
+}
+.mobile-team-panel.active {
+  display: block;
 }
 @media (max-width: 700px) {
   .results-shell {
@@ -3037,6 +3040,23 @@ a {
 .welcome-copy h1 strong {
   color: #172744;
 }
+.welcome-copy .welcome-eyebrow {
+  margin: 0 0 14px;
+  color: #607b5f;
+  font-weight: 700;
+}
+.welcome-copy .welcome-description {
+  margin: 15px 0 24px;
+  color: #52627d;
+  line-height: 1.55;
+}
+@media (min-width: 701px) {
+  .welcome-copy h1 {
+    white-space: nowrap;
+    font-size: clamp(30px, 2.6vw, 39px);
+    letter-spacing: -2.8px;
+  }
+}
 .home-panel {
   position: absolute;
   z-index: 2;
@@ -4333,6 +4353,48 @@ a {
     width: 100%;
     margin-top: 22px;
   }
+}
+
+
+
+/* Keep homepage copy and all entry actions on the same brand typeface. */
+.dashboard-shell .welcome-copy,
+.dashboard-shell .home-action-primary .action-copy,
+.dashboard-shell .home-action-secondary .invite-fields,
+.dashboard-shell .home-action-secondary input,
+.dashboard-shell .home-action-secondary button,
+.dashboard-shell .home-action-result > span {
+  font-family: var(--font-ridi-batang), serif;
+}
+.dashboard-shell .home-action-primary .action-copy b,
+.dashboard-shell .home-action-primary .action-copy small,
+.dashboard-shell .home-action-secondary .invite-fields label,
+.dashboard-shell .home-action-result > span {
+  font-family: inherit;
+}
+
+
+/* Homepage readability pass: keep the entry flow legible from a distance. */
+.dashboard-shell .welcome-copy .welcome-eyebrow { font-size: 19px; }
+.dashboard-shell .welcome-copy .welcome-description { font-size: 19px; }
+.dashboard-shell .home-action-primary .action-copy b { font-size: 28px; }
+.dashboard-shell .home-action-primary .action-copy small { font-size: 16px; }
+.dashboard-shell .home-action-secondary .invite-fields label { font-size: 22px; }
+.dashboard-shell .home-action-secondary input { font-size: 17px; }
+.dashboard-shell .home-action-secondary button { font-size: 17px; }
+.dashboard-shell .home-action-result > span { font-size: 22px; }
+@media (min-width: 701px) {
+  .dashboard-shell .welcome-copy h1 { font-size: clamp(33px, 2.8vw, 42px); }
+}
+@media (max-width: 700px) {
+  .dashboard-shell .welcome-copy .welcome-eyebrow { font-size: 16px; }
+  .dashboard-shell .welcome-copy .welcome-description { font-size: 16px; }
+  .dashboard-shell .home-action-primary .action-copy b { font-size: 23px; }
+  .dashboard-shell .home-action-primary .action-copy small { font-size: 14px; }
+  .dashboard-shell .home-action-secondary .invite-fields label { font-size: 18px; }
+  .dashboard-shell .home-action-secondary input,
+  .dashboard-shell .home-action-secondary button { font-size: 16px; }
+  .dashboard-shell .home-action-result > span { font-size: 19px; }
 }
 
 /* Home actions share one clear card system: create, join, then reopen a result. */
@@ -6278,7 +6340,10 @@ a {
 .team-sidebar-brand { color:#172d50; font-size:28px; font-weight:900; letter-spacing:-.06em; }
 .team-sidebar-brand span { color:#78a56c; }
 .team-desktop-sidebar nav { display:grid; gap:8px; margin-top:44px; }
-.team-desktop-sidebar button { display:flex; align-items:center; width:100%; gap:10px; border:0; border-radius:12px; background:transparent; color:#53677e; cursor:pointer; font:inherit; font-size:14px; font-weight:700; padding:12px 10px; text-align:left; }
+.team-desktop-sidebar button { display:flex; align-items:center; width:100%; gap:10px; border:0; border-radius:12px; background:transparent; color:#53677e; cursor:pointer; font:inherit; font-size:14px; font-weight:700; padding:12px 10px; text-align:left; transition:background .18s ease,color .18s ease,transform .18s ease; }
+.team-desktop-sidebar button i { width:18px; color:#7a9b72; font-style:normal; text-align:center; }
+.team-desktop-sidebar button.active { background:#eaf3e6; color:#2f6040; box-shadow:inset 3px 0 0 #78a56c; }
+.team-desktop-sidebar button.active i { color:#3d7046; }
 .team-desktop-sidebar button:hover,.team-desktop-sidebar button:focus-visible { background:#eef5e9; color:#3d7046; outline:none; }
 .team-desktop-sidebar>p { margin:auto 3px 0; border:1px solid #deead8; border-radius:14px; background:#f4f9f0; color:#688164; font-size:12px; line-height:1.55; padding:14px; }
 .team-result-layout .team-hero { margin-top:0; }
