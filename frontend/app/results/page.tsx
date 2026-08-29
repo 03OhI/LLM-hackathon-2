@@ -216,7 +216,7 @@ function resultCode(positions: Positions | null) {
 }
 
 export default function ResultsPage() {
-  const [view, setView] = useState<View>("personal");
+  const [view, setView] = useState<View>("team");
   const [teamResult, setTeamResult] = useState<TeamResult | null>(null);
   const [personalResult, setPersonalResult] = useState<PersonalResult | null>(
     null,
@@ -305,23 +305,27 @@ export default function ResultsPage() {
     <ResultShell>
       <section className="result-tabs" aria-label="결과 보기 방식">
         <button
-          className={view === "personal" ? "active" : ""}
-          onClick={() => setView("personal")}
-        >
-          개인 결과
-        </button>
-        <button
           className={view === "team" ? "active" : ""}
           onClick={() => setView("team")}
         >
           우리 팀 분석
+        </button>
+        <button
+          className={view === "personal" ? "active" : ""}
+          onClick={() => setView("personal")}
+        >
+          개인 결과
         </button>
       </section>
       <Link
         href={administratorMode ? "/quest?mode=admin" : "/quest"}
         className="result-quest-link"
       >
-        아이스브레이킹 퀘스트로 이동 <b>→</b>
+        <span>
+          <small>NEXT STEP</small>
+          <strong>아이스브레이킹 퀘스트 시작하기</strong>
+        </span>
+        <b>이동하기&nbsp; →</b>
       </Link>
       {view === "personal" ? (
         <PersonalReport
