@@ -33,17 +33,21 @@ router = APIRouter(tags=["results"])
 # ──────────────────────────────────────────────
 
 
+class MemberPositionPublic(BaseModel):
+    """팀 성향 지도용 최소 공개 정보. 원응답과 내부 수치는 포함하지 않는다."""
+
+    participant_id: str
+    display_name: str
+    self_positions: dict
+
+
 class TeamResultResponse(BaseModel):
-    # 최신 기획: team_grade / team_caution_codes / top_caution_pairs /
-    # team_strength_codes / top_complement_pairs 는 공개 API에서 제외한다.
-    # used_rule_ids(내부 rule_id) 도 공개 응답에 노출하지 않는다.
+    # 최신 기획: 팀 점수·등급·규칙 ID·개인 원응답은 공개 API에서 제외한다.
     # (DB(AnalysisResult)에는 계속 저장·계산하되 응답 스키마에만 노출하지 않는다.)
     session_id: str
     status: str  # PROCESSING|COMPLETED|FALLBACK
     distribution: dict | None
-    # 팀원에게 공개하기로 한 표시 이름과 4축 성향만 반환한다.
-    # 원응답·점수·등급·내부 규칙은 포함하지 않는다.
-    member_positions: list[dict] = []
+    member_positions: list[MemberPositionPublic]
     team_comment: dict | None  # TeamSnapshot(title/formula/scene/keywords) 또는 None
     rule_text_fallback: dict[str, str] | None = None  # AI 코멘트가 전혀 없을 때만
 
@@ -52,7 +56,7 @@ class PrivateResultResponse(BaseModel):
     participant_id: str
     status: str  # NOT_REQUESTED|PROCESSING|COMPLETED|FALLBACK
     self_positions: dict | None
-    insight: dict | None  # PrivateCard(card_title/contribution/optional_try)
+    insight: dict | None  # GeneratedInsight.model_dump()
 
 
 # ──────────────────────────────────────────────
@@ -69,57 +73,50 @@ def _latest_analysis(session_id: str, db: DBSession) -> AnalysisResult | None:
 
 
 def _strip_internal(payload: dict | None) -> dict | None:
-    """AI 산출물 dict에서 내부 전용 필드(used_rule_ids)를 제거한다."""
+    """AI 결과에서 내부 규칙 ID를 제거한다."""
     if payload is None:
         return None
-    return {k: v for k, v in payload.items() if k != "used_rule_ids"}
+    return {key: value for key, value in payload.items() if key != "used_rule_ids"}
 
 
-def _public_member_positions(session_id: str, db: DBSession) -> list[dict]:
-    """팀 결과에 허용된 최소 공개 정보만 만든다."""
+def _member_positions(session_id: str, db: DBSession) -> list[MemberPositionPublic]:
+    """완료된 팀원의 표시 이름과 4축 위치만 팀 지도에 공개한다."""
+    from app.models import ParticipantProfile
     from app.services.profile.profile_helpers import canonical_profile_for_participant
 
     participants = db.exec(
         select(Participant).where(
             Participant.session_id == session_id,
-            Participant.submission_status.in_(["SUBMITTED", "LOCKED"]),
+            Participant.submission_status.in_(("SUBMITTED", "LOCKED")),
         )
     ).all()
-
-    positions: list[dict] = []
+    result: list[MemberPositionPublic] = []
     for participant in participants:
-        try:
-            profile = canonical_profile_for_participant(participant.id, db)
-        except Exception:
-            # 제출 상태와 프로필 행이 잠시 동기화되지 않은 참여자는 다음 조회에서 반영한다.
+        if db.get(ParticipantProfile, participant.id) is None:
             continue
-        positions.append(
-            {
-                "participant_id": participant.id,
-                "display_name": participant.nickname,
-                "self_positions": dict(profile.positions.items()),
-            }
+        profile = canonical_profile_for_participant(participant.id, db)
+        result.append(
+            MemberPositionPublic(
+                participant_id=participant.id,
+                display_name=participant.nickname,
+                self_positions=dict(profile.positions.items()),
+            )
         )
-    return positions
+    return result
 
 
-def _build_team_result(
-    session_id: str, analysis: AnalysisResult | None, db: DBSession
-) -> TeamResultResponse:
+def _build_team_result(session_id: str, analysis: AnalysisResult | None, db: DBSession) -> TeamResultResponse:
     if analysis is None:
         return TeamResultResponse(
             session_id=session_id,
             status="PROCESSING",
             distribution=None,
+            member_positions=[],
             team_comment=None,
         )
 
     distribution = json.loads(analysis.distribution_json) if analysis.distribution_json else None
-    team_comment = (
-        _strip_internal(json.loads(analysis.public_report_json))
-        if analysis.public_report_json
-        else None
-    )
+    team_comment = _strip_internal(json.loads(analysis.public_report_json)) if analysis.public_report_json else None
 
     rule_text_fallback = None
     if team_comment is None and analysis.status in ("FALLBACK", "PROCESSING"):
@@ -130,11 +127,7 @@ def _build_team_result(
         session_id=session_id,
         status=analysis.status,
         distribution=distribution,
-        member_positions=(
-            _public_member_positions(session_id, db)
-            if analysis.status != "PROCESSING"
-            else []
-        ),
+        member_positions=_member_positions(session_id, db),
         team_comment=team_comment,
         rule_text_fallback=rule_text_fallback,
     )
@@ -177,11 +170,7 @@ def get_my_result(
 
     profile = canonical_profile_for_participant(participant.id, db)
 
-    insight = (
-        _strip_internal(json.loads(private_insight.insight_json))
-        if private_insight.insight_json
-        else None
-    )
+    insight = _strip_internal(json.loads(private_insight.insight_json)) if private_insight.insight_json else None
 
     return PrivateResultResponse(
         participant_id=participant.id,

@@ -22,6 +22,9 @@ chemistry.py 연속 확장판 — 24문항의 정보를 안 버린다.
 from itertools import combinations
 import numpy as np
 from faultline import diagnose
+# 중립대 경계는 likert.py 가 단일 정의처다. 여기에 숫자를 다시 적지 않는다 —
+# 양쪽에 0.60/0.40 을 따로 하드코딩했더니 한쪽만 좁혔을 때 조용히 안 먹혔다 (2026-08-28).
+from likert import HI as NEUTRAL_HI, LO as NEUTRAL_LO
 
 AXES = ["plan", "drive", "conflict", "comms"]
 WEIGHTS = {"drive": 0.35, "comms": 0.25, "conflict": 0.20, "plan": 0.20}
@@ -42,6 +45,10 @@ GRADES = {
 #   축 점수를 낼 사람이 부족한데도 만점을 주던 것이 결함이었다 (DEFENSE.md)
 MIN_PAIRS = 3        # 유사축(갈등·소통): 중립 아닌 쌍이 이보다 적으면 판정하지 않는다
 MIN_JUDGED = 3       # 주도성: 캡틴/서포터로 판정된 인원
+MAX_UNJUDGED = 3     # 4축 중 이만큼을 못 보면 팀 등급 자체를 내지 않는다
+                     #   [개정 2026-08-28] 2 → 3. 2였을 때 전수의 23.9%가 진단 불가였고
+                     #   그 88%는 "정확히 2개만 못 본" 팀이었다. 못 본 축은 버리는 대신
+                     #   등급에 개수로 반영한다(아래 compute_chemistry 참조).
 UNJUDGED_ACTION = "비어 있는 축은 진단 대신 첫 회의에서 직접 물어보세요"
 
 
@@ -102,8 +109,8 @@ def score_drive(rs, neutral):
     경계는 정수 규칙이다 (GRADE_V2.md §9) — 0.95/0.50/0.20 과 값이 완전히 같으면서
     [팀 판단] 파라미터가 사라진다. (0.20 은 5명 팀에서 도달 불가한 죽은 경계였다)
     """
-    cap = sum(1 for r, n in zip(rs, neutral) if not n and r > 0.60)
-    sup = sum(1 for r, n in zip(rs, neutral) if not n and r < 0.40)
+    cap = sum(1 for r, n in zip(rs, neutral) if not n and r > NEUTRAL_HI)
+    sup = sum(1 for r, n in zip(rs, neutral) if not n and r < NEUTRAL_LO)
     eff = cap + sup
     if eff < MIN_JUDGED:
         return None, ("주도성을 판정할 응답이 부족한 조합", UNJUDGED_ACTION)
@@ -224,17 +231,25 @@ def compute_chemistry(members, with_pairs=True):
     gates = []
     if axis_scores["drive"] == 0.0:
         gates.append("drive_zero")
-    if len(unjudged) >= 2:
+    if len(unjudged) >= MAX_UNJUDGED:
         gates.append("too_many_unjudged")
 
-    # ── 등급 = 0.5 미만인 축의 개수 (GRADE_V2.md)
+    # ── 등급 = "맞춰야 할 것"의 개수 (GRADE_V2.md)
+    #    약한 축 + **못 본 축** + 두 편으로 갈라짐.
+    #    못 본 축을 함께 세는 이유: 등급 이름이 "N가지를 맞추고 시작하는 조합"인데,
+    #    판정하지 못한 축도 첫 회의에서 맞춰야 할 것이다. 이름과 규칙이 같은 것을 가리킨다.
+    #    [개정 2026-08-28] 예전에는 못 본 축이 2개면 무조건 진단하지 않았다. 그런데 전수
+    #    26,334팀에서 진단 불가의 88%가 "정확히 2개만 못 본" 팀이었고, 그중 81%는 판정된
+    #    나머지 두 축이 둘 다 0.5 이상이었다 — 버릴 이유가 없는 팀을 통째로 버리고 있었다.
+    #    반대로 그들을 최하 등급으로 보내는 것도 틀렸다(판정 못 함 ≠ 나쁨). 개수로 센다.
     #    axis_below_half 게이트는 이 규칙이 흡수해 사라졌다.
-    if len(unjudged) >= 2:
-        grade = None                                  # 진단하지 않는다
+    if len(unjudged) >= MAX_UNJUDGED:
+        grade = None                                  # 4축 중 3개 이상을 못 봤다 — 진단하지 않는다
     elif "drive_zero" in gates:
         grade = 3
     else:
         weak = sum(1 for v in axis_scores.values() if v is not None and v < 0.5)
+        weak += len(unjudged)                         # 못 본 축도 맞춰야 할 것이다
         if demoted:
             weak += 1
         grade = min(weak, 3)

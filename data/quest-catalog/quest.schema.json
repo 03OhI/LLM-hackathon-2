@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/icebreaking-quest.schema.json",
+  "title": "Icebreaking Quest (v3, SPEC V5.2)",
+  "description": "SPEC V5.2 §4.1 QuestTemplate과 필드 단위로 일치하는 퀘스트 카탈로그 스키마. 배정 판단에 쓰이는 필드는 전부 코드값이며, 코드의 실제 값 검증(team_rules.yaml rule_id, 허용 context tag)은 patterns.enum.json과 대조하는 validate_quests.py가 담당한다.",
+  "type": "array",
+  "minItems": 1,
+  "items": { "$ref": "#/$defs/quest" },
+
+  "$defs": {
+    "quest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quest_id", "title", "summary", "category", "primary_goal",
+        "duration_minutes", "team_size", "interaction_mode",
+        "energy_level", "disclosure_level", "assignment",
+        "reveals_axes", "is_universal",
+        "best_for", "also_for", "avoid_for", "context_tags",
+        "steps", "deliverable", "completion_condition", "safety_notes",
+        "is_active", "version"
+      ],
+      "properties": {
+        "quest_id": {
+          "type": "string",
+          "pattern": "^Q_(CSB|WSD|COM|TSF|TID|SAR)_[0-9]{3}$"
+        },
+        "title": { "type": "string", "minLength": 2, "maxLength": 40 },
+        "summary": { "type": "string", "minLength": 10, "maxLength": 120 },
+
+        "category": {
+          "enum": ["CASUAL_BONDING", "WORK_STYLE_DISCOVERY", "COMMUNICATION",
+                   "TEAM_SAFETY", "TEAM_IDENTITY", "SHARED_ARTIFACT"]
+        },
+        "primary_goal": { "type": "string", "minLength": 10, "maxLength": 200 },
+
+        "duration_minutes": {
+          "type": "integer", "minimum": 5, "maximum": 25,
+          "description": "team_size.max 기준 권장 소요 시간. 인원별 보정 계수는 SPEC §4.1에 없으므로 단일 값으로 표기한다."
+        },
+
+        "team_size": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["min", "max"],
+          "properties": {
+            "min": { "type": "integer", "minimum": 3, "maximum": 10 },
+            "max": { "type": "integer", "minimum": 3, "maximum": 10 }
+          }
+        },
+
+        "interaction_mode": {
+          "enum": ["POLL", "BLIND_POLL", "COLLAB_EDIT", "ROUND_ROBIN",
+                   "IDEA_BURST", "SCREEN_SHARE", "REACTION_ONLY", "GUIDED_RELAY",
+                   "HYBRID"],
+          "description": "HYBRID는 개인 선택과 팀 합의가 한 퀘스트 안에서 이어지는 형태."
+        },
+        "energy_level": { "enum": ["LOW", "MEDIUM", "HIGH"] },
+        "disclosure_level": { "enum": ["LOW", "MEDIUM", "HIGH"] },
+        "assignment": {
+          "enum": ["AUTO", "MANUAL"],
+          "description": "disclosure_level이 HIGH면 반드시 MANUAL (SPEC §4.4)."
+        },
+
+        "reveals_axes": {
+          "type": "array", "minItems": 1, "maxItems": 4,
+          "description": "이 활동이 드러내는 4축과 그 세부 표현. SPEC §4.3에 따라 활동 설명 전용이며 성향 재판정이나 배정 점수 계산에는 사용하지 않는다.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["axis", "dimension", "pole_a", "pole_b"],
+            "properties": {
+              "axis": { "enum": ["PLANNING", "AGENCY", "CONFLICT", "COMMUNICATION"] },
+              "dimension": { "type": "string", "minLength": 2, "maxLength": 20 },
+              "pole_a": { "type": "string", "minLength": 2, "maxLength": 30 },
+              "pole_b": { "type": "string", "minLength": 2, "maxLength": 30 }
+            }
+          }
+        },
+
+        "is_universal": {
+          "type": "boolean",
+          "description": "true이면 avoid_for는 빈 배열이어야 한다 (SPEC §4.3). 배정 점수 +1과 폴백 정렬에 사용."
+        },
+        "best_for": {
+          "type": "array", "minItems": 1, "maxItems": 4, "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^TEAM_[A-Z_]+$" },
+          "description": "team_rules.yaml의 rule_id만. 자연어 조건 금지 (SPEC §4.2)."
+        },
+        "also_for": {
+          "type": "array", "minItems": 0, "maxItems": 4, "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^TEAM_[A-Z_]+$" }
+        },
+        "avoid_for": {
+          "type": "array", "minItems": 0, "maxItems": 4, "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^TEAM_[A-Z_]+$" }
+        },
+        "context_tags": {
+          "type": "array", "minItems": 0, "maxItems": 4, "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[A-Z][A-Z_]+$" },
+          "description": "SPEC §3의 허용 상황 태그. 실제 값은 validate_quests.py가 대조한다."
+        },
+
+        "materials": {
+          "type": "array", "minItems": 1, "maxItems": 6,
+          "items": { "type": "string" }
+        },
+        "steps": {
+          "type": "array", "minItems": 2, "maxItems": 6,
+          "items": {
+            "type": "string",
+            "minLength": 8,
+            "not": { "pattern": "^\\s*[0-9]+[.)]" }
+          }
+        },
+        "deliverable": { "type": "string", "minLength": 6, "maxLength": 120 },
+
+        "completion_condition": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["description", "checks"],
+          "properties": {
+            "description": { "type": "string", "minLength": 8 },
+            "checks": {
+              "type": "array", "minItems": 1, "maxItems": 4,
+              "items": { "$ref": "#/$defs/check" },
+              "contains": {
+                "type": "object",
+                "properties": { "scope": { "const": "PER_MEMBER" } },
+                "required": ["scope"]
+              }
+            }
+          }
+        },
+        "safety_notes": {
+          "type": "array", "minItems": 2, "maxItems": 5,
+          "items": { "type": "string", "minLength": 10 }
+        },
+
+        "is_active": { "type": "boolean" },
+        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "disclosure_level": { "const": "HIGH" } }, "required": ["disclosure_level"] },
+          "then": { "properties": { "assignment": { "const": "MANUAL" } } }
+        },
+        {
+          "if": { "properties": { "is_universal": { "const": true } }, "required": ["is_universal"] },
+          "then": { "properties": { "avoid_for": { "maxItems": 0 } } }
+        }
+      ]
+    },
+
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "scope", "min_count"],
+      "properties": {
+        "type": {
+          "enum": ["TEXT_SUBMIT", "VOTE", "REACTION", "APPROVE"],
+          "description": "P0 구현 범위 4종. QUESTION/NODE_CREATE/COMMENT는 TEXT_SUBMIT으로, LINK_VISIT는 APPROVE(완료 확인 버튼)로 흡수."
+        },
+        "scope": {
+          "enum": ["PER_MEMBER", "TEAM"],
+          "description": "SPEC §4.3에 따라 P0는 이 둘만 사용한다."
+        },
+        "min_count": { "type": "integer", "minimum": 1, "maximum": 10 }
+      }
+    }
+  }
+}
