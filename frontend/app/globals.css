@@ -7324,44 +7324,32 @@ a {
 }
 
 
-/* Keep the 16-type preview and result preview in the same home-frame height. */
-.workspace-card-types,
-.workspace-card-results {
-  height: 500px;
-  min-height: 500px;
-}
-
-.workspace-card-types .workspace-content,
-.workspace-card-results .workspace-content {
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-@media (max-width: 700px) {
-  .workspace-card-types,
-  .workspace-card-results {
-    height: auto;
-    min-height: 0;
-  }
-
-  .workspace-card-types .workspace-content,
-  .workspace-card-results .workspace-content {
-    overflow-y: visible;
-  }
-}
-
-
-/* All desktop preview tabs share one frame; only their content changes. */
+/* All desktop preview tabs share one frame and one inner canvas. */
 @media (min-width: 701px) {
   .dashboard-top > .workspace-card {
     height: 650px;
     min-height: 650px;
+    max-height: 650px;
   }
 
   .dashboard-top > .workspace-card > .workspace-content {
+    box-sizing: border-box;
+    height: 648px;
     min-height: 0;
+    overflow: hidden;
+  }
+
+  .dashboard-top > .workspace-card > .workspace-content > .tab-panel {
+    box-sizing: border-box;
+    height: 100%;
+    min-height: 100%;
     overflow-y: auto;
     overscroll-behavior: contain;
+  }
+
+  .type-panel {
+    display: grid;
+    grid-template-rows: auto auto auto 150px;
+    align-content: start;
   }
 }
